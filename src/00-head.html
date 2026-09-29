@@ -1,0 +1,315 @@
+<title>Yoru no Gakkō</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Klee+One:wght@400;600&family=Yuji+Syuku&display=swap">
+<style>
+/* Layout: one 16:10 letterboxed stage; DOM overlays sit on the pixel canvas, sized in stage units (--u = 1% of stage width). */
+:root {
+  --void: #07080c;        /* the dark beyond the letterbox */
+  --night: #10131c;       /* panels */
+  --moon: #9fb4ff;        /* moonlight blue */
+  --lantern: #e8a24a;     /* chōchin amber */
+  --shu: #b0282c;         /* torii / Hanako red */
+  --chalk: #dfe3d6;       /* chalk white, main text */
+  --dim: #7d8497;         /* secondary text */
+  --paper: #ece6d6;       /* notebook paper */
+  --pencil: #2b2a33;      /* pencil ink */
+  --rule: #9fb6d9;        /* notebook ruling */
+  --f-title: "Yuji Syuku", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --f-ui: "DotGothic16", "Osaka-Mono", "MS Gothic", monospace;
+  --f-hand: "Klee One", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+  --u: 8px;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+[hidden] { display: none !important; }
+body { background: var(--void); color: var(--chalk); font-family: var(--f-ui); overflow: hidden; margin: 0;
+  -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; touch-action: none; }
+#app { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  padding: env(safe-area-inset-top, 0px) env(safe-area-inset-right, 0px) env(safe-area-inset-bottom, 0px) env(safe-area-inset-left, 0px); }
+#stage { position: relative; width: 800px; height: 500px; background: #000; overflow: hidden; flex: none; }
+#view { position: absolute; inset: 0; width: 100%; height: 100%; image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
+.layer { position: absolute; inset: 0; }
+.kanji { font-family: var(--f-title); }
+
+/* HUD */
+#hud { pointer-events: none; }
+#hp { position: absolute; left: calc(var(--u)*2); top: calc(var(--u)*2); display: flex; align-items: center; gap: calc(var(--u)*0.8);
+  font-size: calc(var(--u)*1.6); color: var(--dim); opacity: .85; transition: opacity .6s; }
+#hp .bar { width: calc(var(--u)*14); height: calc(var(--u)*0.8); background: rgba(255,255,255,.08); outline: 1px solid rgba(255,255,255,.14); }
+#hp .bar i { display: block; height: 100%; width: 100%; background: var(--shu); transition: width .3s; }
+#hp.low .bar i { animation: pulse .9s infinite; }
+@keyframes pulse { 50% { opacity: .35; } }
+#equip { position: absolute; right: calc(var(--u)*2); top: calc(var(--u)*1.6); display: flex; align-items: center; gap: calc(var(--u)*0.8);
+  font-size: calc(var(--u)*1.6); color: var(--dim); }
+#equip b { display: grid; place-items: center; width: calc(var(--u)*3.4); height: calc(var(--u)*3.4); font-weight: 400;
+  font-size: calc(var(--u)*2.2); color: var(--chalk); border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.35); }
+#equip .n { color: var(--chalk); }
+#prompt { position: absolute; left: 50%; bottom: calc(var(--u)*15); transform: translateX(-50%); font-size: calc(var(--u)*1.7);
+  color: var(--chalk); background: rgba(0,0,0,.55); padding: calc(var(--u)*0.4) calc(var(--u)*1.2); white-space: nowrap; opacity: 0; transition: opacity .2s; }
+#prompt.on { opacity: 1; }
+#prompt kbd { font-family: inherit; color: var(--lantern); margin-right: calc(var(--u)*0.6); }
+#toast { position: absolute; left: 50%; top: calc(var(--u)*2); transform: translateX(-50%); font-size: calc(var(--u)*1.7); white-space: nowrap;
+  color: var(--lantern); background: rgba(0,0,0,.6); border: 1px solid rgba(232,162,74,.35); padding: calc(var(--u)*0.4) calc(var(--u)*1.4); opacity: 0; transition: opacity .3s; }
+#toast.on { opacity: 1; }
+#roomcard { position: absolute; left: 0; right: 0; top: 30%; text-align: center; opacity: 0; transition: opacity 1.2s; text-shadow: 0 0 12px #000, 0 0 3px #000; }
+#roomcard.on { opacity: 1; }
+#roomcard .jp { font-family: var(--f-title); font-size: calc(var(--u)*6.4); letter-spacing: .25em; color: var(--chalk); }
+#roomcard .en { font-size: calc(var(--u)*1.7); letter-spacing: .5em; color: var(--dim); margin-top: calc(var(--u)*0.5); }
+#msg { position: absolute; left: 8%; right: 8%; bottom: calc(var(--u)*3); min-height: calc(var(--u)*9); padding: calc(var(--u)*1.4) calc(var(--u)*2.2);
+  background: linear-gradient(rgba(6,8,14,.88), rgba(6,8,14,.94)); border: 1px solid rgba(159,180,255,.28); box-shadow: 0 0 0 1px #000;
+  font-size: calc(var(--u)*2.05); line-height: 1.5; color: var(--chalk); opacity: 0; transition: opacity .25s; }
+#msg.on { opacity: 1; }
+#msg .jp { display: block; font-family: var(--f-hand); font-weight: 600; color: var(--lantern); font-size: 1.05em; }
+#msg .more { position: absolute; right: calc(var(--u)*1.2); bottom: calc(var(--u)*0.6); color: var(--dim); font-size: .75em; animation: pulse 1s infinite; }
+
+/* Panels */
+.panel { background: rgba(8,10,16,.93); pointer-events: auto; }
+.center { display: grid; place-items: center; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+.btn { font-family: var(--f-ui); font-size: calc(var(--u)*2); padding: calc(var(--u)*0.7) calc(var(--u)*2); color: var(--chalk);
+  border: 1px solid rgba(159,180,255,.35); background: rgba(0,0,0,.4); }
+.btn:hover, .btn:focus-visible, .btn.sel { background: var(--chalk); color: var(--void); outline: none; }
+
+#choice { display: flex; align-items: flex-end; justify-content: center; padding-bottom: calc(var(--u)*14); pointer-events: auto; }
+#choice .opts { display: flex; flex-direction: column; align-items: stretch; gap: calc(var(--u)*0.8); max-width: 72%; }
+#choice .opts .btn { text-align: left; font-size: calc(var(--u)*1.85); }
+
+/* Title */
+#title { background: radial-gradient(ellipse at 50% 60%, rgba(7,8,12,.15), rgba(7,8,12,.85) 75%); display: flex; flex-direction: column;
+  align-items: center; justify-content: center; text-align: center; pointer-events: auto; cursor: pointer; }
+#title h1 { font-family: var(--f-title); font-weight: 400; margin: 0; font-size: calc(var(--u)*12); letter-spacing: .12em; color: var(--chalk);
+  text-shadow: 0 0 calc(var(--u)*2) rgba(159,180,255,.35), 0 0 3px #000; line-height: 1.1; }
+#title .roma { letter-spacing: .6em; font-size: calc(var(--u)*1.9); color: var(--moon); margin-top: calc(var(--u)*1); }
+#title .sub { font-size: calc(var(--u)*1.6); color: var(--dim); margin-top: calc(var(--u)*0.8); }
+#title .start { margin-top: calc(var(--u)*5); font-size: calc(var(--u)*2.2); color: var(--lantern); animation: pulse 1.6s infinite; }
+#title .keys { margin-top: calc(var(--u)*3.5); font-size: calc(var(--u)*1.45); color: var(--dim); line-height: 1.8;
+  display: grid; grid-template-columns: auto auto; gap: 0 calc(var(--u)*2.5); text-align: left; }
+#title .keys b { color: var(--chalk); font-weight: 400; }
+#title .seal { position: absolute; right: calc(var(--u)*4); bottom: calc(var(--u)*3.5); width: calc(var(--u)*7); height: calc(var(--u)*7);
+  border: 2px solid var(--shu); color: var(--shu); font-family: var(--f-title); font-size: calc(var(--u)*2.4); display: grid; place-items: center;
+  line-height: 1; transform: rotate(-6deg); opacity: .8; writing-mode: vertical-rl; }
+
+/* Intro / ending text screens */
+.story { background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u)*2.2);
+  padding: 0 10%; text-align: center; pointer-events: auto; }
+.story p { margin: 0; opacity: 0; transition: opacity 1.4s; }
+.story p.on { opacity: 1; }
+.story .jp { font-family: var(--f-hand); font-size: calc(var(--u)*2.6); color: var(--chalk); }
+.story .en { font-size: calc(var(--u)*1.7); color: var(--dim); margin-top: calc(var(--u)*0.4); display: block; }
+.story .skip { position: absolute; bottom: calc(var(--u)*2.5); right: calc(var(--u)*3); font-size: calc(var(--u)*1.4); color: var(--dim); opacity: .7; }
+#ending { gap: calc(var(--u)*1.3); }
+#ending .jp { font-size: calc(var(--u)*2.2); }
+#ending h2, #over h2 { font-family: var(--f-title); font-weight: 400; font-size: calc(var(--u)*6.5); margin: 0; letter-spacing: .15em; }
+#over h2 { color: var(--shu); }
+#over .en, #ending .en { font-size: calc(var(--u)*1.8); }
+.stats { font-size: calc(var(--u)*1.6); color: var(--dim); display: grid; grid-template-columns: auto auto; gap: calc(var(--u)*0.4) calc(var(--u)*3);
+  font-variant-numeric: tabular-nums; text-align: left; }
+.stats b { color: var(--chalk); font-weight: 400; text-align: right; }
+
+/* Inventory */
+#inv { display: grid; grid-template-columns: 42% 1fr; gap: calc(var(--u)*2.5); padding: calc(var(--u)*3.5) calc(var(--u)*4); }
+#inv h3 { font-weight: 400; margin: 0 0 calc(var(--u)*1.2); font-size: calc(var(--u)*1.6); color: var(--dim); letter-spacing: .3em; }
+#inv ul { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: calc(var(--u)*0.5);
+  overflow-y: auto; max-height: calc(var(--u)*40); }
+#inv li button { width: 100%; display: flex; align-items: center; gap: calc(var(--u)*1.2); padding: calc(var(--u)*0.5) calc(var(--u)*0.8);
+  font-size: calc(var(--u)*1.8); text-align: left; border: 1px solid transparent; }
+#inv li button .k { width: calc(var(--u)*3.4); height: calc(var(--u)*3.4); display: grid; place-items: center; font-family: var(--f-title);
+  font-size: calc(var(--u)*2.2); border: 1px solid rgba(255,255,255,.22); flex: none; }
+#inv li button .c { margin-left: auto; color: var(--dim); font-variant-numeric: tabular-nums; }
+#inv li button .eq { color: var(--lantern); font-size: .8em; }
+#inv li button.sel { border-color: var(--moon); background: rgba(159,180,255,.1); }
+#inv .detail { display: flex; flex-direction: column; gap: calc(var(--u)*1.4); min-width: 0; }
+#inv .big { font-family: var(--f-title); font-size: calc(var(--u)*7); color: var(--chalk); line-height: 1; }
+#inv .name { font-size: calc(var(--u)*2.3); }
+#inv .name small { display: block; color: var(--dim); font-size: .7em; margin-top: calc(var(--u)*0.3); }
+#inv .desc { font-size: calc(var(--u)*1.75); line-height: 1.6; color: #b9bfcc; }
+#inv .acts { display: flex; gap: calc(var(--u)*1); flex-wrap: wrap; }
+#inv .cond { margin-top: auto; display: flex; align-items: center; gap: calc(var(--u)*1.2); font-size: calc(var(--u)*1.6); color: var(--dim); }
+#inv .cond canvas { width: calc(var(--u)*18); height: calc(var(--u)*4); border: 1px solid rgba(255,255,255,.15); background: #000; }
+#inv .cond b { font-weight: 400; }
+#inv .hint { position: absolute; bottom: calc(var(--u)*1.4); left: calc(var(--u)*4); font-size: calc(var(--u)*1.35); color: var(--dim); }
+
+/* Document: a page torn from a ruled school notebook */
+#doc { display: grid; place-items: center; background: rgba(0,0,0,.72); pointer-events: auto; }
+#doc .page { position: relative; width: 70%; height: 86%; background: var(--paper); color: var(--pencil); font-family: var(--f-hand);
+  padding: calc(var(--u)*3) calc(var(--u)*3.5) calc(var(--u)*3) calc(var(--u)*7); box-shadow: 0 calc(var(--u)*1) calc(var(--u)*4) #000;
+  background-image: linear-gradient(90deg, transparent calc(var(--u)*5.2), rgba(176,40,44,.55) calc(var(--u)*5.2), rgba(176,40,44,.55) calc(var(--u)*5.35), transparent calc(var(--u)*5.35)),
+                    repeating-linear-gradient(transparent 0, transparent calc(var(--u)*3.3), var(--rule) calc(var(--u)*3.3), var(--rule) calc(var(--u)*3.4));
+  transform: rotate(-.6deg); overflow: hidden; display: flex; flex-direction: column; }
+#doc .page h4 { margin: 0 0 calc(var(--u)*0.6); font-size: calc(var(--u)*2.4); font-weight: 600; line-height: calc(var(--u)*3.4); }
+#doc .body { font-size: calc(var(--u)*1.9); line-height: calc(var(--u)*3.4); overflow-y: auto; flex: 1; min-height: 0; }
+#doc .body p { margin: 0; }
+#doc .body .en { color: #5b5a66; font-size: .82em; }
+#doc .body .torn { color: var(--shu); }
+#doc .nav { display: flex; justify-content: space-between; align-items: center; font-family: var(--f-ui); font-size: calc(var(--u)*1.4);
+  color: #6d6a74; padding-top: calc(var(--u)*0.8); }
+#doc .nav button { color: var(--pencil); font-size: calc(var(--u)*1.6); }
+
+#pause { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u)*1.4); }
+#pause h2 { font-family: var(--f-title); font-weight: 400; font-size: calc(var(--u)*5); margin: 0 0 calc(var(--u)*1.5); letter-spacing: .3em; }
+
+#fps { position: absolute; left: 4px; bottom: 2px; font-size: 10px; color: #0f0; display: none; }
+
+/* Boss bar */
+#boss { position: absolute; left: 50%; top: calc(var(--u)*5.5); transform: translateX(-50%); width: 46%; text-align: center; pointer-events: none; }
+#boss .bn { display: flex; justify-content: center; align-items: baseline; gap: calc(var(--u)*1); margin-bottom: calc(var(--u)*0.5); text-shadow: 0 0 6px #000; }
+#boss .bn .jp { font-family: var(--f-title); font-size: calc(var(--u)*2.6); color: var(--chalk); }
+#boss .bn .en { font-size: calc(var(--u)*1.3); color: var(--dim); letter-spacing: .3em; }
+#boss .bar { height: calc(var(--u)*0.9); background: rgba(0,0,0,.6); outline: 1px solid rgba(176,40,44,.6); }
+#boss .bar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #6d1418, var(--shu)); transition: width .25s; }
+
+/* Big centred line, for sung words and shouted names */
+#bigtext { display: grid; place-items: center; pointer-events: none; font-family: var(--f-title); font-size: calc(var(--u)*5.2); color: var(--chalk);
+  text-shadow: 0 0 calc(var(--u)*1.5) #000, 0 0 4px #000; letter-spacing: .12em; text-align: center; opacity: 0; transition: opacity .35s; }
+#bigtext.on { opacity: 1; }
+#bigtext.red { color: #ff6a60; }
+#bigtext small { display: block; font-family: var(--f-ui); font-size: .32em; color: var(--dim); letter-spacing: .2em; margin-top: calc(var(--u)*0.8); }
+
+/* Dial padlock */
+#dial { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u)*1.6); }
+#dial .dl-title { font-family: var(--f-title); font-size: calc(var(--u)*3.6); letter-spacing: .2em; }
+#dial .dl-sub { color: var(--dim); font-size: calc(var(--u)*1.7); }
+#dial .wheels { display: flex; gap: calc(var(--u)*1.4); padding: calc(var(--u)*1.6) calc(var(--u)*2.4); background: #2b2a26; border: 2px solid #6d6552;
+  border-radius: calc(var(--u)*1); box-shadow: inset 0 0 calc(var(--u)*2) #000; }
+#dial .wheel { display: flex; flex-direction: column; align-items: center; gap: calc(var(--u)*0.4); }
+#dial .wheel button { font-size: calc(var(--u)*1.8); color: var(--dim); padding: calc(var(--u)*0.2) calc(var(--u)*1); }
+#dial .wheel .num { width: calc(var(--u)*6); height: calc(var(--u)*7.4); display: grid; place-items: center; font-size: calc(var(--u)*5);
+  font-variant-numeric: tabular-nums; background: linear-gradient(#11100e, #3a372f 50%, #11100e); color: #e8dcc0; border: 1px solid #000; }
+#dial .wheel.sel .num { outline: 2px solid var(--lantern); }
+#dial .dl-acts { display: flex; gap: calc(var(--u)*1.5); }
+#dial .hint { color: var(--dim); font-size: calc(var(--u)*1.35); }
+
+/* Kokkuri-san sheet: a torii, yes/no, digits and the kana table, with a ¥10 coin moving over it */
+#kokkuri { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u)*1.2); background: rgba(0,0,0,.78); pointer-events: auto; }
+#kokkuri .sheet { position: relative; width: 74%; aspect-ratio: 1.75; max-width: 100%; background: #efe6cf; color: #2a1c14; font-family: var(--f-hand); font-weight: 600;
+  box-shadow: 0 0 calc(var(--u)*4) rgba(232,162,74,.25), 0 calc(var(--u)*1) calc(var(--u)*3) #000; padding: calc(var(--u)*1.2); transform: rotate(.5deg); }
+#kokkuri .torii { position: absolute; left: 50%; top: 4%; width: 13%; height: 20%; transform: translateX(-50%); }
+#kokkuri .torii i { position: absolute; left: -6%; right: -6%; height: 12%; background: var(--shu); }
+#kokkuri .torii i:first-child { top: 0; border-radius: 40% 40% 0 0; }
+#kokkuri .torii i:nth-child(2) { top: 26%; left: 6%; right: 6%; height: 8%; }
+#kokkuri .torii b { position: absolute; top: 8%; bottom: 0; width: 12%; background: var(--shu); }
+#kokkuri .torii b:nth-of-type(1) { left: 16%; } #kokkuri .torii b:nth-of-type(2) { right: 16%; }
+#kokkuri .yes, #kokkuri .no { position: absolute; top: 9%; font-size: calc(var(--u)*2.2); }
+#kokkuri .yes { left: 14%; } #kokkuri .no { right: 12%; }
+#kokkuri .nums { position: absolute; left: 8%; right: 8%; top: 29%; display: grid; grid-template-columns: repeat(10, 1fr); text-align: center; font-size: calc(var(--u)*1.9); }
+#kokkuri .kana { position: absolute; left: 8%; right: 8%; top: 42%; bottom: 5%; display: grid; grid-template-columns: repeat(10, 1fr); grid-template-rows: repeat(5, 1fr);
+  text-align: center; align-items: center; font-size: calc(var(--u)*1.9); }
+#kokkuri .hot { color: var(--shu); text-shadow: 0 0 6px rgba(176,40,44,.6); }
+#kokkuri .coin { position: absolute; width: calc(var(--u)*3.6); height: calc(var(--u)*3.6); margin: calc(var(--u)*-1.8) 0 0 calc(var(--u)*-1.8); border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #f0b070, #a8602c 60%, #6a3818); border: 1px solid #4a2410; color: #3a1a08; font-family: var(--f-ui);
+  font-size: calc(var(--u)*1.2); display: grid; place-items: center; transition: left .75s cubic-bezier(.5,0,.3,1), top .75s cubic-bezier(.5,0,.3,1);
+  box-shadow: 0 2px 4px rgba(0,0,0,.5); }
+#kokkuri .answer { font-family: var(--f-hand); font-size: calc(var(--u)*3); color: var(--lantern); min-height: calc(var(--u)*4); letter-spacing: .3em; text-shadow: 0 0 8px #000; }
+
+/* Map */
+#map { display: flex; flex-direction: column; padding: calc(var(--u)*3) calc(var(--u)*4); gap: calc(var(--u)*1.2); }
+#map h3 { margin: 0; font-weight: 400; font-size: calc(var(--u)*1.6); color: var(--dim); letter-spacing: .3em; }
+#map .floors { flex: 1; display: flex; flex-direction: column; gap: calc(var(--u)*1.2); min-height: 0; }
+#map .floor { position: relative; flex: 1; border-left: 2px solid rgba(159,180,255,.3); padding-left: calc(var(--u)*5); }
+#map .floor > span { position: absolute; left: calc(var(--u)*0.6); top: 50%; transform: translateY(-50%); font-size: calc(var(--u)*1.7); color: var(--moon); }
+#map .rooms { position: relative; height: 100%; }
+#map .rm { position: absolute; display: grid; place-items: center; text-align: center; line-height: 1.15; font-size: calc(var(--u)*1.35);
+  border: 1px dashed rgba(255,255,255,.18); color: rgba(255,255,255,.3); padding: 2px; box-sizing: border-box; }
+#map .rm small { display: block; font-size: .75em; opacity: .8; }
+#map .rm.seen { border-style: solid; border-color: rgba(159,180,255,.5); color: var(--chalk); background: rgba(159,180,255,.08); }
+#map .rm.here { border-color: var(--lantern); background: rgba(232,162,74,.18); color: #fff; animation: pulse 1.2s infinite; }
+#map .hint { color: var(--dim); font-size: calc(var(--u)*1.35); }
+#goal { margin-top: calc(var(--u)*1.6); font-size: calc(var(--u)*1.5); color: var(--lantern); line-height: 1.5; }
+#goal b { color: var(--dim); font-weight: 400; margin-right: calc(var(--u)*0.6); }
+#title .menu { margin-top: calc(var(--u)*4.5); display: flex; flex-direction: column; gap: calc(var(--u)*1); align-items: center; }
+#title .menu .btn { min-width: calc(var(--u)*24); }
+
+/* Touch controls */
+#touch { position: fixed; left: 0; right: 0; bottom: 0; height: 0; pointer-events: none; z-index: 5; }
+#touch .pad, #touch .acts { position: absolute; bottom: calc(env(safe-area-inset-bottom, 0px) + 16px); pointer-events: auto; }
+#touch .pad { left: 16px; width: 150px; height: 150px; }
+#touch .acts { right: 16px; width: 160px; height: 150px; }
+#touch button { position: absolute; width: 52px; height: 52px; border-radius: 50%; background: rgba(20,24,36,.55); border: 1px solid rgba(159,180,255,.35);
+  color: var(--chalk); font-family: var(--f-title); font-size: 20px; display: grid; place-items: center; touch-action: none; }
+#touch button.on { background: rgba(159,180,255,.35); }
+#touch button small { position: absolute; bottom: -16px; font-family: var(--f-ui); font-size: 10px; color: var(--dim); white-space: nowrap; }
+#touch .pad button { border-radius: 10px; font-family: var(--f-ui); font-size: 18px; }
+@media (prefers-reduced-motion: reduce) { #title .start, #hp.low .bar i, #msg .more { animation: none; } }
+</style>
+
+<div id="app">
+  <div id="stage">
+    <canvas id="view" width="480" height="300"></canvas>
+    <div id="kokkuri" class="layer" hidden>
+      <div class="sheet"><div class="torii"><i></i><i></i><b></b><b></b></div><div class="yes">はい</div><div class="no">いいえ</div>
+        <div class="nums"></div><div class="kana"></div><div class="coin">10</div></div>
+      <div class="answer"></div>
+    </div>
+    <div id="bigtext" class="layer"></div>
+    <div id="boss" hidden><div class="bn"><span class="jp"></span><span class="en"></span></div><div class="bar"><i></i></div></div>
+    <div id="hud" class="layer" hidden>
+      <div id="hp"><span>体力</span><div class="bar"><i></i></div></div>
+      <div id="equip"><span class="n">Bare hands</span><b class="kanji">手</b></div>
+      <div id="prompt"></div>
+      <div id="roomcard"><div class="jp"></div><div class="en"></div></div>
+      <div id="msg"><p></p></div>
+    </div>
+    <div id="choice" class="layer" hidden><div class="opts"></div></div>
+    <div id="inv" class="layer panel" hidden>
+      <div><h3>持ち物 · ITEMS</h3><ul id="invlist"></ul><div id="goal"></div></div>
+      <div class="detail">
+        <div class="big kanji" id="invbig"></div>
+        <div class="name" id="invname"></div>
+        <div class="desc" id="invdesc"></div>
+        <div class="acts" id="invacts"></div>
+        <div class="cond"><canvas id="ecg" width="180" height="40"></canvas><div>状態 <b id="condtxt"></b></div></div>
+      </div>
+      <div class="hint">↑↓ choose · E / Enter use · M map · I / Esc close</div>
+    </div>
+    <div id="dial" class="layer panel" hidden>
+      <div class="dl-title">書庫</div>
+      <div class="dl-sub">The archive door is held by a four-digit dial padlock.</div>
+      <div class="wheels"></div>
+      <div class="dl-acts"><button class="btn" data-act="open">開ける · Open</button><button class="btn" data-act="cancel">やめる · Leave it</button></div>
+      <div class="hint">← → choose a wheel · ↑ ↓ turn it · E open · Esc leave</div>
+    </div>
+    <div id="map" class="layer panel" hidden><h3>校内案内図 · SCHOOL MAP</h3><div class="floors"></div><div class="hint">M / Esc close</div></div>
+    <div id="doc" class="layer" hidden>
+      <div class="page"><h4 id="doctitle"></h4><div class="body" id="docbody"></div>
+        <div class="nav"><button id="docprev">← 前</button><span id="docpage"></span><button id="docnext">次 →</button></div></div>
+    </div>
+    <div id="pause" class="layer panel" hidden>
+      <h2>一時停止</h2>
+      <button class="btn" data-act="resume">Resume</button>
+      <button class="btn" data-act="restart">Restart from title</button>
+    </div>
+    <div id="intro" class="layer story" hidden><div class="skip">E / tap to skip</div></div>
+    <div id="over" class="layer story" hidden></div>
+    <div id="ending" class="layer story" hidden></div>
+    <div id="title" class="layer">
+      <h1>夜の学校</h1>
+      <div class="roma">YORU NO GAKKŌ</div>
+      <div class="sub">a night-school survival horror</div>
+      <div class="menu" id="titlemenu"></div>
+      <div class="keys">
+        <span><b>↑ ↓</b> walk / back up</span><span><b>← →</b> turn</span>
+        <span><b>Shift</b> run</span><span><b>Space</b> attack · use weapon</span>
+        <span><b>E</b> examine · open</span><span><b>I</b> items · <b>Q</b> switch weapon</span>
+        <span><b>M</b> school map</span><span><b>Esc</b> pause</span>
+      </div>
+      <div class="seal">七不思議</div>
+    </div>
+    <div id="fps"></div>
+  </div>
+  <div id="touch" hidden>
+    <div class="pad">
+      <button data-k="up" style="left:49px;top:0">▲</button>
+      <button data-k="left" style="left:0;top:49px">◀</button>
+      <button data-k="right" style="left:98px;top:49px">▶</button>
+      <button data-k="down" style="left:49px;top:98px">▼</button>
+    </div>
+    <div class="acts">
+      <button data-k="run" data-toggle="1" style="left:0;top:0">走<small>run</small></button>
+      <button data-k="inv" style="left:104px;top:0">持<small>items</small></button>
+      <button data-k="interact" style="left:0;top:86px">調<small>examine</small></button>
+      <button data-k="attack" style="left:104px;top:86px">撃<small>attack</small></button>
+      <button data-k="cycle" style="left:52px;top:44px">替<small>switch</small></button>
+    </div>
+  </div>
+</div>
