@@ -2,6 +2,8 @@
 
 # 夜の学校 · Yoru no Gakkō
 
+**English** · [简体中文](README.zh-CN.md) · [繁體中文](README.zh-TW.md) · [日本語](README.ja.md)
+
 **A retro fixed-camera survival-horror game set in a Japanese high school at 2 a.m.**
 Seven mysteries. One forgotten name. Free, open source, and it runs in your browser.
 
