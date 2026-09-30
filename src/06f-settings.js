@@ -11,7 +11,7 @@ const SET_ROWS = [
   { k: 'voice', label: '声 · Voice', min: 0, max: 10 },
   { k: 'text', label: '文字の大きさ · Text size', opts: [[0, '小 · Small'], [1, '中 · Normal'], [2, '大 · Large'], [3, '特大 · Larger']] },
   { k: 'controls', label: '操作 · Controls', opts: [['tank', 'クラシック · Tank (classic)'], ['modern', 'モダン · Modern (camera-relative)']] },
-  { k: 'lang', label: '字幕 · Subtitles', raw: true, opts: [['en', 'English'], ['zh-Hans', '简体中文'], ['zh-Hant', '繁體中文']] },
+  { k: 'lang', label: '字幕 · Subtitles', raw: true, opts: [['en', 'English'], ['zh-Hans', '简体中文'], ['zh-Hant', '繁體中文'], ['ja', '日本語']] },
 ];
 
 function loadSettings() {

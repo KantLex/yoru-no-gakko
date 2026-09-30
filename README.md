@@ -46,8 +46,8 @@ No further spoilers here.
 - **Two acts and four chapters**, with notes, diaries and old class photographs that slowly rewrite what
   you thought the story was.
 - A shinai, purifying salt and ofuda to fight back; onigiri, ramune and bandages to keep going.
-- **Bilingual text**: Japanese on screen with English, Traditional Chinese (繁體中文) or Simplified Chinese
-  (简体中文) beneath.
+- **Four text languages**: Japanese on screen with English, Traditional Chinese (繁體中文) or Simplified Chinese
+  (简体中文) beneath, or a fully Japanese mode (日本語) where all narration, menus and documents are in Japanese.
 - **Voiced heroine**: sixteen short Japanese voice lines at key moments of the story, with subtitles.
 - **Richer sound**, all synthesised in the browser: each room has its own acoustics, footsteps echo down
   the corridors, wind blows on the roof, and a school chime sounds somewhere far away.
@@ -107,6 +107,7 @@ The source lives in `src/` as numbered parts that `build.sh` joins in order into
 | `06e-i18n.js` | Language switching and the translation lookup |
 | `06f-settings.js` | Settings screen and saved preferences |
 | `06g-strings-zh.js` | Simplified and Traditional Chinese text |
+| `06j-strings-ja.js` | Japanese text |
 | `06h-voice.js` | The heroine's voice lines and their subtitles |
 | `06i-meta.js` | Records kept across playthroughs |
 
