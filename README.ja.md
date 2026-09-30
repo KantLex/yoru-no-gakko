@@ -10,7 +10,7 @@
 
 最新情報は [X の @aisongman](https://x.com/aisongman) をフォローしてください。
 
-https://github.com/user-attachments/assets/328f2bfb-8d6e-4ca4-8f84-791624bd6b13
+https://github.com/user-attachments/assets/7e40b621-5d16-48e6-9546-7ed378a1f6b4
 
 | | |
 |---|---|
