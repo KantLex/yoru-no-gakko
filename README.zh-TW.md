@@ -10,7 +10,7 @@
 
 追蹤 [X 上的 @aisongman](https://x.com/aisongman) 取得最新消息。
 
-https://github.com/user-attachments/assets/328f2bfb-8d6e-4ca4-8f84-791624bd6b13
+https://github.com/user-attachments/assets/a907d088-45c0-42c0-935e-0a7b4c9ad744
 
 | | |
 |---|---|
