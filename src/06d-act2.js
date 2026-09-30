@@ -196,7 +196,7 @@ Object.assign(AI, {
   rokuro(e, dt, c) {
     const m = e.m, H = m.head.position;
     m.root.position.y = c.fy;
-    const phase2 = e.hp <= 6;
+    const phase2 = e.hp <= e.T.hp / 2;                 // half her hp (6 of 12; 9 of 18 in Nightmare)
     const hover = () => V3(Math.sin(e.ph * 0.9) * 0.5, 2.55 + Math.sin(e.ph * 1.3) * 0.25, 0.45);
     const easeTo = (v, k) => H.lerp(v, 1 - Math.exp(-dt * k));
     switch (e.state) {
@@ -268,22 +268,28 @@ function bossBar(o) {
   const el = $('boss');
   if (!o) { el.hidden = true; return; }
   el.hidden = false;
-  el.querySelector('.jp').textContent = o.name; el.querySelector('.en').textContent = o.en;
+  el.querySelector('.jp').textContent = o.name; el.querySelector('.en').textContent = tr(o.en);
   el.querySelector('.bar i').style.width = clamp(o.frac, 0, 1) * 100 + '%';
 }
 let bigT = null;
 function bigText(html, secs, red) {
   const el = $('bigtext'); clearTimeout(bigT);
   if (!html) { el.classList.remove('on'); return; }
+  html = /</.test(html) ? html.replace(/<small>([\s\S]*?)<\/small>/g, (_, s) => `<small>${tr(s)}</small>`) : tr(html);   // the English is in <small>, or is the whole line
   el.innerHTML = `<div>${html}</div>`; el.classList.toggle('red', !!red); el.classList.add('on');
   if (secs) bigT = setTimeout(() => el.classList.remove('on'), secs * 1000);
 }
-async function showStory(lines, hold = 2.8) {
+async function showStory(lines, hold = 2.8) {   // lines: [jp, en, voice?]
   const el = $('intro');
   el.querySelectorAll('p').forEach((p) => p.remove());
-  const ps = lines.map(([jp, en]) => { const p = document.createElement('p'); p.innerHTML = `<span class="jp">${jp}</span><span class="en">${en}</span>`; el.insertBefore(p, el.querySelector('.skip')); return p; });
+  const ps = lines.map(([jp, en]) => { const p = document.createElement('p'); p.innerHTML = `<span class="jp">${jp}</span><span class="en">${tr(en)}</span>`; el.insertBefore(p, el.querySelector('.skip')); return p; });
   el.hidden = false; G.storyOpen = true; G.skip = false;
-  for (const p of ps) { if (G.skip) break; p.classList.add('on'); for (let k = 0; k < hold * 10 && !G.skip; k++) await wait(0.1); }
+  for (let i = 0; i < ps.length && !G.skip; i++) {
+    ps[i].classList.add('on');
+    let spoken = !lines[i][2]; if (!spoken) audio.speak(lines[i][2]).then(() => { spoken = true; });
+    for (let k = 0; (k < hold * 10 || !spoken) && k < 150 && !G.skip; k++) await wait(0.1);   // hold, and let a voiced line finish
+  }
+  if (G.skip) audio.stopVoice();
   el.hidden = true; G.storyOpen = false;
 }
 const CHAPTERS = {
@@ -321,6 +327,7 @@ async function loopEvent() {
   await fadeTo(1, 1.6);
   await say('You stepped through the doors, out into the night...');
   await say('...and you are standing in the entrance hall. The same shoe lockers. The same humming vending machine. Behind you, the doors are chained shut again.');
+  await say('「うそ……戻ってる……？」', { jp: true, sub: 'No... I\'m back where I started?', voice: 'v04' });
   audio.play('voice', 0, 4.5, 300);
   await say('「まだ、帰れないよ。まだ、だれもあなたをさがしてないもの」', { jp: true, sub: '"You can\'t go home yet. Nobody is even looking for you."' });
   audio.play('shutter', 7, 2.4); G.room.setShutter('east', false, true); shake(0.3);
@@ -365,6 +372,7 @@ async function storeroomScene(R) {
   await fadeTo(1, 0.8);
   await say('Through the gap between the doors, in a stripe of moonlight: a girl in a kendo uniform, curled up on the gym mats. Her lips are blue.');
   audio.play('sting'); shake(0.4); G.flash = 0.5;
+  await say('「……わたし？」', { jp: true, sub: '...That\'s me?', voice: 'v06' });
   await say('It\'s you.');
   G.camOverride = null; G.cam = null;
   await showStory([
@@ -372,7 +380,7 @@ async function storeroomScene(R) {
     ['目をつぶって、うしろの正面を当てるまで、目を開けちゃだめだって。', 'I had to keep my eyes shut until I guessed who was right behind me.'],
     ['みんなが歌いながら、私の肩を押して歩かせた。階段を、十二、十三……', 'They sang as they steered me by the shoulders. Down the stairs: twelve, thirteen...'],
     ['目を開けたら、倉庫の扉が閉まる音がした。笑い声が遠ざかっていった。', 'When I opened my eyes, the storeroom door slammed, and their laughter faded away.'],
-    ['私は、眠ってなんかいなかった。', 'I never fell asleep.'],
+    ['私は、眠ってなんかいなかった。', 'I never fell asleep.', 'v07'],
   ], 3.2);
   F.storeroom_seen = 1;
   audio.play('voice', 9, 5, 330);
@@ -412,6 +420,8 @@ async function okubiChase(R, door) {
   await wait(1.2);
   G.cutscene = false;
   bigText('走れ！<small>RUN — the rooftop door is at the west end</small>', 2.2);
+  note('「逃げなきゃ！」', 3, true, 'I have to run!');
+  audio.speak('v10');
 }
 
 // ── Kokkuri-san ──
@@ -460,7 +470,7 @@ async function kokkuriScene(R) {
   if (c !== 0) { G.cutscene = false; return; }
   const el = $('kokkuri'); buildKokkuriSheet(); el.querySelector('.answer').textContent = ''; el.hidden = false;
   await wait(0.05); coinTo('torii');
-  await say('「こっくりさん、こっくりさん、おいでください」', { jp: true, sub: '"Kokkuri-san, Kokkuri-san, please come."' });
+  await say('「こっくりさん、こっくりさん、おいでください」', { jp: true, sub: '"Kokkuri-san, Kokkuri-san, please come."', voice: 'v08' });
   audio.play('whisper'); coinTo('yes'); await wait(1.3);
   const asked = new Set();
   while (asked.size < QA.length) {
@@ -502,7 +512,7 @@ function openDial(code) {
       w.querySelector('.dn').onclick = () => { d.sel = i; dialTurn(-1); };
       wheels.appendChild(w); return w;
     });
-    el.querySelector('.dl-sub').textContent = 'The archive door is held by a four-digit dial padlock.';
+    el.querySelector('.dl-sub').textContent = tr('The archive door is held by a four-digit dial padlock.');
     el.querySelector('[data-act=open]').onclick = () => dialTry();
     el.querySelector('[data-act=cancel]').onclick = () => dialClose(false);
     el.hidden = false; dialRender();
@@ -514,7 +524,7 @@ function dialTry() {
   const d = G.dial;
   if (d.vals.join('') === d.code) { dialClose(true); return; }
   audio.play('thud');
-  $('dial').querySelector('.dl-sub').textContent = 'The shackle doesn\'t move. Wrong number.';
+  $('dial').querySelector('.dl-sub').textContent = tr('The shackle doesn\'t move. Wrong number.');
 }
 function dialClose(ok) { $('dial').hidden = true; const r = G.dial.resolve; G.dial = null; r(ok); }
 function dialInput(hit) {
@@ -524,7 +534,7 @@ function dialInput(hit) {
   if (hit('up')) dialTurn(1);
   if (hit('down')) dialTurn(-1);
   if (hit('interact') || hit('attack')) dialTry();
-  if (hit('pause') || hit('inv')) dialClose(false);
+  if (hit('pause') || hit('inv') || hit('back')) dialClose(false);
 }
 
 // ── the school map, from the back of the student handbook ──
@@ -541,7 +551,7 @@ function openMap() {
   const box = $('map').querySelector('.floors');
   box.innerHTML = MAP_FLOORS.map(([label, rooms]) => `<div class="floor"><span>${label}</span><div class="rooms">${rooms.map(([id, jp, en, x, y, w, h]) => {
     const seen = F['visited_' + id] || G.roomId === id, here = G.roomId === id;
-    return `<div class="rm${seen ? ' seen' : ''}${here ? ' here' : ''}" style="left:${x / 12 * 100}%;top:${y * 50}%;width:${w / 12 * 100}%;height:${h * 50}%">${jp}<small>${here ? '現在地 · you' : en}</small></div>`;
+    return `<div class="rm${seen ? ' seen' : ''}${here ? ' here' : ''}" style="left:${x / 12 * 100}%;top:${y * 50}%;width:${w / 12 * 100}%;height:${h * 50}%">${jp}<small>${tr(here ? '現在地 · you' : en)}</small></div>`;
   }).join('')}</div></div>`).join('');
   $('map').hidden = false; G.mapOpen = true;
 }
@@ -558,7 +568,7 @@ async function archiveScene(R) {
   if (c !== 0) { G.cutscene = false; return; }
   audio.play('coin'); await wait(0.7); audio.play('coin'); await wait(0.7);
   bigText('白石　小夜<small>SHIRAISHI SAYO</small>', 3.4);
-  audio.play('rin');
+  audio.play('rin'); audio.speak('v09');
   await wait(3.6);
   F.realname = 1;
   await say('Shiraishi Sayo. Not Hanako. "Hanako" is the name printed on sample forms, the name for a girl who could be anyone. They gave it to her so that her real one would be forgotten.');
@@ -595,7 +605,7 @@ async function finaleScene(R) {
   G.camOverride = { pos: V3(0, 7.4, 6.2), look: V3(0, 0, 0.6), fov: 55 };
   await fadeTo(1, 0.6);
   G.cutscene = false;
-  note(isTouch ? 'When the song stops, turn to face whoever is right behind you, and tap 撃.' : 'When the song stops, turn to face whoever is right behind you, and press Space.', 6);
+  note(trf(lastDevice === 'touch' ? 'When the song stops, turn to face whoever is right behind you, and tap {key}.' : 'When the song stops, turn to face whoever is right behind you, and press {key}.', { key: glyph('attack') }), 6);
 }
 function slotAngle(i) { return G.final.angle + i * TAU / 6; }
 function placeCircle() {
@@ -647,7 +657,7 @@ function updateFinale(dt) {
       if (f.t > 0.8) { G.fadeTarget = 1; G.fadeSpeed = 3; f.phase = 'answer'; f.t = 0; }
       break;
     case 'answer':
-      if (f.t > rd.win) finaleFail('Too slow.');
+      if (f.t > rd.win * (F.hard ? 0.85 : 1)) finaleFail('Too slow.');
       break;
   }
   placeCircle();
@@ -663,8 +673,10 @@ async function finaleAnswer() {
   f.busy = true; f.decoySlot = undefined;
   const calls = ['「花子さん、みーつけた！」', '「花子さん！」', '「小夜ちゃん！」'];
   bigText(calls[f.round], 2, f.round === 2);
-  audio.play(f.round === 2 ? 'rin' : 'giggle', f.R.kids[0].root.position.x, f.R.kids[0].root.position.z);
+  const v = audio.speak(['v11', 'v12', 'v13'][f.round]);
   G.flash = 0.35;
+  await Promise.race([v, wait(1.2)]);               // her shout first, then the answer from the circle
+  audio.play(f.round === 2 ? 'rin' : 'giggle', f.R.kids[0].root.position.x, f.R.kids[0].root.position.z);
   await wait(1.6);
   f.wins++;
   if (f.round === 0) await say('「みつかっちゃった。……でも、それはわたしの名前じゃないよ」', { jp: true, sub: '"You found me. ...But that isn\'t my name."' });
@@ -717,7 +729,7 @@ async function finaleWin() {
     R.sun.position.set(24, -4, 8); R.sun.lookAt(0, 2, 0); R.scene.add(R.sun);
   }
   G.final = null;
-  G.dawn = { R, g, t: 0, dur: 45, next: 1.2, which: 0 };
+  G.dawn = { R, g, t: 0, dur: F.hard ? 55 : 45, next: 1.2, which: 0 };
   G.camOverride = () => ({ pos: V3(player.x * 0.35, 6.2, 9.6), look: V3(player.x * 0.5, 1.4, player.z * 0.4 - 3), fov: 64 });
   G.cutscene = false;
 }
@@ -790,6 +802,7 @@ async function dawnEnd() {
   R.rings.forEach((r) => (r.visible = false));
   bossBar(null);
   audio.play('dawn'); G.flash = 0.7;
+  await say('「……朝だ。」', { jp: true, sub: '...It\'s morning.', voice: 'v14' });
   await say('The sun clears the rooftops of the town. Its first light falls across the skull, and the skull begins to crumble like ash in a wind.');
   await tween(3, (q) => {
     g.skull.position.y = 5.2 - q * 6; g.skull.scale.setScalar(1 - q * 0.6);

@@ -27,7 +27,7 @@ function officeChair(R, x, z, ry) {
 }
 
 ROOM_DEFS.music = () => {
-  const R = new Room('music', { name: '音楽室', en: 'MUSIC ROOM', surface: 'wood', ambience: [0.09, 0.04, 0], fogNear: 7, fogFar: 22 });
+  const R = new Room('music', { name: '音楽室', en: 'MUSIC ROOM', surface: 'wood', ambience: [0.09, 0.04, 0], acoustics: 'room', fogNear: 7, fogFar: 22 });
   const x0 = -5, x1 = 5, z0 = -4, z1 = 4, h = 3.2;
   R.floor(x0, z0, x1, z1, mat(0xffffff, { map: TEX.wood }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -100,7 +100,8 @@ ROOM_DEFS.music = () => {
   R.spot({ id: 'salt', x: -4.45, z: 1.6, r: 0.9, when: () => !F.salt_music, use: async () => {
     F.salt_music = 1; R.salt.visible = false;
     await say('Another cone of morijio just inside the door. Someone was very worried about what might come through it.');
-    give('salt', 2);
+    give('salt', F.hard ? 1 : 2);
+    await hardPencil('music');
   } });
   R.spot({ id: 'board', x: -1.3, z: z0 + 0.5, r: 1.0, use: () => say('A melody in chalk on the staff lines. Underneath: 「最後まで弾いてはいけない」 "It must never be played to the end."') });
   R.spot({ id: 'umb', x: 4.3, z: -3.3, r: 1.0, when: () => !F.ofuda, use: () => say('An old red paper umbrella, a wagasa, leaning in the corner. Its paper looks almost warm.') });
@@ -118,7 +119,7 @@ ROOM_DEFS.music = () => {
 
 // A straight flight of twelve steps between two floors: the upper door at the north landing, the lower at the south.
 function stairwell(id, name, en, o) {
-  const R = new Room(id, { name, en, surface: 'stair', ambience: [0.13, 0.08, 0], fogNear: 6, fogFar: 20 });
+  const R = new Room(id, { name, en, surface: 'stair', ambience: [0.13, 0.08, 0], acoustics: 'stair', fogNear: 6, fogFar: 20 });
   const x0 = -1.6, x1 = 1.6, z0 = -5.5, z1 = 5.5, top = 3.0, s0 = -3.5, s1 = 2.0, n = 12, run = (s1 - s0) / n, rise = top / n, H = 6.2;
   Object.assign(R, { x0, x1, z0, z1, top, s0, s1, run, rise });
   R.floorY = (x, z) => (z <= s0 ? top : z >= s1 ? 0 : top - Math.min(n, Math.floor((z - s0) / run) + 1) * rise);
@@ -163,6 +164,7 @@ ROOM_DEFS.stairs = () => stairwell('stairs', '西階段', 'WEST STAIRWELL', { to
     audio.play('thud'); shake(0.7); audio.play('sting', 0, 0, 0.4);
     await say('You counted the steps on the way down, the way you always do. Ten... eleven... twelve.');
     await say('...and your foot came down on a thirteenth.');
+    await say('「……十三段目？」', { jp: true, sub: '...A thirteenth step?', voice: 'v05' });
     await say('For a moment there are hands on your shoulders, steering you, and a girl\'s voice counting the steps for you, laughing. Then nothing.');
     G.cutscene = false;
   });
@@ -171,7 +173,7 @@ ROOM_DEFS.stairs = () => stairwell('stairs', '西階段', 'WEST STAIRWELL', { to
 } });
 
 ROOM_DEFS.entrance = () => {
-  const R = new Room('entrance', { name: '昇降口', en: 'ENTRANCE HALL', surface: 'tile', ambience: [0.13, 0.1, 0], fogNear: 7, fogFar: 24 });
+  const R = new Room('entrance', { name: '昇降口', en: 'ENTRANCE HALL', surface: 'tile', ambience: [0.13, 0.1, 0], acoustics: 'hall', fogNear: 7, fogFar: 24 });
   const x0 = -7, x1 = 7, z0 = -5, z1 = 5, h = 3.2;
   R.floor(x0, z0, x1, 2.6, mat(0xffffff, { map: TEX.floortile }), 1.6);
   R.floor(x0, 2.6, x1, z1, mat(0x8a8078, { map: TEX.floortile }), 0.8);
@@ -233,7 +235,7 @@ ROOM_DEFS.entrance = () => {
 };
 
 ROOM_DEFS.staff = () => {
-  const R = new Room('staff', { name: '職員室', en: 'STAFF ROOM', surface: 'lino', ambience: [0.11, 0.03, 0], fogNear: 7, fogFar: 22 });
+  const R = new Room('staff', { name: '職員室', en: 'STAFF ROOM', surface: 'lino', ambience: [0.11, 0.03, 0], acoustics: 'room', fogNear: 7, fogFar: 22 });
   const x0 = -5, x1 = 5, z0 = -4, z1 = 4, h = 3;
   R.floor(x0, z0, x1, z1, mat(0xa0a8a0, { map: TEX.lino }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -244,7 +246,7 @@ ROOM_DEFS.staff = () => {
   R.wall('x', z1, x0, x1, -1, { h });
   R.door({ id: 'door', wall: 'x', at: z1, pos: -3.5, inner: -1, kind: 'slide', w: 1.1, to: 'entrance', toDoor: 'staff', snd: 'slide' });
   // two islands of steel desks, facing each other
-  for (const x of [-2.9, -1.85, -0.8]) { officeDesk(R, x, -0.35, -1); officeDesk(R, x, 0.35, 1); officeChair(R, x, -1.0, 0); officeChair(R, x, 1.0, Math.PI); }
+  for (const x of [-2.9, -1.85, -0.8]) { officeDesk(R, x, -0.35, -1); officeDesk(R, x, 0.35, 1, x !== -1.85); officeChair(R, x, -1.0, 0); officeChair(R, x, 1.0, Math.PI); }
   for (const x of [1.6, 2.65, 3.7]) { officeDesk(R, x, -0.35, -1); officeDesk(R, x, 0.35, 1, x !== 2.65); officeChair(R, x, -1.0, 0); if (x !== 2.65) officeChair(R, x, 1.0, Math.PI); }
   R.box(0.44, 0.08, 0.44, M.dark, 2.65, 0.43, 1.05); R.box(0.44, 0.5, 0.06, M.dark, 2.65, 0.51, 1.27); R.cyl(0.03, 0.03, 0.4, 5, M.steel, 2.65, 0.05, 1.05);
   // desk lamp on the night-duty teacher's desk
@@ -277,10 +279,11 @@ ROOM_DEFS.staff = () => {
   } });
   R.spot({ id: 'teacher', x: 2.65, z: 1.35, r: 1.1, when: () => !F.noppera_awake && !F.dead_N, use: async () => {
     await say('A teacher is sitting at the lamp-lit desk with his back to you, perfectly still.');
-    await say('「先生…？」', { jp: true, sub: '"Sensei...?"' });
+    await say('「先生…？」', { jp: true, sub: '"Sensei...?"', voice: 'v03' });
     wake('N');
   } });
   R.spot({ id: 'chair', x: 2.65, z: 1.35, r: 1.1, when: () => F.dead_N, use: () => say('A heap of dry leaves on the chair, and a smell like wet fur. Something small, a badger perhaps, scurried away under the desks.') });
+  journalDesk(R, -2.1, 0.73, 0.42, -2.2, 1.1, -0.15, 0.7);   // the empty desk, from its west corner
   R.spot({ id: 'log', x: -0.8, z: 0.8, r: 1.0, use: async () => {
     if (!F.dutylog) { F.dutylog = 1; await say('An open notebook on a desk: 「宿直日誌」, the night-duty log.'); give('dutylog'); showDoc('dutylog'); }
     else showDoc('dutylog');

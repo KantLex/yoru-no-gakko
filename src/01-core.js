@@ -25,13 +25,14 @@ const post = {
   uniforms: {
     tDiffuse: { value: rt.texture }, time: { value: 0 }, res: { value: new THREE.Vector2(W, H) },
     fade: { value: 0 }, flash: { value: 0 }, red: { value: 0 }, levels: { value: 22 }, gray: { value: 0 }, wobble: { value: 0 },
+    bright: { value: 1 }, gamma: { value: 1 },   // brightness setting (06f)
   },
 };
 post.mat = new THREE.ShaderMaterial({
   uniforms: post.uniforms, depthTest: false, depthWrite: false,
   vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
   fragmentShader: `
-    uniform sampler2D tDiffuse; uniform float time, fade, flash, red, levels, gray, wobble; uniform vec2 res; varying vec2 vUv;
+    uniform sampler2D tDiffuse; uniform float time, fade, flash, red, levels, gray, wobble, bright, gamma; uniform vec2 res; varying vec2 vUv;
     float bayer2(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
     float bayer4(vec2 a){ return bayer2(0.5 * a) * 0.25 + bayer2(a); }
     float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
@@ -40,6 +41,7 @@ post.mat = new THREE.ShaderMaterial({
       vec2 uv = vUv;
       uv.x += sin(uv.y * 40.0 + time * 9.0) * 0.004 * wobble;
       vec3 c = toSRGB(texture2D(tDiffuse, uv).rgb);
+      c = pow(c, vec3(gamma)) * bright;
       float l = dot(c, vec3(0.299, 0.587, 0.114));
       c = mix(c, vec3(l), gray);
       vec2 d = vUv - 0.5; c *= 1.0 - dot(d, d) * 1.25;
@@ -69,6 +71,15 @@ function fitStage() {
   stage.style.width = w + 'px';
   stage.style.height = Math.floor(w / 1.6) + 'px';
   stage.style.setProperty('--u', (w / 100).toFixed(2) + 'px');
+  // touch pause button: just outside the stage's top-right corner when there is room, else inside it under the equip box
+  const tp = touchUI.querySelector('.tpause');
+  if (tp && !touchUI.hidden) {
+    const r = stage.getBoundingClientRect(), s = 40;
+    let x = r.right - s, y = r.top - s - 8;
+    if (innerWidth - r.right >= s + 16) { x = r.right + 8; y = r.top + 4; }
+    else if (y < 4) { x = r.right - s - w * 0.02; y = r.top + w * 0.06; }
+    tp.style.left = x + 'px'; tp.style.top = y + 'px';
+  }
 }
 addEventListener('resize', fitStage);
 
@@ -76,33 +87,105 @@ addEventListener('resize', fitStage);
 const KEYMAP = {
   ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
   ShiftLeft: 'run', ShiftRight: 'run', Space: 'attack', KeyE: 'interact', Enter: 'interact', NumpadEnter: 'interact',
-  KeyI: 'inv', Tab: 'inv', KeyQ: 'cycle', KeyM: 'map', Escape: 'pause', KeyP: 'pause', Backquote: 'debug',
+  KeyI: 'inv', Tab: 'inv', KeyQ: 'cycle', KeyM: 'map', Escape: 'pause', KeyP: 'pause', Backspace: 'back', Backquote: 'debug',
 };
-const held = {}, touchHeld = {};
+const held = {}, touchHeld = {}, padHeld = {}, stickHeld = {};
 let pressed = new Set();
 let runToggle = false;
+// control scheme: 'tank' (classic: up walks, left/right turn) or 'modern' (camera-relative); S3's settings call setControlScheme
+let CONTROLS = isTouch ? 'modern' : 'tank';
+function setControlScheme(s) { CONTROLS = s === 'modern' ? 'modern' : 'tank'; onInputChange(); }
+// last input source, for on-screen glyphs: 'kb' | 'touch' | 'pad'
+let lastDevice = isTouch ? 'touch' : 'kb';
+function setDevice(d) { if (d !== lastDevice) { lastDevice = d; onInputChange(); } }
+const GLYPHS = {
+  kb: { interact: 'E', attack: 'Space', inv: 'I', cycle: 'Q', map: 'M', pause: 'Esc', run: 'Shift', back: 'Backspace' },
+  touch: { interact: '調', attack: '撃', inv: '持', cycle: '替', map: '持', pause: '⏸', run: '走', back: '⏸' },
+  pad: { interact: 'A', attack: 'X', inv: 'Y', cycle: 'LB', map: 'Back', pause: 'Start', run: 'B', back: 'B' },
+};
+const glyph = (a) => GLYPHS[lastDevice][a] || a;
 addEventListener('keydown', (e) => {
   const a = KEYMAP[e.code];
   if (!a) return;
   e.preventDefault();
   if (!held[a]) pressed.add(a);
   held[a] = true;
+  setDevice('kb');
   audio.unlock();
 });
 addEventListener('keyup', (e) => { const a = KEYMAP[e.code]; if (a) held[a] = false; });
-addEventListener('blur', () => { for (const k in held) held[k] = false; for (const k in touchHeld) touchHeld[k] = false; });
+addEventListener('pointerdown', () => audio.unlock());   // "click once to enable sound"
+addEventListener('blur', () => { for (const k in held) held[k] = false; for (const k in touchHeld) touchHeld[k] = false; clearPad(); padQuiet = true; });
+addEventListener('gamepaddisconnected', clearPad);
+
+// ── Gamepad (standard mapping), polled once per frame ──
+const PADMAP = { 0: ['interact'], 1: ['back', 'run'], 2: ['attack'], 3: ['inv'], 4: ['cycle'], 5: ['cycle'], 6: ['run'], 7: ['attack'], 8: ['map'], 9: ['pause'], 12: ['up'], 13: ['down'], 14: ['left'], 15: ['right'] };
+const DIRS = ['up', 'down', 'left', 'right'];
+const PADACTS = ['interact', 'back', 'run', 'attack', 'inv', 'cycle', 'map', 'pause', ...DIRS];
+const stick = { x: 0, y: 0, mag: 0 };
+const padNow = {}, padRep = { up: 0, down: 0, left: 0, right: 0 };   // held direction → time of its next menu autorepeat (0 = not held)
+let padLive = false, padQuiet = false, padCtx = null;
+function clearPad() {
+  for (const k in padHeld) padHeld[k] = false;
+  for (const k in stickHeld) stickHeld[k] = false;
+  for (const k in padRep) padRep[k] = 0;
+  stick.x = stick.y = stick.mag = 0; padLive = false;
+}
+// ctx identifies the open menu/overlay (from frame()): directions held into a newly opened one don't autorepeat until released;
+// after a blur (padQuiet) whatever is still held becomes the baseline instead of a fresh press
+function pollPad(ctx) {
+  let gp = null;
+  try { const gs = navigator.getGamepads ? navigator.getGamepads() : null; if (gs) for (let i = 0; i < gs.length; i++) if (gs[i] && gs[i].connected !== false) { gp = gs[i]; break; } } catch (_) {}
+  const reopen = ctx !== padCtx; padCtx = ctx;
+  if (!gp) { if (padLive) clearPad(); padQuiet = false; return; }
+  padLive = true;
+  // left stick: radial deadzone, rescaled to 0..1; y is up/away (the pad's axis 1 is +down)
+  const ax = gp.axes[0] || 0, ay = -(gp.axes[1] || 0), m = Math.hypot(ax, ay);
+  const k = m < 0.2 ? 0 : Math.min(1, (m - 0.2) / 0.75) / m;
+  stick.x = ax * k; stick.y = ay * k; stick.mag = Math.min(1, m * k);
+  stickHeld.up = stickHeld.up ? stick.y > 0.35 : stick.y > 0.5; stickHeld.down = stickHeld.down ? -stick.y > 0.35 : -stick.y > 0.5;
+  stickHeld.left = stickHeld.left ? -stick.x > 0.35 : -stick.x > 0.5; stickHeld.right = stickHeld.right ? stick.x > 0.35 : stick.x > 0.5;
+  for (const a of PADACTS) padNow[a] = false;
+  const bs = gp.buttons;
+  for (let i = 0; i < bs.length; i++) { const b = bs[i], acts = PADMAP[i]; if (acts && b && (b.pressed || b.value > 0.5)) for (const a of acts) padNow[a] = true; }
+  const t = performance.now(); let edge = false;
+  for (const a of PADACTS) {
+    const dir = a in padRep, on = padNow[a] || (dir && stickHeld[a]), was = !!padHeld[a] || (dir && padRep[a] > 0);
+    if (on && !was && !padQuiet) { pressed.add(a); edge = true; if (dir) padRep[a] = t + 350; }
+    else if (on && dir && (reopen || padQuiet)) padRep[a] = Infinity;               // held into a new menu: wait for release
+    else if (on && dir && t >= padRep[a]) { pressed.add(a); padRep[a] = t + 110; }   // menu autorepeat
+    if (!on && dir) padRep[a] = 0;
+    padHeld[a] = padNow[a];
+  }
+  padQuiet = false;
+  if (edge || stick.mag > 0.15) setDevice('pad');
+  if (edge) audio.unlock();
+}
+// movement intent {x right, y up/away, mag 0..1}: digital directions (8-way, normalised) merged with the left stick (reused object)
+const moveV = { x: 0, y: 0, mag: 0, analog: false };
+const digDir = (a) => !!held[a] || !!touchHeld[a] || !!padHeld[a];
 const input = {
-  down: (a) => !!held[a] || !!touchHeld[a] || (a === 'run' && runToggle),
+  down: (a) => !!held[a] || !!touchHeld[a] || !!padHeld[a] || !!stickHeld[a] || (a === 'run' && runToggle),
   hit: (a) => pressed.has(a),
   consume: (a) => pressed.delete(a),
-  endFrame: () => { pressed = new Set(); },
+  endFrame: () => { pressed.clear(); },
+  poll: pollPad,
+  move() {
+    let x = (digDir('right') ? 1 : 0) - (digDir('left') ? 1 : 0), y = (digDir('up') ? 1 : 0) - (digDir('down') ? 1 : 0);
+    const analog = !x && !y && stick.mag > 0;
+    const l = Math.hypot(x, y); if (l) { x /= l; y /= l; }
+    x += stick.x; y += stick.y;
+    const mag = Math.min(1, Math.hypot(x, y)), n = Math.hypot(x, y) || 1;
+    moveV.x = x / n * mag; moveV.y = y / n * mag; moveV.mag = mag; moveV.analog = analog;
+    return moveV;
+  },
 };
 if (isTouch) {
   touchUI.hidden = false;
   touchUI.querySelectorAll('button').forEach((b) => {
     const k = b.dataset.k;
     const on = (e) => {
-      e.preventDefault(); audio.unlock();
+      e.preventDefault(); audio.unlock(); setDevice('touch');
       if (b.dataset.toggle) { runToggle = !runToggle; b.classList.toggle('on', runToggle); return; }
       if (!touchHeld[k]) pressed.add(k);
       touchHeld[k] = true; b.classList.add('on');

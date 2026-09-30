@@ -26,7 +26,7 @@ function corridor(R, x0, x1, opts = {}) {
 }
 
 ROOM_DEFS.hall1 = () => {
-  const R = new Room('hall1', { name: '１階 廊下', en: '1F CORRIDOR', surface: 'lino', ambience: [0.14, 0.09, 0], fogNear: 6, fogFar: 22 });
+  const R = new Room('hall1', { name: '１階 廊下', en: '1F CORRIDOR', surface: 'lino', ambience: [0.14, 0.09, 0], acoustics: 'corridor', fogNear: 6, fogFar: 22 });
   const x0 = -12, x1 = 12, { z0 } = corridor(R, x0, x1, { exitAt: x0 });
   R.door({ id: 'west', wall: 'z', at: x0, pos: 0, inner: +1, kind: 'steel', w: 1.4, to: 'entrance', toDoor: 'east', snd: 'creak' });
   R.door({ id: 'infirmary', wall: 'x', at: z0, pos: -7, inner: +1, kind: 'slide', sign: '保健室', to: 'infirmary', toDoor: 'door', snd: 'slide' });
@@ -55,7 +55,7 @@ ROOM_DEFS.hall1 = () => {
 };
 
 ROOM_DEFS.infirmary = () => {
-  const R = new Room('infirmary', { name: '保健室', en: 'INFIRMARY', surface: 'lino', ambience: [0.1, 0.03, 0], fogNear: 6, fogFar: 20 });
+  const R = new Room('infirmary', { name: '保健室', en: 'INFIRMARY', surface: 'lino', ambience: [0.1, 0.03, 0], acoustics: 'room', fogNear: 6, fogFar: 20 });
   const x0 = -4.5, x1 = 4.5, z0 = -3.5, z1 = 3.5, h = 3;
   R.floor(x0, z0, x1, z1, mat(0xb4bcb8, { map: TEX.lino }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -98,6 +98,7 @@ ROOM_DEFS.infirmary = () => {
   R.cam([x0, z0, 0, z1], [-4.2, 2.75, -3.2], [2.2, 0.6, 1.6], 58);
   R.cam([0, z0, x1, z1], [4.2, 2.75, 3.1], [-2.5, 0.6, -1.8], 56);
 
+  journalDesk(R, -3.2, 0.75, -2.52, -2.7, -2.9, 0.15);   // east end, from the window side
   R.spot({ id: 'desk', x: -3.6, z: -1.9, r: 1.0, use: async () => {
     if (!F.nurselog) {
       F.nurselog = 1;
@@ -109,7 +110,8 @@ ROOM_DEFS.infirmary = () => {
     if (F.cabinet) return say('The medicine cabinet. Nothing left that would help tonight.');
     F.cabinet = 1;
     await say('The medicine cabinet. Bandages, gauze, and a bottle of painkillers. You take what you can carry.');
-    give('bandage', 2); give('painkiller');
+    give('bandage', F.hard ? 1 : 2); give('painkiller');
+    await hardPencil('infirmary');
   } });
   R.spot({ id: 'chart', x: x0 + 0.5, z: 0.2, r: 1.1, use: () => say('The eye chart. The rings get smaller and smaller. The bottom line isn\'t rings at all: 「みつけて」 — "Find me."') });
   R.spot({ id: 'bed1', x: 2.0, z: -2.0, r: 1.0, use: () => say('The sheets are still warm. There is a dent in the pillow, as if someone got up a moment ago.') });
@@ -143,7 +145,7 @@ function skeletonModel(R, x, z) {
 }
 
 ROOM_DEFS.science = () => {
-  const R = new Room('science', { name: '理科室', en: 'SCIENCE LAB', surface: 'lino', ambience: [0.11, 0.04, 0], fogNear: 7, fogFar: 22 });
+  const R = new Room('science', { name: '理科室', en: 'SCIENCE LAB', surface: 'lino', ambience: [0.11, 0.04, 0], acoustics: 'room', fogNear: 7, fogFar: 22 });
   const x0 = -5, x1 = 5, z0 = -4, z1 = 4, h = 3;
   R.floor(x0, z0, x1, z1, mat(0x9aa29c, { map: TEX.lino }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -189,7 +191,8 @@ ROOM_DEFS.science = () => {
     if (F.salt_lab) return say('The chemicals cabinet. Acids and alcohol. Nothing that helps against the dead.');
     F.salt_lab = 1;
     await say('The chemicals cabinet. A plastic tub labelled 塩化ナトリウム — sodium chloride. Salt is salt.');
-    give('salt', 3);
+    give('salt', F.hard ? 2 : 3);
+    await hardPencil('science');
   } });
   R.spot({ id: 'jars', x: x0 + 0.8, z: -1.2, r: 1.2, use: () => say('Specimen jars: a frog, a snake, a thing with too many fingers. In the last jar, the pale thing inside turns slowly to look at you.') });
   R.spot({ id: 'board', x: -0.5, z: z0 + 0.6, r: 1.2, use: () => say('Chemistry notes. In the corner, in a different, rounder hand: 「こっくりさん　こっくりさん　おいでください」 — the words that call Kokkuri-san.') });
@@ -198,7 +201,7 @@ ROOM_DEFS.science = () => {
 };
 
 ROOM_DEFS.gym = () => {
-  const R = new Room('gym', { name: '体育館', en: 'GYMNASIUM', surface: 'wood', ambience: [0.13, 0.1, 0], fogNear: 10, fogFar: 34 });
+  const R = new Room('gym', { name: '体育館', en: 'GYMNASIUM', surface: 'wood', ambience: [0.13, 0.1, 0], acoustics: 'hall', fogNear: 10, fogFar: 34 });
   const x0 = -10, x1 = 10, z0 = -8, z1 = 8, h = 7;
   R.box(20, 0.1, 16, mat(0xffffff, { map: TEX.court }), 0, -0.1, 0, { cast: false });
   R.ceiling(x0, z0, x1, z1, h);

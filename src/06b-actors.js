@@ -13,6 +13,9 @@ let ofudaMesh = null;
 const smooth = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 const turnTo = (e, target, rate, dt) => { e.rot += clamp(angDiff(e.rot, target), -rate * dt, rate * dt); };
 const moveFwd = (e, sp, dt) => { e.x += Math.sin(e.rot) * sp * dt; e.z += Math.cos(e.rot) * sp * dt; };
+// modern controls: the camera yaw is latched while a direction is held, so reverse-angle cuts don't flip her around
+let moveLatch = null;
+function relatchMove(rot) { const mv = input.move(); moveLatch = mv.mag > 0.05 ? { a: Math.atan2(mv.x, mv.y), yaw: rot + Math.atan2(mv.x, mv.y) } : null; }
 
 function initPlayer() {
   player.m = buildStudent();
@@ -41,12 +44,28 @@ function updatePlayer(dt) {
   p.inv -= dt; p.hurtT = Math.max(0, p.hurtT - dt);
   let fwd = 0, turn = 0;
   if (!G.cutscene && !p.atk && G.mode === 'play') {
-    turn = (input.down('left') ? 1 : 0) - (input.down('right') ? 1 : 0);
-    if (input.down('up')) fwd = input.down('run') ? 3.1 : 1.45;
-    else if (input.down('down')) fwd = -0.85;
+    const mv = input.move(), run = input.down('run');
+    if (CONTROLS === 'modern') {
+      // camera-relative: steer toward the stick direction as seen from the latched camera yaw, no backpedal
+      if (mv.mag > 0.05) {
+        const a = Math.atan2(mv.x, mv.y);
+        if (!moveLatch || Math.abs(angDiff(moveLatch.a, a)) > 0.7) moveLatch = { yaw: camYaw(), a };
+        const target = moveLatch.yaw - a;
+        turnTo(p, target, 9, dt);
+        fwd = (run ? 3.1 : 1.45) * mv.mag * Math.max(0, Math.cos(angDiff(p.rot, target)));
+      } else moveLatch = null;
+    } else if (mv.analog) {
+      turn = -mv.x;
+      fwd = mv.y > 0 ? (run ? 3.1 : 1.45) * mv.y : -0.85 * -mv.y;
+    } else {
+      turn = (input.down('left') ? 1 : 0) - (input.down('right') ? 1 : 0);
+      if (input.down('up')) fwd = run ? 3.1 : 1.45;
+      else if (input.down('down')) fwd = -0.85;
+    }
     if (G.turnOnly) fwd = 0;
     if (p.slowT > 0) fwd *= 0.45;
   }
+  p.fwdIntent = fwd > 0.2;                         // walking forward on purpose: checkDoors reads this
   p.slowT = Math.max(0, (p.slowT || 0) - dt);
   p.rot += turn * (fwd > 2 ? 2.2 : 2.8) * dt;
   p.speed = lerp(p.speed, fwd, 1 - Math.exp(-dt * 10));
@@ -152,6 +171,7 @@ function resolveAttack(a) {
 function hurtPlayer(dmg, fx, fz) {
   const p = player;
   if (p.inv > 0 || p.dead || G.mode !== 'play' || G.cutscene) return false;
+  if (F.hard) dmg = Math.round(dmg * 1.5);         // Nightmare
   G.hp = Math.max(0, G.hp - dmg);
   p.inv = 0.9; p.hurtT = 0.4;
   const dx = p.x - fx, dz = p.z - fz, d = Math.hypot(dx, dz) || 1;
@@ -180,9 +200,10 @@ const ETYPES = {
   noppera: { hp: 6, r: 0.35, speed: 1.05, aggro: 99, dmg: 18, build: buildNoppera },
 };
 function makeEnemy(s) {
-  const T = ETYPES[s.type], m = T.build();
+  const T0 = ETYPES[s.type], hard = !!F.hard;       // Nightmare: a per-instance scaled copy (ETYPES itself is never touched)
+  const T = hard ? { ...T0, speed: T0.speed * 1.12, hp: T0.hp < 99 ? Math.ceil(T0.hp * 1.5) : T0.hp } : T0, m = T.build();
   const e = { ...s, T, m, hp: T.hp, rot: s.rot ?? rand(-3, 3), state: 'idle', t: 0, ph: rand(0, 10), cd: 1, kx: 0, kz: 0, homeX: s.x, homeZ: s.z,
-    aggro: s.aggro ?? T.aggro, lightBase: T.light || 0, stunT: 0 };
+    aggro: (s.aggro ?? T.aggro) + (hard ? 1.5 : 0), lightBase: T.light || 0, stunT: 0 };
   e.dormant = !!s.dormant && !F['awake_' + s.id];
   if (s.seated && !e.dormant) e.seated = false;
   if (s.standby && !e.dormant) e.standby = false;

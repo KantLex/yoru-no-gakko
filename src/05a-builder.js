@@ -6,7 +6,7 @@ const FACE = { N: Math.PI, S: 0, E: Math.PI / 2, W: -Math.PI / 2 };
 
 class Room {
   constructor(id, o) {
-    Object.assign(this, { id, name: o.name, en: o.en, surface: o.surface || 'wood', ambience: o.ambience || [0.12, 0.05, 0] });
+    Object.assign(this, { id, name: o.name, en: o.en, surface: o.surface || 'wood', ambience: o.ambience || [0.12, 0.05, 0], acoustics: o.acoustics || 'room' });
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x010207);
     this.scene.fog = new THREE.Fog(0x010207, o.fogNear ?? 7, o.fogFar ?? 24);

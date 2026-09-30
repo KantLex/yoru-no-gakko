@@ -22,7 +22,7 @@ ROOM_DEFS.stairs_e = () => stairwell('stairs_e', '東階段', 'EAST STAIRWELL', 
 } });
 
 ROOM_DEFS.hall3 = () => {
-  const R = new Room('hall3', { name: '３階 廊下', en: '3F CORRIDOR', surface: 'lino', ambience: [0.15, 0.11, 0], fogNear: 5, fogFar: 22 });
+  const R = new Room('hall3', { name: '３階 廊下', en: '3F CORRIDOR', surface: 'lino', ambience: [0.15, 0.11, 0], acoustics: 'corridor', fogNear: 5, fogFar: 22 });
   const x0 = -14, x1 = 14, { z0 } = corridor(R, x0, x1, { exitAt: x0 });
   R.door({ id: 'stairs_e', wall: 'z', at: x1, pos: 0, inner: -1, kind: 'steel', w: 1.2, sign: '東階段', to: 'stairs_e', toDoor: 'top', snd: 'creak' });
   R.door({ id: 'roof', wall: 'z', at: x0, pos: 0, inner: +1, kind: 'steel', w: 1.2, sign: '屋上', to: 'roof', toDoor: 'door', snd: 'creak', lock: 'roofkey',
@@ -65,7 +65,7 @@ ROOM_DEFS.hall3 = () => {
 };
 
 ROOM_DEFS.class3b = () => {
-  const R = new Room('class3b', { name: '３年Ｂ組', en: 'CLASSROOM 3-B', surface: 'wood', ambience: [0.1, 0.04, 0], fogNear: 6, fogFar: 20 });
+  const R = new Room('class3b', { name: '３年Ｂ組', en: 'CLASSROOM 3-B', surface: 'wood', ambience: [0.1, 0.04, 0], acoustics: 'room', fogNear: 6, fogFar: 20 });
   const x0 = -4.5, x1 = 4.5, z0 = -3.5, z1 = 3.5, h = 3;
   R.floor(x0, z0, x1, z1, mat(0xffffff, { map: TEX.wood }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -102,9 +102,11 @@ ROOM_DEFS.class3b = () => {
   R.spot({ id: 'kokkuri', x: 0, z: 0.75, r: 0.8, use: () => kokkuriScene(R) });
   R.spot({ id: 'kokkuri2', x: 0, z: -0.75, r: 0.8, use: () => kokkuriScene(R) });
   R.spot({ id: 'board', x: x0 + 0.6, z: 0, r: 1.4, use: () => say('The class\'s plan for the festival: 「お化け屋敷」, a haunted house. Beside it, in red chalk and a different hand: 「本物」 — "the real thing." The jobs list includes "kagome kagome."') });
+  journalDesk(R, -2.95, 0.76, -1.95, -2.4, -2.4, 0.1, 0.7);   // east end, from behind the desk
   R.spot({ id: 'tdesk', x: -3.3, z: -1.3, r: 1.0, use: async () => {
     if (F.desk3b) return say('The teacher\'s desk. Empty drawers, and a class photo turned face down.');
     F.desk3b = 1;
+    if (F.hard) { await say('In the teacher\'s drawer: a paper packet of salt from the school kitchen.'); give('salt'); await hardPencil('class3b'); return; }
     await say('In the teacher\'s drawer: a first-aid pouch, and a paper packet of salt from the school kitchen.');
     give('bandage'); give('salt', 2);
   } });
@@ -119,7 +121,7 @@ ROOM_DEFS.class3b = () => {
 };
 
 ROOM_DEFS.library = () => {
-  const R = new Room('library', { name: '図書室', en: 'LIBRARY', surface: 'wood', ambience: [0.1, 0.05, 0], fogNear: 6, fogFar: 22 });
+  const R = new Room('library', { name: '図書室', en: 'LIBRARY', surface: 'wood', ambience: [0.1, 0.05, 0], acoustics: 'room', fogNear: 6, fogFar: 22 });
   const x0 = -6, x1 = 6, z0 = -5, z1 = 5, h = 3.2;
   R.floor(x0, z0, x1, z1, mat(0x7a4a4a, { map: TEX.lino }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -148,6 +150,7 @@ ROOM_DEFS.library = () => {
   R.cam([-0.8, z0, x1, 0.6], [5.6, 2.9, 4.6], [-0.5, 0.5, -3], 58);
   R.cam([x0, -5, x1, z1], [-5.6, 3.0, 4.6], [3, 0.5, 0], 58);
 
+  journalDesk(R, 2.15, 1.04, 3.6, 2.8, 3.4, -0.2, 0.7);   // east end of the counter
   R.spot({ id: 'counter', x: 1.4, z: 3.0, r: 1.1, use: async () => {
     if (!F.yearbook) {
       F.yearbook = 1;
@@ -156,7 +159,7 @@ ROOM_DEFS.library = () => {
     } else await say('The 1950 yearbook, open at Class 2-A. The homeroom teacher smiles stiffly in the corner: a young man named Kuroda.');
   } });
   R.spot({ id: 'ghostbooks', x: -3.4, z: -2.0, r: 1.2, use: () => say('The shelf of 学校の怪談, school ghost stories, is the most worn in the library. Every book falls open at the same story: Toilet Hanako-san.') });
-  R.spot({ id: 'table', x: 2.9, z: -1.6, r: 1.1, use: () => say('Someone has scratched tally marks into the table, in groups of five. Forty-five groups.') });
+  R.spot({ id: 'table', x: 2.9, z: -1.6, r: 1.1, use: async () => { await say('Someone has scratched tally marks into the table, in groups of five. Forty-five groups.'); await hardPencil('library'); } });
   R.trigger([x0, -2.6, -1.4, -1.4], async () => {
     if (F.bookdrop) return;
     F.bookdrop = 1;
@@ -169,7 +172,7 @@ ROOM_DEFS.library = () => {
 };
 
 ROOM_DEFS.archive = () => {
-  const R = new Room('archive', { name: '書庫', en: 'ARCHIVE', surface: 'wood', ambience: [0.08, 0.02, 0], fogNear: 4, fogFar: 14 });
+  const R = new Room('archive', { name: '書庫', en: 'ARCHIVE', surface: 'wood', ambience: [0.08, 0.02, 0], acoustics: 'room', fogNear: 4, fogFar: 14 });
   const x0 = -3, x1 = 3, z0 = -2.5, z1 = 2.5, h = 2.8;
   R.floor(x0, z0, x1, z1, mat(0xffffff, { map: TEX.wood }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -209,7 +212,7 @@ ROOM_DEFS.archive = () => {
 };
 
 ROOM_DEFS.roof = () => {
-  const R = new Room('roof', { name: '屋上', en: 'ROOFTOP', surface: 'tile', ambience: [0.07, 0.22, 0], fogNear: 16, fogFar: 70 });
+  const R = new Room('roof', { name: '屋上', en: 'ROOFTOP', surface: 'tile', ambience: [0.07, 0.22, 0], acoustics: 'outdoor', fogNear: 16, fogFar: 70 });
   R.skyCol = new THREE.Color(0x060a18); R.scene.background = R.skyCol; R.scene.fog.color = R.skyCol;
   const x0 = -8, x1 = 8, z0 = -7, z1 = 7;
   R.box(16, 0.1, 14, mat(0xffffff, { map: TEX.concrete }), 0, -0.1, 0, { uv: 2, cast: false });

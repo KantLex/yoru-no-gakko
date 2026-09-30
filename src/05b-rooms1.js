@@ -4,7 +4,7 @@ const ROOM_DEFS = {};
 const plaster = () => mat(0xffffff, { map: TEX.plaster });
 
 ROOM_DEFS.classroom = () => {
-  const R = new Room('classroom', { name: '２年Ａ組', en: 'CLASSROOM 2-A', surface: 'wood', ambience: [0.12, 0.04, 0], fogNear: 7, fogFar: 22 });
+  const R = new Room('classroom', { name: '２年Ａ組', en: 'CLASSROOM 2-A', surface: 'wood', ambience: [0.12, 0.04, 0], acoustics: 'room', fogNear: 7, fogFar: 22 });
   const x0 = -4.5, x1 = 4.5, z0 = -3.5, z1 = 3.5, h = 3;
   R.floor(x0, z0, x1, z1, mat(0xffffff, { map: TEX.wood }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -45,7 +45,7 @@ ROOM_DEFS.classroom = () => {
   R.cam([-4.5, -3.5, 1.6, 0.4], [-4.1, 2.75, 3.1], [1.2, 0.5, -2.2], 55);
 
   R.spot({ id: 'mydesk', x: -3.2, z: 1.7, use: async () => {
-    if (!F.onigiri) { F.onigiri = 1; await say('Your desk by the window. Your bag still hangs on its hook.'); give('onigiri'); give('handbook'); await say('Inside: the onigiri you never finished at lunch, and your student handbook, with the school map in the back.'); }
+    if (!F.onigiri) { F.onigiri = 1; await say('Your desk by the window. Your bag still hangs on its hook.'); give('onigiri'); give('handbook'); await say('Inside: the onigiri you never finished at lunch, and your student handbook, with the school map in the back.'); await hardPencil('classroom', 'And your pencil case. There is one pencil left in it.'); }
     else await say('Your desk. Scratched into the corner, very small: 「消えろ」 — "Disappear." You stopped seeing it weeks ago.');
   } });
   R.spot({ id: 'yuki', x: -1.95, z: 1.7, use: async () => {
@@ -53,6 +53,7 @@ ROOM_DEFS.classroom = () => {
     else await say('Yuki\'s desk. Yuki used to save you a seat at lunch. Not since the summer.');
   } });
   R.spot({ id: 'vase', x: 0.55, z: -0.3, use: () => say('A vase of white chrysanthemums on a desk. That\'s what a class does when a student has died. The name label on the desk reads 花子 — Hanako.') });
+  journalDesk(R, -0.38, 0.74, -2.62, -0.6, -3.05, 0.1, 0.5);   // west end, from the teacher's side
   R.spot({ id: 'tdesk', x: 0, z: -2.55, r: 1.1, use: () => say('The attendance book. Beside every name for October 13th, a neat red circle: present. Beside yours, in pencil, someone has written 「いない人」 — "the one who isn\'t here."') });
   R.spot({ id: 'board', x: 0, z: -3.1, r: 1.3, use: () => say('「自習」 — "Self-study." In the day-duty column on the right, in careful chalk: 日直 花子. There is no Hanako in this class. Above the board, the clock has stopped at 2:13.') });
   R.spot({ id: 'window', x: -4.1, z: 0, r: 1.3, use: () => say('The school gate is shut. Past it, the town is completely dark. Not one streetlight, not one window.') });
@@ -73,7 +74,7 @@ ROOM_DEFS.classroom = () => {
 };
 
 ROOM_DEFS.hall2 = () => {
-  const R = new Room('hall2', { name: '２階 廊下', en: '2F CORRIDOR', surface: 'lino', ambience: [0.14, 0.09, 0], fogNear: 6, fogFar: 22 });
+  const R = new Room('hall2', { name: '２階 廊下', en: '2F CORRIDOR', surface: 'lino', ambience: [0.14, 0.09, 0], acoustics: 'corridor', fogNear: 6, fogFar: 22 });
   const x0 = -14, x1 = 14, z0 = -1.5, z1 = 1.5, h = 3;
   R.floor(x0, z0, x1, z1, mat(0xffffff, { map: TEX.lino }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -126,7 +127,7 @@ ROOM_DEFS.hall2 = () => {
   R.spot({ id: 'salt', x: 1.9, z: z0 + 0.35, r: 0.9, when: () => !F.salt_hall, use: async () => {
     F.salt_hall = 1; R.salt.visible = false;
     await say('A small cone of salt on a saucer beside the lavatory door. Morijio — salt set out to keep spirits from crossing a threshold. You scoop it into a handkerchief.');
-    give('salt', 2);
+    give('salt', F.hard ? 1 : 2);
   } });
   R.spot({ id: 'sink', x: 3.0, z: z0 + 0.4, use: () => say('The taps are dry. One of them drips anyway. The drops look red in the hydrant light... no, just rust.') });
   R.spot({ id: 'board', x: -1.8, z: z0 + 0.3, r: 1.1, use: () => say('The corridor notice board. 「廊下を走るな！」 "No running in the corridor!" Beside it, a yellowed poster: 「探しています」 "MISSING: girl, red skirt, bobbed hair." The date on it is 1950.') });
@@ -142,7 +143,7 @@ ROOM_DEFS.hall2 = () => {
 };
 
 ROOM_DEFS.toilet = () => {
-  const R = new Room('toilet', { name: '女子トイレ', en: 'GIRLS\' LAVATORY', surface: 'tile', ambience: [0.1, 0.02, 0.015], fogNear: 5, fogFar: 16 });
+  const R = new Room('toilet', { name: '女子トイレ', en: 'GIRLS\' LAVATORY', surface: 'tile', ambience: [0.1, 0.02, 0.015], acoustics: 'tile', fogNear: 5, fogFar: 16 });
   const x0 = -3, x1 = 3, z0 = -2.5, z1 = 2.5, h = 2.8;
   const tile = mat(0xffffff, { map: TEX.tile });
   R.floor(x0, z0, x1, z1, mat(0xffffff, { map: TEX.floortile }), 1.2);
@@ -200,7 +201,7 @@ ROOM_DEFS.toilet = () => {
     G.cutscene = true;
     audio.play('knock', centres[2], -1.0);
     await wait(1.6);
-    await say('「花子さん、遊びましょ」', { jp: true, sub: '"Hanako-san... will you come out and play?"' });
+    await say('「花子さん、遊びましょ」', { jp: true, sub: '"Hanako-san... will you come out and play?"', voice: 'v02' });
     G.cutscene = true;
     await wait(1.4);
     audio.play('voice', centres[2], -1.6);

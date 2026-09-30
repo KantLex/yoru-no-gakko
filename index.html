@@ -18,7 +18,7 @@
 <title>Yoru no Gakkō</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Klee+One:wght@400;600&family=Yuji+Syuku&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Klee+One:wght@400;600&family=Yuji+Syuku&family=Noto+Sans+SC:wght@400;600&family=Noto+Sans+TC:wght@400;600&display=swap">
 <style>
 /* Layout: one 16:10 letterboxed stage; DOM overlays sit on the pixel canvas, sized in stage units (--u = 1% of stage width). */
 :root {
@@ -35,9 +35,14 @@
   --f-title: "Yuji Syuku", "Hiragino Mincho ProN", "Yu Mincho", serif;
   --f-ui: "DotGothic16", "Osaka-Mono", "MS Gothic", monospace;
   --f-hand: "Klee One", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+  --f-sub: var(--f-ui);   /* secondary (translated) text: subtitles, labels, descriptions */
+  --f-subh: var(--f-hand); /* ...on the handwritten notebook pages */
   --u: 8px;
+  --ts: 1;                /* text-size setting, multiplies the reading-text sizes */
   color-scheme: dark;
 }
+:root:lang(zh-Hans) { --f-sub: "Noto Sans SC", var(--f-ui); --f-subh: "Noto Sans SC", var(--f-hand); }
+:root:lang(zh-Hant) { --f-sub: "Noto Sans TC", var(--f-ui); --f-subh: "Noto Sans TC", var(--f-hand); }
 html, body { height: 100%; }
 [hidden] { display: none !important; }
 body { background: var(--void); color: var(--chalk); font-family: var(--f-ui); overflow: hidden; margin: 0;
@@ -62,20 +67,20 @@ body { background: var(--void); color: var(--chalk); font-family: var(--f-ui); o
 #equip b { display: grid; place-items: center; width: calc(var(--u)*3.4); height: calc(var(--u)*3.4); font-weight: 400;
   font-size: calc(var(--u)*2.2); color: var(--chalk); border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.35); }
 #equip .n { color: var(--chalk); }
-#prompt { position: absolute; left: 50%; bottom: calc(var(--u)*15); transform: translateX(-50%); font-size: calc(var(--u)*1.7);
+#prompt { position: absolute; left: 50%; bottom: calc(var(--u)*15); transform: translateX(-50%); font-size: calc(var(--u)*1.7*var(--ts));
   color: var(--chalk); background: rgba(0,0,0,.55); padding: calc(var(--u)*0.4) calc(var(--u)*1.2); white-space: nowrap; opacity: 0; transition: opacity .2s; }
 #prompt.on { opacity: 1; }
 #prompt kbd { font-family: inherit; color: var(--lantern); margin-right: calc(var(--u)*0.6); }
-#toast { position: absolute; left: 50%; top: calc(var(--u)*2); transform: translateX(-50%); font-size: calc(var(--u)*1.7); white-space: nowrap;
+#toast { position: absolute; left: 50%; top: calc(var(--u)*2); transform: translateX(-50%); font-size: calc(var(--u)*1.7*var(--ts)); white-space: nowrap;
   color: var(--lantern); background: rgba(0,0,0,.6); border: 1px solid rgba(232,162,74,.35); padding: calc(var(--u)*0.4) calc(var(--u)*1.4); opacity: 0; transition: opacity .3s; }
 #toast.on { opacity: 1; }
 #roomcard { position: absolute; left: 0; right: 0; top: 30%; text-align: center; opacity: 0; transition: opacity 1.2s; text-shadow: 0 0 12px #000, 0 0 3px #000; }
 #roomcard.on { opacity: 1; }
 #roomcard .jp { font-family: var(--f-title); font-size: calc(var(--u)*6.4); letter-spacing: .25em; color: var(--chalk); }
-#roomcard .en { font-size: calc(var(--u)*1.7); letter-spacing: .5em; color: var(--dim); margin-top: calc(var(--u)*0.5); }
+#roomcard .en { font-size: calc(var(--u)*1.7*var(--ts)); letter-spacing: .5em; color: var(--dim); margin-top: calc(var(--u)*0.5); }
 #msg { position: absolute; left: 8%; right: 8%; bottom: calc(var(--u)*3); min-height: calc(var(--u)*9); padding: calc(var(--u)*1.4) calc(var(--u)*2.2);
   background: linear-gradient(rgba(6,8,14,.88), rgba(6,8,14,.94)); border: 1px solid rgba(159,180,255,.28); box-shadow: 0 0 0 1px #000;
-  font-size: calc(var(--u)*2.05); line-height: 1.5; color: var(--chalk); opacity: 0; transition: opacity .25s; }
+  font-size: calc(var(--u)*2.05*var(--ts)); line-height: 1.5; color: var(--chalk); opacity: 0; transition: opacity .25s; }
 #msg.on { opacity: 1; }
 #msg .jp { display: block; font-family: var(--f-hand); font-weight: 600; color: var(--lantern); font-size: 1.05em; }
 #msg .more { position: absolute; right: calc(var(--u)*1.2); bottom: calc(var(--u)*0.6); color: var(--dim); font-size: .75em; animation: pulse 1s infinite; }
@@ -84,13 +89,13 @@ body { background: var(--void); color: var(--chalk); font-family: var(--f-ui); o
 .panel { background: rgba(8,10,16,.93); pointer-events: auto; }
 .center { display: grid; place-items: center; }
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
-.btn { font-family: var(--f-ui); font-size: calc(var(--u)*2); padding: calc(var(--u)*0.7) calc(var(--u)*2); color: var(--chalk);
+.btn { font-family: var(--f-sub); font-size: calc(var(--u)*2); padding: calc(var(--u)*0.7) calc(var(--u)*2); color: var(--chalk);
   border: 1px solid rgba(159,180,255,.35); background: rgba(0,0,0,.4); }
 .btn:hover, .btn:focus-visible, .btn.sel { background: var(--chalk); color: var(--void); outline: none; }
 
 #choice { display: flex; align-items: flex-end; justify-content: center; padding-bottom: calc(var(--u)*14); pointer-events: auto; }
 #choice .opts { display: flex; flex-direction: column; align-items: stretch; gap: calc(var(--u)*0.8); max-width: 72%; }
-#choice .opts .btn { text-align: left; font-size: calc(var(--u)*1.85); }
+#choice .opts .btn { text-align: left; font-size: calc(var(--u)*1.85*var(--ts)); }
 
 /* Title */
 #title { background: radial-gradient(ellipse at 50% 60%, rgba(7,8,12,.15), rgba(7,8,12,.85) 75%); display: flex; flex-direction: column;
@@ -103,23 +108,26 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 #title .keys { margin-top: calc(var(--u)*3.5); font-size: calc(var(--u)*1.45); color: var(--dim); line-height: 1.8;
   display: grid; grid-template-columns: auto auto; gap: 0 calc(var(--u)*2.5); text-align: left; }
 #title .keys b { color: var(--chalk); font-weight: 400; }
+#title .padhint { position: absolute; left: 0; right: 0; bottom: calc(var(--u)*2.2); font-size: calc(var(--u)*1.4); color: var(--lantern); }
 #title .seal { position: absolute; right: calc(var(--u)*4); bottom: calc(var(--u)*3.5); width: calc(var(--u)*7); height: calc(var(--u)*7);
   border: 2px solid var(--shu); color: var(--shu); font-family: var(--f-title); font-size: calc(var(--u)*2.4); display: grid; place-items: center;
   line-height: 1; transform: rotate(-6deg); opacity: .8; writing-mode: vertical-rl; }
+#title .seal.hard { right: calc(var(--u)*13); bottom: calc(var(--u)*3.8); width: calc(var(--u)*4.2); height: calc(var(--u)*4.2); font-size: calc(var(--u)*1.6);
+  background: var(--shu); color: #f3e6dc; transform: rotate(9deg); }
 
 /* Intro / ending text screens */
 .story { background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u)*2.2);
   padding: 0 10%; text-align: center; pointer-events: auto; }
 .story p { margin: 0; opacity: 0; transition: opacity 1.4s; }
 .story p.on { opacity: 1; }
-.story .jp { font-family: var(--f-hand); font-size: calc(var(--u)*2.6); color: var(--chalk); }
-.story .en { font-size: calc(var(--u)*1.7); color: var(--dim); margin-top: calc(var(--u)*0.4); display: block; }
+.story .jp { font-family: var(--f-hand); font-size: calc(var(--u)*2.6*var(--ts)); color: var(--chalk); }
+.story .en { font-size: calc(var(--u)*1.7*var(--ts)); color: var(--dim); margin-top: calc(var(--u)*0.4); display: block; }
 .story .skip { position: absolute; bottom: calc(var(--u)*2.5); right: calc(var(--u)*3); font-size: calc(var(--u)*1.4); color: var(--dim); opacity: .7; }
 #ending { gap: calc(var(--u)*1.3); }
-#ending .jp { font-size: calc(var(--u)*2.2); }
+#ending .jp { font-size: calc(var(--u)*2.2*var(--ts)); }
 #ending h2, #over h2 { font-family: var(--f-title); font-weight: 400; font-size: calc(var(--u)*6.5); margin: 0; letter-spacing: .15em; }
 #over h2 { color: var(--shu); }
-#over .en, #ending .en { font-size: calc(var(--u)*1.8); }
+#over .en, #ending .en { font-size: calc(var(--u)*1.8*var(--ts)); }
 .stats { font-size: calc(var(--u)*1.6); color: var(--dim); display: grid; grid-template-columns: auto auto; gap: calc(var(--u)*0.4) calc(var(--u)*3);
   font-variant-numeric: tabular-nums; text-align: left; }
 .stats b { color: var(--chalk); font-weight: 400; text-align: right; }
@@ -140,7 +148,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 #inv .big { font-family: var(--f-title); font-size: calc(var(--u)*7); color: var(--chalk); line-height: 1; }
 #inv .name { font-size: calc(var(--u)*2.3); }
 #inv .name small { display: block; color: var(--dim); font-size: .7em; margin-top: calc(var(--u)*0.3); }
-#inv .desc { font-size: calc(var(--u)*1.75); line-height: 1.6; color: #b9bfcc; }
+#inv .desc { font-size: calc(var(--u)*1.75*var(--ts)); line-height: 1.6; color: #b9bfcc; }
 #inv .acts { display: flex; gap: calc(var(--u)*1); flex-wrap: wrap; }
 #inv .cond { margin-top: auto; display: flex; align-items: center; gap: calc(var(--u)*1.2); font-size: calc(var(--u)*1.6); color: var(--dim); }
 #inv .cond canvas { width: calc(var(--u)*18); height: calc(var(--u)*4); border: 1px solid rgba(255,255,255,.15); background: #000; }
@@ -150,12 +158,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 /* Document: a page torn from a ruled school notebook */
 #doc { display: grid; place-items: center; background: rgba(0,0,0,.72); pointer-events: auto; }
 #doc .page { position: relative; width: 70%; height: 86%; background: var(--paper); color: var(--pencil); font-family: var(--f-hand);
-  padding: calc(var(--u)*3) calc(var(--u)*3.5) calc(var(--u)*3) calc(var(--u)*7); box-shadow: 0 calc(var(--u)*1) calc(var(--u)*4) #000;
+  padding: calc(var(--u)*3*var(--ts)) calc(var(--u)*3.5) calc(var(--u)*3) calc(var(--u)*7); box-shadow: 0 calc(var(--u)*1) calc(var(--u)*4) #000;
   background-image: linear-gradient(90deg, transparent calc(var(--u)*5.2), rgba(176,40,44,.55) calc(var(--u)*5.2), rgba(176,40,44,.55) calc(var(--u)*5.35), transparent calc(var(--u)*5.35)),
-                    repeating-linear-gradient(transparent 0, transparent calc(var(--u)*3.3), var(--rule) calc(var(--u)*3.3), var(--rule) calc(var(--u)*3.4));
+                    repeating-linear-gradient(transparent 0, transparent calc(var(--u)*3.3*var(--ts)), var(--rule) calc(var(--u)*3.3*var(--ts)), var(--rule) calc(var(--u)*3.4*var(--ts)));
   transform: rotate(-.6deg); overflow: hidden; display: flex; flex-direction: column; }
-#doc .page h4 { margin: 0 0 calc(var(--u)*0.6); font-size: calc(var(--u)*2.4); font-weight: 600; line-height: calc(var(--u)*3.4); }
-#doc .body { font-size: calc(var(--u)*1.9); line-height: calc(var(--u)*3.4); overflow-y: auto; flex: 1; min-height: 0; }
+#doc .page h4 { margin: 0 0 calc(var(--u)*0.6*var(--ts)); font-size: calc(var(--u)*2.4); font-weight: 600; line-height: calc(var(--u)*3.4*var(--ts)); }
+#doc .body { font-size: calc(var(--u)*1.9*var(--ts)); line-height: calc(var(--u)*3.4*var(--ts)); overflow-y: auto; flex: 1; min-height: 0; }
 #doc .body p { margin: 0; }
 #doc .body .en { color: #5b5a66; font-size: .82em; }
 #doc .body .torn { color: var(--shu); }
@@ -177,11 +185,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 #boss .bar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #6d1418, var(--shu)); transition: width .25s; }
 
 /* Big centred line, for sung words and shouted names */
-#bigtext { display: grid; place-items: center; pointer-events: none; font-family: var(--f-title); font-size: calc(var(--u)*5.2); color: var(--chalk);
+#bigtext { display: grid; place-items: center; pointer-events: none; font-family: var(--f-title); font-size: calc(var(--u)*5.2*var(--ts)); color: var(--chalk);
   text-shadow: 0 0 calc(var(--u)*1.5) #000, 0 0 4px #000; letter-spacing: .12em; text-align: center; opacity: 0; transition: opacity .35s; }
 #bigtext.on { opacity: 1; }
 #bigtext.red { color: #ff6a60; }
-#bigtext small { display: block; font-family: var(--f-ui); font-size: .32em; color: var(--dim); letter-spacing: .2em; margin-top: calc(var(--u)*0.8); }
+#bigtext small { display: block; font-family: var(--f-sub); font-size: .32em; color: var(--dim); letter-spacing: .2em; margin-top: calc(var(--u)*0.8); }
 
 /* Dial padlock */
 #dial { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u)*1.6); }
@@ -236,6 +244,65 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 #goal b { color: var(--dim); font-weight: 400; margin-right: calc(var(--u)*0.6); }
 #title .menu { margin-top: calc(var(--u)*4.5); display: flex; flex-direction: column; gap: calc(var(--u)*1); align-items: center; }
 #title .menu .btn { min-width: calc(var(--u)*24); }
+#pause .btn { min-width: calc(var(--u)*24); }
+#pause .pinfo { margin-top: calc(var(--u)*1.2); font-size: calc(var(--u)*1.5); color: var(--dim); }
+#pause .pinfo b { color: var(--chalk); font-weight: 400; margin-left: calc(var(--u)*0.4); }
+#pause .pinfo .hard { color: var(--shu); margin-left: calc(var(--u)*2.5); }
+#title .menu .desc { font-size: max(11px, calc(var(--u)*1.45*var(--ts))); color: var(--dim); margin: calc(var(--u)*-0.5) 0 calc(var(--u)*0.3); max-width: max(calc(var(--u)*44), 88%); }
+#title .menu .desc.hard { color: var(--shu); }
+/* four or more rows in the menu (Continue + its Nightmare tag, New game, Records, Settings): tighten so the key help clears the bottom and the sound hint */
+#title.tall .menu { margin-top: calc(var(--u)*2); gap: calc(var(--u)*0.7); }
+#title.tall .keys { margin-top: calc(var(--u)*1.5); line-height: 1.55; }
+#title.tall .padhint { bottom: calc(var(--u)*0.9); }
+
+/* Records (over the title and the pause panel) */
+#records { display: flex; flex-direction: column; align-items: center; gap: calc(var(--u)*0.6); padding: calc(var(--u)*2.6) calc(var(--u)*5) calc(var(--u)*1.6);
+  background: rgba(8,10,16,.97); }
+#records h2 { font-family: var(--f-title); font-weight: 400; font-size: calc(var(--u)*3.6); margin: 0; letter-spacing: .3em; }
+#records .body { flex: 1; min-height: 0; width: 100%; overflow-y: auto; display: grid; grid-template-columns: 1.4fr 1fr; gap: 0 calc(var(--u)*4); align-content: start; }
+#records .body > div { min-width: 0; }
+#records h3 { font-weight: 400; margin: calc(var(--u)*1.2) 0 calc(var(--u)*0.5); font-size: calc(var(--u)*1.45); color: var(--dim); letter-spacing: .25em; }
+#records h3 .n { color: var(--chalk); letter-spacing: 0; margin-left: calc(var(--u)*0.6); }
+#records ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: calc(var(--u)*0.25); }
+#records li { display: flex; align-items: baseline; gap: calc(var(--u)*0.9); font-size: calc(var(--u)*1.6*var(--ts)); line-height: 1.35; }
+#records li i { font-style: normal; color: var(--dim); min-width: 1.4em; font-family: var(--f-title); }
+#records li b { font-weight: 400; font-family: var(--f-hand); color: var(--chalk); white-space: nowrap; }
+#records li .en { color: var(--dim); font-size: .85em; min-width: 0; }   /* long names wrap under themselves */
+#records .body.more { -webkit-mask-image: linear-gradient(#000 82%, transparent); mask-image: linear-gradient(#000 82%, transparent); }   /* more below */
+#records li .q { color: #474c5a; letter-spacing: .2em; }
+#records .stats { margin-top: calc(var(--u)*1.4); font-size: calc(var(--u)*1.5*var(--ts)); width: max-content; }
+#records .back { margin-top: calc(var(--u)*0.6); min-width: calc(var(--u)*20); }
+#records .hint { color: var(--dim); font-size: calc(var(--u)*1.35); }
+#ending .hint-end .jp { font-size: calc(var(--u)*1.8*var(--ts)); color: var(--dim); }
+#ending .hint-end .en { font-size: calc(var(--u)*1.5*var(--ts)); color: #5d6475; }
+
+/* Settings (over the title and the pause panel) */
+#settings { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u)*0.6); background: rgba(8,10,16,.97); }
+#settings h2 { font-family: var(--f-title); font-weight: 400; font-size: calc(var(--u)*4); margin: 0 0 calc(var(--u)*1.2); letter-spacing: .3em; }
+#settings .rows { display: flex; flex-direction: column; gap: calc(var(--u)*0.4); width: calc(var(--u)*80); }
+#settings .row { display: grid; grid-template-columns: 1fr auto minmax(calc(var(--u)*30), auto) auto; align-items: center; cursor: pointer;
+  font-size: calc(var(--u)*1.75*var(--ts)); padding: calc(var(--u)*0.35) calc(var(--u)*1.4); border: 1px solid transparent; white-space: nowrap; }
+#settings .row.sel { border-color: var(--moon); background: rgba(159,180,255,.1); }
+#settings .lbl { color: var(--dim); }
+#settings .row.sel .lbl { color: var(--chalk); }
+#settings .arr { color: var(--dim); font-size: .9em; padding: calc(var(--u)*0.3) calc(var(--u)*1.4); }
+#settings .row.sel .arr { color: var(--lantern); }
+#settings .val { cursor: pointer; text-align: center; display: flex; justify-content: center; align-items: center; gap: calc(var(--u)*1); }
+#settings .val b { font-weight: 400; min-width: 2ch; text-align: right; font-variant-numeric: tabular-nums; }
+#settings .cells { display: inline-flex; gap: calc(var(--u)*0.3); }
+#settings .cells i { width: calc(var(--u)*1.3*var(--ts)); height: calc(var(--u)*1.3*var(--ts)); background: rgba(255,255,255,.12); outline: 1px solid rgba(255,255,255,.1); }
+#settings .cells i.on { background: var(--chalk); }
+#settings .back { margin-top: calc(var(--u)*1.2); min-width: calc(var(--u)*20); }
+#settings .hint { color: var(--dim); font-size: calc(var(--u)*1.35); margin-top: calc(var(--u)*0.6); }
+
+/* Translated text: its own font stack (Noto Sans SC/TC first under zh), and no Latin-caps letter-spacing for Hanzi */
+.en, #msg p, #toast, #prompt, .hint, .skip, #title .sub, #title .keys, #title .padhint, #equip .n, #inv h3, #inv li button, #inv .name, #inv .desc,
+#inv .cond, #goal, #map h3, #map .rm small, #dial .dl-sub, .stats, #settings .row, #touch button small, #records h3, #pause .pinfo, #title .menu .desc { font-family: var(--f-sub); }
+#doc .body .en { font-family: var(--f-subh); }
+:lang(zh-Hans) #roomcard .en, :lang(zh-Hant) #roomcard .en { letter-spacing: .15em; }
+:lang(zh-Hans) #boss .bn .en, :lang(zh-Hant) #boss .bn .en, :lang(zh-Hans) #bigtext small, :lang(zh-Hant) #bigtext small { letter-spacing: .08em; }
+:lang(zh-Hans) #inv h3, :lang(zh-Hant) #inv h3, :lang(zh-Hans) #map h3, :lang(zh-Hant) #map h3, :lang(zh-Hans) #settings h2, :lang(zh-Hant) #settings h2,
+:lang(zh-Hans) #records h2, :lang(zh-Hant) #records h2, :lang(zh-Hans) #records h3, :lang(zh-Hant) #records h3 { letter-spacing: .1em; }
 
 /* Touch controls */
 #touch { position: fixed; left: 0; right: 0; bottom: 0; height: 0; pointer-events: none; z-index: 5; }
@@ -245,8 +312,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 #touch button { position: absolute; width: 52px; height: 52px; border-radius: 50%; background: rgba(20,24,36,.55); border: 1px solid rgba(159,180,255,.35);
   color: var(--chalk); font-family: var(--f-title); font-size: 20px; display: grid; place-items: center; touch-action: none; }
 #touch button.on { background: rgba(159,180,255,.35); }
-#touch button small { position: absolute; bottom: -16px; font-family: var(--f-ui); font-size: 10px; color: var(--dim); white-space: nowrap; }
+#touch button small { position: absolute; bottom: -16px; font-family: var(--f-sub); font-size: 10px; color: var(--dim); white-space: nowrap; }
 #touch .pad button { border-radius: 10px; font-family: var(--f-ui); font-size: 18px; }
+#touch .tpause { position: fixed; width: 40px; height: 40px; border-radius: 10px; font-family: var(--f-ui); font-size: 16px; pointer-events: auto; }
 @media (prefers-reduced-motion: reduce) { #title .start, #hp.low .bar i, #msg .more { animation: none; } }
 </style>
 
@@ -269,7 +337,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     </div>
     <div id="choice" class="layer" hidden><div class="opts"></div></div>
     <div id="inv" class="layer panel" hidden>
-      <div><h3>持ち物 · ITEMS</h3><ul id="invlist"></ul><div id="goal"></div></div>
+      <div><h3 data-t="持ち物 · ITEMS">持ち物 · ITEMS</h3><ul id="invlist"></ul><div id="goal"></div></div>
       <div class="detail">
         <div class="big kanji" id="invbig"></div>
         <div class="name" id="invname"></div>
@@ -277,44 +345,69 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
         <div class="acts" id="invacts"></div>
         <div class="cond"><canvas id="ecg" width="180" height="40"></canvas><div>状態 <b id="condtxt"></b></div></div>
       </div>
-      <div class="hint">↑↓ choose · E / Enter use · M map · I / Esc close</div>
+      <div class="hint" data-dev="kb" data-t="↑↓ choose · E / Enter use · M map · I / Esc close">↑↓ choose · E / Enter use · M map · I / Esc close</div><div class="hint" data-dev="pad" data-t="↑↓ choose · A use · Back map · B close" hidden>↑↓ choose · A use · Back map · B close</div>
     </div>
     <div id="dial" class="layer panel" hidden>
       <div class="dl-title">書庫</div>
       <div class="dl-sub">The archive door is held by a four-digit dial padlock.</div>
       <div class="wheels"></div>
-      <div class="dl-acts"><button class="btn" data-act="open">開ける · Open</button><button class="btn" data-act="cancel">やめる · Leave it</button></div>
-      <div class="hint">← → choose a wheel · ↑ ↓ turn it · E open · Esc leave</div>
+      <div class="dl-acts"><button class="btn" data-act="open" data-t="開ける · Open">開ける · Open</button><button class="btn" data-act="cancel" data-t="やめる · Leave it">やめる · Leave it</button></div>
+      <div class="hint" data-dev="kb" data-t="← → choose a wheel · ↑ ↓ turn it · E open · Esc leave">← → choose a wheel · ↑ ↓ turn it · E open · Esc leave</div><div class="hint" data-dev="pad" data-t="← → choose a wheel · ↑ ↓ turn it · A open · B leave" hidden>← → choose a wheel · ↑ ↓ turn it · A open · B leave</div>
     </div>
-    <div id="map" class="layer panel" hidden><h3>校内案内図 · SCHOOL MAP</h3><div class="floors"></div><div class="hint">M / Esc close</div></div>
+    <div id="map" class="layer panel" hidden><h3 data-t="校内案内図 · SCHOOL MAP">校内案内図 · SCHOOL MAP</h3><div class="floors"></div><div class="hint" data-dev="kb" data-t="M / Esc close">M / Esc close</div><div class="hint" data-dev="pad" data-t="Back / B close" hidden>Back / B close</div></div>
     <div id="doc" class="layer" hidden>
       <div class="page"><h4 id="doctitle"></h4><div class="body" id="docbody"></div>
         <div class="nav"><button id="docprev">← 前</button><span id="docpage"></span><button id="docnext">次 →</button></div></div>
     </div>
     <div id="pause" class="layer panel" hidden>
       <h2>一時停止</h2>
-      <button class="btn" data-act="resume">Resume</button>
-      <button class="btn" data-act="restart">Restart from title</button>
+      <button class="btn" data-act="resume" data-t="Resume">Resume</button>
+      <button class="btn" data-act="settings" data-t="Settings">Settings</button>
+      <button class="btn" data-act="records" data-t="Records">Records</button>
+      <button class="btn" data-act="restart" data-t="Restart from title">Restart from title</button>
+      <div class="pinfo"></div>
     </div>
-    <div id="intro" class="layer story" hidden><div class="skip">E / tap to skip</div></div>
+    <div id="intro" class="layer story" hidden><div class="skip" data-dev="kb" data-t="E / tap to skip">E / tap to skip</div><div class="skip" data-dev="pad" data-t="A to skip" hidden>A to skip</div></div>
     <div id="over" class="layer story" hidden></div>
     <div id="ending" class="layer story" hidden></div>
     <div id="title" class="layer">
       <h1>夜の学校</h1>
       <div class="roma">YORU NO GAKKŌ</div>
-      <div class="sub">a night-school survival horror</div>
+      <div class="sub" data-t="a night-school survival horror">a night-school survival horror</div>
       <div class="menu" id="titlemenu"></div>
       <div class="keys">
-        <span><b>↑ ↓</b> walk / back up</span><span><b>← →</b> turn</span>
-        <span><b>Shift</b> run</span><span><b>Space</b> attack · use weapon</span>
-        <span><b>E</b> examine · open</span><span><b>I</b> items · <b>Q</b> switch weapon</span>
-        <span><b>M</b> school map</span><span><b>Esc</b> pause</span>
+        <span data-scheme="tank"><b>↑ ↓</b> <span data-t="walk / back up">walk / back up</span></span><span data-scheme="tank"><b>← →</b> <span data-t="turn">turn</span></span>
+        <span data-scheme="modern" hidden><b>↑ ↓ ← →</b> <span data-t="walk">walk</span></span><span data-scheme="modern" hidden><b>Backspace</b> <span data-t="back · close">back · close</span></span>
+        <span><b>Shift</b> <span data-t="run">run</span></span><span><b>Space</b> <span data-t="attack · use weapon">attack · use weapon</span></span>
+        <span><b>E</b> <span data-t="examine · open">examine · open</span></span><span><b>I</b> <span data-t="items">items</span> · <b>Q</b> <span data-t="switch weapon">switch weapon</span></span>
+        <span><b>M</b> <span data-t="school map">school map</span></span><span><b>Esc</b> <span data-t="pause">pause</span></span>
       </div>
+      <div class="keys pad" hidden>
+        <span><b>L-stick</b> <span data-t="walk">walk</span></span><span><b>B</b> / <b>LT</b> <span data-t="run">run</span></span>
+        <span><b>A</b> <span data-t="examine · open">examine · open</span></span><span><b>X</b> / <b>RT</b> <span data-t="attack">attack</span></span>
+        <span><b>Y</b> <span data-t="items">items</span> · <b>LB</b> <span data-t="switch weapon">switch weapon</span></span><span><b>Back</b> <span data-t="school map">school map</span></span>
+        <span><b>Start</b> <span data-t="pause">pause</span></span><span><b>B</b> <span data-t="back · close">back · close</span></span>
+      </div>
+      <div class="padhint" id="padhint" data-t="🔈 Press a key or click once to enable sound" hidden>🔈 Press a key or click once to enable sound</div>
       <div class="seal">七不思議</div>
+      <div class="seal hard" title="悪夢" hidden>悪夢</div>
+    </div>
+    <div id="records" class="layer panel" hidden>
+      <h2 data-t="記録 · RECORDS">記録 · RECORDS</h2>
+      <div class="body"></div>
+      <button class="btn back sel" data-t="戻る · Back">戻る · Back</button>
+      <div class="hint" data-dev="kb" data-t="↑↓ scroll · Esc back">↑↓ scroll · Esc back</div><div class="hint" data-dev="pad" data-t="↑↓ scroll · B back" hidden>↑↓ scroll · B back</div>
+    </div>
+    <div id="settings" class="layer panel" hidden>
+      <h2 data-t="設定 · SETTINGS">設定 · SETTINGS</h2>
+      <div class="rows"></div>
+      <button class="btn back" data-t="戻る · Back">戻る · Back</button>
+      <div class="hint" data-dev="kb" data-t="↑↓ choose · ← → change · Esc back">↑↓ choose · ← → change · Esc back</div><div class="hint" data-dev="pad" data-t="↑↓ choose · ← → change · B back" hidden>↑↓ choose · ← → change · B back</div>
     </div>
     <div id="fps"></div>
   </div>
   <div id="touch" hidden>
+    <button class="tpause" data-k="pause" aria-label="pause">⏸︎</button>
     <div class="pad">
       <button data-k="up" style="left:49px;top:0">▲</button>
       <button data-k="left" style="left:0;top:49px">◀</button>
@@ -322,11 +415,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       <button data-k="down" style="left:49px;top:98px">▼</button>
     </div>
     <div class="acts">
-      <button data-k="run" data-toggle="1" style="left:0;top:0">走<small>run</small></button>
-      <button data-k="inv" style="left:104px;top:0">持<small>items</small></button>
-      <button data-k="interact" style="left:0;top:86px">調<small>examine</small></button>
-      <button data-k="attack" style="left:104px;top:86px">撃<small>attack</small></button>
-      <button data-k="cycle" style="left:52px;top:44px">替<small>switch</small></button>
+      <button data-k="run" data-toggle="1" style="left:0;top:0">走<small data-t="run">run</small></button>
+      <button data-k="inv" style="left:104px;top:0">持<small data-t="items">items</small></button>
+      <button data-k="interact" style="left:0;top:86px">調<small data-t="examine">examine</small></button>
+      <button data-k="attack" style="left:104px;top:86px">撃<small data-t="attack">attack</small></button>
+      <button data-k="cycle" style="left:52px;top:44px">替<small data-t="switch">switch</small></button>
     </div>
   </div>
 </div>
@@ -358,13 +451,14 @@ const post = {
   uniforms: {
     tDiffuse: { value: rt.texture }, time: { value: 0 }, res: { value: new THREE.Vector2(W, H) },
     fade: { value: 0 }, flash: { value: 0 }, red: { value: 0 }, levels: { value: 22 }, gray: { value: 0 }, wobble: { value: 0 },
+    bright: { value: 1 }, gamma: { value: 1 },   // brightness setting (06f)
   },
 };
 post.mat = new THREE.ShaderMaterial({
   uniforms: post.uniforms, depthTest: false, depthWrite: false,
   vertexShader: `varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0.0, 1.0); }`,
   fragmentShader: `
-    uniform sampler2D tDiffuse; uniform float time, fade, flash, red, levels, gray, wobble; uniform vec2 res; varying vec2 vUv;
+    uniform sampler2D tDiffuse; uniform float time, fade, flash, red, levels, gray, wobble, bright, gamma; uniform vec2 res; varying vec2 vUv;
     float bayer2(vec2 a){ a = floor(a); return fract(dot(a, vec2(0.5, a.y * 0.75))); }
     float bayer4(vec2 a){ return bayer2(0.5 * a) * 0.25 + bayer2(a); }
     float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233))) * 43758.5453); }
@@ -373,6 +467,7 @@ post.mat = new THREE.ShaderMaterial({
       vec2 uv = vUv;
       uv.x += sin(uv.y * 40.0 + time * 9.0) * 0.004 * wobble;
       vec3 c = toSRGB(texture2D(tDiffuse, uv).rgb);
+      c = pow(c, vec3(gamma)) * bright;
       float l = dot(c, vec3(0.299, 0.587, 0.114));
       c = mix(c, vec3(l), gray);
       vec2 d = vUv - 0.5; c *= 1.0 - dot(d, d) * 1.25;
@@ -402,6 +497,15 @@ function fitStage() {
   stage.style.width = w + 'px';
   stage.style.height = Math.floor(w / 1.6) + 'px';
   stage.style.setProperty('--u', (w / 100).toFixed(2) + 'px');
+  // touch pause button: just outside the stage's top-right corner when there is room, else inside it under the equip box
+  const tp = touchUI.querySelector('.tpause');
+  if (tp && !touchUI.hidden) {
+    const r = stage.getBoundingClientRect(), s = 40;
+    let x = r.right - s, y = r.top - s - 8;
+    if (innerWidth - r.right >= s + 16) { x = r.right + 8; y = r.top + 4; }
+    else if (y < 4) { x = r.right - s - w * 0.02; y = r.top + w * 0.06; }
+    tp.style.left = x + 'px'; tp.style.top = y + 'px';
+  }
 }
 addEventListener('resize', fitStage);
 
@@ -409,33 +513,105 @@ addEventListener('resize', fitStage);
 const KEYMAP = {
   ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right',
   ShiftLeft: 'run', ShiftRight: 'run', Space: 'attack', KeyE: 'interact', Enter: 'interact', NumpadEnter: 'interact',
-  KeyI: 'inv', Tab: 'inv', KeyQ: 'cycle', KeyM: 'map', Escape: 'pause', KeyP: 'pause', Backquote: 'debug',
+  KeyI: 'inv', Tab: 'inv', KeyQ: 'cycle', KeyM: 'map', Escape: 'pause', KeyP: 'pause', Backspace: 'back', Backquote: 'debug',
 };
-const held = {}, touchHeld = {};
+const held = {}, touchHeld = {}, padHeld = {}, stickHeld = {};
 let pressed = new Set();
 let runToggle = false;
+// control scheme: 'tank' (classic: up walks, left/right turn) or 'modern' (camera-relative); S3's settings call setControlScheme
+let CONTROLS = isTouch ? 'modern' : 'tank';
+function setControlScheme(s) { CONTROLS = s === 'modern' ? 'modern' : 'tank'; onInputChange(); }
+// last input source, for on-screen glyphs: 'kb' | 'touch' | 'pad'
+let lastDevice = isTouch ? 'touch' : 'kb';
+function setDevice(d) { if (d !== lastDevice) { lastDevice = d; onInputChange(); } }
+const GLYPHS = {
+  kb: { interact: 'E', attack: 'Space', inv: 'I', cycle: 'Q', map: 'M', pause: 'Esc', run: 'Shift', back: 'Backspace' },
+  touch: { interact: '調', attack: '撃', inv: '持', cycle: '替', map: '持', pause: '⏸', run: '走', back: '⏸' },
+  pad: { interact: 'A', attack: 'X', inv: 'Y', cycle: 'LB', map: 'Back', pause: 'Start', run: 'B', back: 'B' },
+};
+const glyph = (a) => GLYPHS[lastDevice][a] || a;
 addEventListener('keydown', (e) => {
   const a = KEYMAP[e.code];
   if (!a) return;
   e.preventDefault();
   if (!held[a]) pressed.add(a);
   held[a] = true;
+  setDevice('kb');
   audio.unlock();
 });
 addEventListener('keyup', (e) => { const a = KEYMAP[e.code]; if (a) held[a] = false; });
-addEventListener('blur', () => { for (const k in held) held[k] = false; for (const k in touchHeld) touchHeld[k] = false; });
+addEventListener('pointerdown', () => audio.unlock());   // "click once to enable sound"
+addEventListener('blur', () => { for (const k in held) held[k] = false; for (const k in touchHeld) touchHeld[k] = false; clearPad(); padQuiet = true; });
+addEventListener('gamepaddisconnected', clearPad);
+
+// ── Gamepad (standard mapping), polled once per frame ──
+const PADMAP = { 0: ['interact'], 1: ['back', 'run'], 2: ['attack'], 3: ['inv'], 4: ['cycle'], 5: ['cycle'], 6: ['run'], 7: ['attack'], 8: ['map'], 9: ['pause'], 12: ['up'], 13: ['down'], 14: ['left'], 15: ['right'] };
+const DIRS = ['up', 'down', 'left', 'right'];
+const PADACTS = ['interact', 'back', 'run', 'attack', 'inv', 'cycle', 'map', 'pause', ...DIRS];
+const stick = { x: 0, y: 0, mag: 0 };
+const padNow = {}, padRep = { up: 0, down: 0, left: 0, right: 0 };   // held direction → time of its next menu autorepeat (0 = not held)
+let padLive = false, padQuiet = false, padCtx = null;
+function clearPad() {
+  for (const k in padHeld) padHeld[k] = false;
+  for (const k in stickHeld) stickHeld[k] = false;
+  for (const k in padRep) padRep[k] = 0;
+  stick.x = stick.y = stick.mag = 0; padLive = false;
+}
+// ctx identifies the open menu/overlay (from frame()): directions held into a newly opened one don't autorepeat until released;
+// after a blur (padQuiet) whatever is still held becomes the baseline instead of a fresh press
+function pollPad(ctx) {
+  let gp = null;
+  try { const gs = navigator.getGamepads ? navigator.getGamepads() : null; if (gs) for (let i = 0; i < gs.length; i++) if (gs[i] && gs[i].connected !== false) { gp = gs[i]; break; } } catch (_) {}
+  const reopen = ctx !== padCtx; padCtx = ctx;
+  if (!gp) { if (padLive) clearPad(); padQuiet = false; return; }
+  padLive = true;
+  // left stick: radial deadzone, rescaled to 0..1; y is up/away (the pad's axis 1 is +down)
+  const ax = gp.axes[0] || 0, ay = -(gp.axes[1] || 0), m = Math.hypot(ax, ay);
+  const k = m < 0.2 ? 0 : Math.min(1, (m - 0.2) / 0.75) / m;
+  stick.x = ax * k; stick.y = ay * k; stick.mag = Math.min(1, m * k);
+  stickHeld.up = stickHeld.up ? stick.y > 0.35 : stick.y > 0.5; stickHeld.down = stickHeld.down ? -stick.y > 0.35 : -stick.y > 0.5;
+  stickHeld.left = stickHeld.left ? -stick.x > 0.35 : -stick.x > 0.5; stickHeld.right = stickHeld.right ? stick.x > 0.35 : stick.x > 0.5;
+  for (const a of PADACTS) padNow[a] = false;
+  const bs = gp.buttons;
+  for (let i = 0; i < bs.length; i++) { const b = bs[i], acts = PADMAP[i]; if (acts && b && (b.pressed || b.value > 0.5)) for (const a of acts) padNow[a] = true; }
+  const t = performance.now(); let edge = false;
+  for (const a of PADACTS) {
+    const dir = a in padRep, on = padNow[a] || (dir && stickHeld[a]), was = !!padHeld[a] || (dir && padRep[a] > 0);
+    if (on && !was && !padQuiet) { pressed.add(a); edge = true; if (dir) padRep[a] = t + 350; }
+    else if (on && dir && (reopen || padQuiet)) padRep[a] = Infinity;               // held into a new menu: wait for release
+    else if (on && dir && t >= padRep[a]) { pressed.add(a); padRep[a] = t + 110; }   // menu autorepeat
+    if (!on && dir) padRep[a] = 0;
+    padHeld[a] = padNow[a];
+  }
+  padQuiet = false;
+  if (edge || stick.mag > 0.15) setDevice('pad');
+  if (edge) audio.unlock();
+}
+// movement intent {x right, y up/away, mag 0..1}: digital directions (8-way, normalised) merged with the left stick (reused object)
+const moveV = { x: 0, y: 0, mag: 0, analog: false };
+const digDir = (a) => !!held[a] || !!touchHeld[a] || !!padHeld[a];
 const input = {
-  down: (a) => !!held[a] || !!touchHeld[a] || (a === 'run' && runToggle),
+  down: (a) => !!held[a] || !!touchHeld[a] || !!padHeld[a] || !!stickHeld[a] || (a === 'run' && runToggle),
   hit: (a) => pressed.has(a),
   consume: (a) => pressed.delete(a),
-  endFrame: () => { pressed = new Set(); },
+  endFrame: () => { pressed.clear(); },
+  poll: pollPad,
+  move() {
+    let x = (digDir('right') ? 1 : 0) - (digDir('left') ? 1 : 0), y = (digDir('up') ? 1 : 0) - (digDir('down') ? 1 : 0);
+    const analog = !x && !y && stick.mag > 0;
+    const l = Math.hypot(x, y); if (l) { x /= l; y /= l; }
+    x += stick.x; y += stick.y;
+    const mag = Math.min(1, Math.hypot(x, y)), n = Math.hypot(x, y) || 1;
+    moveV.x = x / n * mag; moveV.y = y / n * mag; moveV.mag = mag; moveV.analog = analog;
+    return moveV;
+  },
 };
 if (isTouch) {
   touchUI.hidden = false;
   touchUI.querySelectorAll('button').forEach((b) => {
     const k = b.dataset.k;
     const on = (e) => {
-      e.preventDefault(); audio.unlock();
+      e.preventDefault(); audio.unlock(); setDevice('touch');
       if (b.dataset.toggle) { runToggle = !runToggle; b.classList.toggle('on', runToggle); return; }
       if (!touchHeld[k]) pressed.add(k);
       touchHeld[k] = true; b.classList.add('on');
@@ -524,12 +700,14 @@ function mat(color, opts = {}) {
 const midi = (n) => 440 * 2 ** ((n - 69) / 12);
 const audio = {
   ctx: null, ready: false, lx: 0, lz: 0, rx: 1, rz: 0, loops: {},
+  vol: { music: 1, sound: 1, voice: 1 }, duckK: 1, ducks: 0, acoustic: 'room',
   unlock() {
     if (!this.ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
       if (!AC) return;
       this.ctx = new AC();
       this.build();
+      this.voPrefetch();
     }
     if (this.ctx.state === 'suspended') this.ctx.resume();
   },
@@ -546,15 +724,66 @@ const audio = {
     }
     this.verb = c.createConvolver(); this.verb.buffer = ir;
     const vl = c.createBiquadFilter(); vl.type = 'lowpass'; vl.frequency.value = 3200;
-    this.verbIn = c.createGain(); this.verbIn.gain.value = 0.55;
-    this.verbIn.connect(vl).connect(this.verb).connect(this.master);
+    this.verbIn = c.createGain(); this.verbIn.gain.value = 0.55;   // the room's send level (setAcoustics)
+    this.verbFix = c.createGain(); this.verbFix.gain.value = 0.55; // music keeps the same reverb everywhere
+    this.verbIn.connect(vl).connect(this.verb).connect(this.master); this.verbFix.connect(vl);
     const nb = c.createBuffer(1, c.sampleRate * 2, c.sampleRate), nd = nb.getChannelData(0);
     for (let i = 0; i < nd.length; i++) nd[i] = Math.random() * 2 - 1;
     this.noiseBuf = nb;
+    // category buses: dry → master, wet → reverb, both at volume × duck, so 0 silences the reverb send too
+    this.bus = {};
+    for (const k of ['music', 'sfx', 'amb', 'voice']) {
+      const dry = c.createGain(), wet = c.createGain();
+      dry.gain.value = wet.gain.value = this.busLvl(k);
+      dry.connect(this.master); wet.connect(k === 'music' ? this.verbFix : this.verbIn);
+      this.bus[k] = { dry, wet };
+    }
+    // footstep echo: a short slap-back whose repeats get darker (on in corridors, stairwells, halls)
+    this.echoIn = c.createGain(); this.echoIn.gain.value = 0;
+    this.echoDelay = c.createDelay(0.5); this.echoDelay.delayTime.value = 0.12;
+    const el = c.createBiquadFilter(); el.type = 'lowpass'; el.frequency.value = 1500;
+    const fb = c.createGain(); fb.gain.value = 0.35;
+    this.echoIn.connect(this.echoDelay).connect(el); el.connect(fb).connect(this.echoDelay); el.connect(this.bus.sfx.dry);
     this.ready = true;
     this.drone();
+    this.setAcoustics(this.acoustic);
+  },
+  // ── volumes (0..1 per category, perceptual curve) and voice ducking ──
+  busLvl(k) {
+    const v = k === 'music' ? this.vol.music : k === 'voice' ? this.vol.voice : this.vol.sound;
+    return v * v * ((k === 'music' || k === 'amb') && this.vol.voice > 0 ? this.duckK : 1); // a muted line doesn't duck
+  },
+  applyVol(tc = 0.05, ks = ['music', 'sfx', 'amb', 'voice']) {
+    if (!this.ready) return;
+    const t = this.now();
+    for (const k of ks) { const g = this.busLvl(k); this.bus[k].dry.gain.setTargetAtTime(g, t, tc); this.bus[k].wet.gain.setTargetAtTime(g, t, tc); }
+  },
+  setVolume(kind, v) { // kind: 'music' | 'sound' (sfx + ambience) | 'voice'; stored so it applies once build() runs
+    if (!(kind in this.vol)) return;
+    this.vol[kind] = clamp(+v || 0, 0, 1);
+    this.applyVol();
+  },
+  duck(d) { // counted, so overlapping lines don't un-duck early
+    this.ducks = Math.max(0, this.ducks + d);
+    const on = this.ducks > 0;
+    this.duckK = on ? 0.4 : 1; // about -8 dB
+    this.applyVol(on ? 0.08 : 0.5, ['music', 'amb']);
+  },
+  // ── per-room acoustics: reverb send, footstep echo, roof wind ──
+  ACOUSTICS: { room: [0.4, 0, 0.12], corridor: [0.75, 0.42, 0.13], stair: [0.7, 0.38, 0.1], tile: [0.85, 0, 0.1], hall: [0.95, 0.5, 0.16], outdoor: [0.06, 0, 0.12] },
+  setAcoustics(kind = 'room') {
+    this.acoustic = this.ACOUSTICS[kind] ? kind : 'room';
+    if (!this.ready) return;
+    const [send, echo, dt] = this.ACOUSTICS[this.acoustic], t = this.now();
+    this.verbIn.gain.setTargetAtTime(send, t, 0.4);
+    this.echoIn.gain.setTargetAtTime(echo, t, 0.3);
+    this.echoDelay.delayTime.setTargetAtTime(dt, t, 0.2);
+    this.roofWind.gain.setTargetAtTime(this.acoustic === 'outdoor' ? 0.24 : 0, t, 1.5);
   },
   now() { return this.ctx.currentTime; },
+  // one-shots only while the clock runs: a context left suspended (pad-only input isn't a user activation) would
+  // otherwise queue every sound at one frozen currentTime and play them all at once on the first click
+  live() { return this.ready && this.ctx.state === 'running'; },
   listen(x, z, rx, rz) { this.lx = x; this.lz = z; this.rx = rx; this.rz = rz; },
   spatial(x, z) {
     if (x === undefined) return { g: 1, p: 0 };
@@ -563,13 +792,14 @@ const audio = {
     const p = d > 0.01 ? clamp((dx * this.rx + dz * this.rz) / d, -1, 1) * 0.75 : 0;
     return { g, p };
   },
-  // Output chain for one sound: gain → pan → dry + reverb send
-  out(vol = 1, x, z, wet = 0.35) {
-    const c = this.ctx, s = this.spatial(x, z);
+  // Output chain for one sound: gain → pan → bus dry + reverb send (+ echo send)
+  out(vol = 1, x, z, wet = 0.35, bus = 'sfx', echo = 0) {
+    const c = this.ctx, s = this.spatial(x, z), b = this.bus[bus];
     const g = c.createGain(); g.gain.value = vol * s.g;
     const p = c.createStereoPanner(); p.pan.value = s.p;
-    g.connect(p); p.connect(this.master);
-    if (wet > 0) { const w = c.createGain(); w.gain.value = wet; p.connect(w); w.connect(this.verbIn); }
+    g.connect(p); p.connect(b.dry);
+    if (wet > 0) { const w = c.createGain(); w.gain.value = wet; p.connect(w); w.connect(b.wet); }
+    if (echo > 0) { const e = c.createGain(); e.gain.value = echo; p.connect(e); e.connect(this.echoIn); }
     return g;
   },
   env(param, t, a, peak, d, floor = 0.0001) {
@@ -596,13 +826,53 @@ const audio = {
     return s;
   },
   play(name, x, z, ...args) {
-    if (!this.ready) return;
+    if (!this.live()) return;
     try { this.sfx[name].call(this, this.now(), x, z, ...args); } catch (e) { console.warn(e); }
   },
+  // ── voice lines: audio/voice/<id>.mp3 (VOICE, 06h). Missing files just mean subtitles only. ──
+  voP: {}, vo: null, voTok: 0,
+  voLoad(id) { // cached promise of the decoded buffer, or null
+    if (typeof fetch !== 'function' || location.protocol === 'file:' || !VOICE_FILES.includes(id)) return Promise.resolve(null);
+    if (!this.voP[id]) {
+      const p = this.voP[id] = fetch(`audio/voice/${id}.mp3`).then((r) => (r.ok ? r.arrayBuffer() : r.status >= 500 ? Promise.reject() : null))
+        .then((ab) => ab && new Promise((res) => { // callback form, for old Safari
+          try { const q = this.ctx.decodeAudioData(ab, res, () => res(null)); q?.catch?.(() => res(null)); } catch (_) { res(null); }
+        }), () => { if (this.voP[id] === p) delete this.voP[id]; return null; }); // network blip / 5xx: not cached, the next speak retries
+    }
+    return this.voP[id];
+  },
+  voPrefetch() { VOICE_FILES.reduce((p, id) => p.then(() => this.voLoad(id)), Promise.resolve()); }, // one at a time
+  speak(id, o = {}) { // resolves when the line ends (at once if it can't play); a new line stops the previous one
+    this.stopVoice();
+    if (!this.live() || !VOICE[id]) return Promise.resolve(false);
+    const tok = this.voTok;
+    return this.voLoad(id).then((buf) => new Promise((res) => {
+      if (!buf || tok !== this.voTok || !this.live()) return res(false);
+      const s = this.ctx.createBufferSource(), cur = { s, res, done: false };
+      s.buffer = buf; s.connect(this.out(o.vol ?? 1, undefined, undefined, 0.12, 'voice'));
+      s.onended = () => this.voEnd(cur);
+      s.start();
+      this.vo = cur; this.duck(1);
+      cur.timer = setTimeout(() => { try { s.stop(); } catch (_) {} this.voEnd(cur); }, (buf.duration + 2) * 1000); // suspended context
+    })).catch(() => false);
+  },
+  voEnd(cur) {
+    if (cur.done) return;
+    cur.done = true; clearTimeout(cur.timer); cur.s.onended = null;
+    if (this.vo === cur) this.vo = null;
+    this.duck(-1); cur.res(true);
+  },
+  stopVoice() {
+    this.voTok++;
+    const cur = this.vo; if (!cur) return;
+    try { cur.s.stop(); } catch (_) {}
+    this.voEnd(cur);
+  },
+  voicePlaying() { return !!this.vo && this.vol.voice > 0; }, // an audible line (holds the ambient timers)
   sfx: {
     step(t, x, z, surface = 'wood') {
       const f = { wood: 650, tile: 2400, lino: 1300, stair: 500 }[surface] || 900;
-      this.noise(t, 0.07, this.out(0.35, x, z, 0.25), 0.5, 0.002, { type: 'bandpass', f: f * rand(0.85, 1.15), q: 1.4 });
+      this.noise(t, 0.07, this.out(0.35, x, z, 0.25, 'sfx', 0.9), 0.5, 0.002, { type: 'bandpass', f: f * rand(0.85, 1.15), q: 1.4 });
     },
     slide(t, x, z) { // Japanese sliding classroom door: rattle, then a clack
       const c = this.ctx, o = this.out(0.5, x, z, 0.4), s = c.createBufferSource(), f = c.createBiquadFilter(), g = c.createGain(), lfo = c.createOscillator(), lg = c.createGain();
@@ -646,7 +916,7 @@ const audio = {
       const s = this.osc('sine', 150, t, 0.25, o, 0.8); s.frequency.exponentialRampToValueAtTime(60, t + 0.25);
     },
     sting(t, x, z, vol = 0.5) {
-      const c = this.ctx, o = this.out(vol, undefined, undefined, 0.8), f = c.createBiquadFilter();
+      const c = this.ctx, o = this.out(vol, undefined, undefined, 0.8, 'music'), f = c.createBiquadFilter();
       f.type = 'lowpass'; f.frequency.setValueAtTime(300, t); f.frequency.exponentialRampToValueAtTime(5200, t + 0.35); f.frequency.exponentialRampToValueAtTime(600, t + 2.2);
       f.connect(o);
       for (const n of [48, 49, 55, 60, 61, 66]) {
@@ -669,7 +939,7 @@ const audio = {
       }
     },
     chime(t, x, z, warp = 0) { // the school chime, rung at 2 a.m. and slightly wrong
-      const o = this.out(0.28, undefined, undefined, 0.9);
+      const o = this.out(0.28, undefined, undefined, 0.9, 'music');
       const seq = [64, 60, 62, 55, 55, 62, 64, 60];
       seq.forEach((n, i) => {
         const tt = t + i * 1.05 + (i >= 4 ? 0.5 : 0), f = midi(n) * (1 - warp * i * 0.006);
@@ -678,9 +948,29 @@ const audio = {
         this.osc('sine', f * 3.02, tt, 0.8, o, 0.05, 0.01);
       });
     },
+    chimeFar(t) { // the same Westminster phrases from a speaker somewhere far off in the building
+      const c = this.ctx, o = this.out(0.1, undefined, undefined, 0.95, 'amb'), f = c.createBiquadFilter(), pn = c.createStereoPanner();
+      f.type = 'lowpass'; f.frequency.value = 850; pn.pan.value = rand(-0.5, 0.5); f.connect(pn).connect(o);
+      const d = rand(0.992, 1.004);
+      [64, 60, 62, 55, 55, 62, 64, 60].forEach((n, i) => {
+        const tt = t + i * 1.1 + (i >= 4 ? 0.6 : 0), fr = midi(n) * d;
+        this.osc('sine', fr, tt, 3.2, f, 0.35, 0.02);
+        this.osc('sine', fr * 2.01, tt, 1.4, f, 0.08, 0.02);
+      });
+    },
+    farSteps(t) { // someone walking slowly across the floor above
+      const c = this.ctx, o = this.out(0.26, undefined, undefined, 0.3, 'amb'), f = c.createBiquadFilter(), pn = c.createStereoPanner();
+      f.type = 'lowpass'; f.frequency.value = 360; pn.pan.value = rand(-0.6, 0.6); f.connect(pn).connect(o);
+      const n = 4 + Math.floor(Math.random() * 4), gap = rand(0.5, 0.66), away = Math.random() < 0.5;
+      for (let i = 0; i < n; i++) {
+        const tt = t + i * gap * rand(0.94, 1.06), a = 0.45 + 0.55 * (away ? 1 - i / n : i / n);
+        this.noise(tt, 0.09, f, 0.6 * a, 0.004);
+        this.osc('sine', rand(80, 95), tt, 0.12, f, 0.5 * a, 0.004);
+      }
+    },
     heart(t) { const o = this.out(0.9, undefined, undefined, 0); this.osc('sine', 55, t, 0.12, o, 0.8); this.osc('sine', 50, t + 0.24, 0.16, o, 0.6); },
     geta(t, x, z) { // wooden sandal clack of the one-legged umbrella
-      const o = this.out(0.5, x, z, 0.4);
+      const o = this.out(0.5, x, z, 0.4, 'sfx', 0.6);
       this.osc('square', 820 * rand(0.95, 1.05), t, 0.05, o, 0.15); this.osc('sine', 1350, t, 0.07, o, 0.2);
       this.noise(t, 0.03, o, 0.3, 0.001, { type: 'highpass', f: 3000 });
     },
@@ -715,7 +1005,7 @@ const audio = {
       s.connect(f).connect(g).connect(o); s.start(t); s.stop(t + 1.6); v.start(t); v.stop(t + 1.6);
     },
     teke(t, x, z) { // elbows slapping the corridor floor
-      const o = this.out(0.7, x, z, 0.35);
+      const o = this.out(0.7, x, z, 0.35, 'sfx', 0.6);
       this.noise(t, 0.035, o, 0.9, 0.001, { type: 'bandpass', f: rand(1400, 1900), q: 2 });
       this.osc('sine', rand(160, 200), t, 0.05, o, 0.5);
     },
@@ -754,7 +1044,7 @@ const audio = {
       }
     },
     dawn(t) { // first light: a slow, warm major chord
-      const o = this.out(0.3, undefined, undefined, 0.9);
+      const o = this.out(0.3, undefined, undefined, 0.9, 'music');
       [48, 55, 60, 64, 67, 71, 74].forEach((n, i) => { this.osc('sine', midi(n), t + i * 0.18, 7, o, 0.16, 2.2); this.osc('triangle', midi(n) * 1.002, t + i * 0.18, 5, o, 0.04, 2.5); });
     },
   },
@@ -763,7 +1053,7 @@ const audio = {
   drone() {
     const c = this.ctx;
     this.droneGain = c.createGain(); this.droneGain.gain.value = 0;
-    this.droneGain.connect(this.master);
+    this.droneGain.connect(this.bus.amb.dry);
     for (const f of [49, 52.3, 98.7]) {
       const o = c.createOscillator(); o.type = f > 90 ? 'triangle' : 'sine'; o.frequency.value = f;
       const g = c.createGain(); g.gain.value = f > 90 ? 0.03 : 0.14; o.connect(g).connect(this.droneGain); o.start();
@@ -777,7 +1067,18 @@ const audio = {
     const hz = c.createOscillator(); hz.type = 'sawtooth'; hz.frequency.value = 100;
     const hf = c.createBiquadFilter(); hf.type = 'lowpass'; hf.frequency.value = 500;
     this.buzzGain = c.createGain(); this.buzzGain.gain.value = 0;
-    hz.connect(hf).connect(this.buzzGain).connect(this.master); hz.start();
+    hz.connect(hf).connect(this.buzzGain).connect(this.bus.amb.dry); hz.start();
+    // roof wind: gusting low noise plus a thin whistle; bypasses droneGain, only up outdoors (setAcoustics)
+    const rn = c.createBufferSource(); rn.buffer = this.noiseBuf; rn.loop = true;
+    const rl = c.createBiquadFilter(); rl.type = 'lowpass'; rl.frequency.value = 600;
+    const gust = c.createGain(); gust.gain.value = 0.55;
+    for (const [fq, a] of [[0.11, 0.3], [0.043, 0.2]]) { const l = c.createOscillator(), g = c.createGain(); l.frequency.value = fq; g.gain.value = a; l.connect(g).connect(gust.gain); l.start(); }
+    const wb = c.createBiquadFilter(); wb.type = 'bandpass'; wb.frequency.value = 1400; wb.Q.value = 18;
+    const wl = c.createOscillator(), wlg = c.createGain(), wg = c.createGain(); wl.frequency.value = 0.07; wlg.gain.value = 300; wg.gain.value = 0.7;
+    wl.connect(wlg).connect(wb.frequency); wl.start();
+    this.roofWind = c.createGain(); this.roofWind.gain.value = 0;
+    rn.connect(rl).connect(gust); rn.connect(wb).connect(wg).connect(gust);
+    gust.connect(this.roofWind).connect(this.bus.amb.dry); rn.start(0, 0.7);
   },
   setAmbience(level, wind = 0.05, buzz = 0) {
     if (!this.ready) return;
@@ -793,11 +1094,11 @@ const audio = {
   pianoStart(x, z) {
     if (!this.ready) return;
     const p = this.piano; p.on = true; p.x = x; p.z = z; p.i = 0; p.next = this.now() + 0.3;
-    if (!p.gain) { p.gain = this.ctx.createGain(); p.pan = this.ctx.createStereoPanner(); p.gain.connect(p.pan); p.pan.connect(this.master); const w = this.ctx.createGain(); w.gain.value = 0.6; p.pan.connect(w); w.connect(this.verbIn); }
+    if (!p.gain) { p.gain = this.ctx.createGain(); p.pan = this.ctx.createStereoPanner(); p.gain.connect(p.pan); p.pan.connect(this.bus.music.dry); const w = this.ctx.createGain(); w.gain.value = 0.6; p.pan.connect(w); w.connect(this.bus.music.wet); }
   },
   pianoStop(bang) {
     const p = this.piano; if (!p.on) return; p.on = false;
-    if (bang && this.ready) { const t = this.now(); for (const n of [28, 29, 35, 40, 41, 46]) this.pianoNote(midi(n), t, 0.5, 3); }
+    if (bang && this.live()) { const t = this.now(); for (const n of [28, 29, 35, 40, 41, 46]) this.pianoNote(midi(n), t, 0.5, 3); }
   },
   pianoNote(f, t, vol, dur = 1.8) {
     const o = this.piano.gain;
@@ -815,13 +1116,13 @@ const audio = {
     let t = this.ready ? this.now() + 0.05 : 0, total = 0;
     for (const [n, b] of this.SONG) {
       const dur = b * beat;
-      if (this.ready) for (let v = 0; v < 3; v++) this.sungNote(midi(n) * (1 + (v - 1) * 0.006), t + v * 0.012, dur, v);
+      if (this.live()) for (let v = 0; v < 3; v++) this.sungNote(midi(n) * (1 + (v - 1) * 0.006), t + v * 0.012, dur, v);
       t += dur; total += dur;
     }
     return total;
   },
   sungNote(f, t, dur, v) {
-    const c = this.ctx, o = this.out(0.22, undefined, undefined, 0.8), s = c.createOscillator(), g = c.createGain();
+    const c = this.ctx, o = this.out(0.22, undefined, undefined, 0.8, 'music'), s = c.createOscillator(), g = c.createGain();
     s.type = 'sawtooth'; s.frequency.setValueAtTime(f, t);
     const vib = c.createOscillator(), vg = c.createGain(); vib.frequency.value = 5 + v; vg.gain.value = f * 0.012; vib.connect(vg).connect(s.frequency);
     g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(0.5, t + 0.06); g.gain.setValueAtTime(0.45, t + Math.max(0.07, dur - 0.08)); g.gain.linearRampToValueAtTime(0.0001, t + dur + 0.05);
@@ -834,7 +1135,7 @@ const audio = {
   update() {
     if (!this.ready) return;
     const p = this.piano;
-    if (p.on && p.gain) {
+    if (p.on && p.gain && this.live()) {
       const s = this.spatial(p.x, p.z);
       p.gain.gain.setTargetAtTime(0.25 + s.g * 0.9, this.now(), 0.1);
       p.pan.pan.setTargetAtTime(s.p, this.now(), 0.1);
@@ -1577,7 +1878,7 @@ const FACE = { N: Math.PI, S: 0, E: Math.PI / 2, W: -Math.PI / 2 };
 
 class Room {
   constructor(id, o) {
-    Object.assign(this, { id, name: o.name, en: o.en, surface: o.surface || 'wood', ambience: o.ambience || [0.12, 0.05, 0] });
+    Object.assign(this, { id, name: o.name, en: o.en, surface: o.surface || 'wood', ambience: o.ambience || [0.12, 0.05, 0], acoustics: o.acoustics || 'room' });
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x010207);
     this.scene.fog = new THREE.Fog(0x010207, o.fogNear ?? 7, o.fogFar ?? 24);
@@ -1814,7 +2115,7 @@ const ROOM_DEFS = {};
 const plaster = () => mat(0xffffff, { map: TEX.plaster });
 
 ROOM_DEFS.classroom = () => {
-  const R = new Room('classroom', { name: '２年Ａ組', en: 'CLASSROOM 2-A', surface: 'wood', ambience: [0.12, 0.04, 0], fogNear: 7, fogFar: 22 });
+  const R = new Room('classroom', { name: '２年Ａ組', en: 'CLASSROOM 2-A', surface: 'wood', ambience: [0.12, 0.04, 0], acoustics: 'room', fogNear: 7, fogFar: 22 });
   const x0 = -4.5, x1 = 4.5, z0 = -3.5, z1 = 3.5, h = 3;
   R.floor(x0, z0, x1, z1, mat(0xffffff, { map: TEX.wood }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -1855,7 +2156,7 @@ ROOM_DEFS.classroom = () => {
   R.cam([-4.5, -3.5, 1.6, 0.4], [-4.1, 2.75, 3.1], [1.2, 0.5, -2.2], 55);
 
   R.spot({ id: 'mydesk', x: -3.2, z: 1.7, use: async () => {
-    if (!F.onigiri) { F.onigiri = 1; await say('Your desk by the window. Your bag still hangs on its hook.'); give('onigiri'); give('handbook'); await say('Inside: the onigiri you never finished at lunch, and your student handbook, with the school map in the back.'); }
+    if (!F.onigiri) { F.onigiri = 1; await say('Your desk by the window. Your bag still hangs on its hook.'); give('onigiri'); give('handbook'); await say('Inside: the onigiri you never finished at lunch, and your student handbook, with the school map in the back.'); await hardPencil('classroom', 'And your pencil case. There is one pencil left in it.'); }
     else await say('Your desk. Scratched into the corner, very small: 「消えろ」 — "Disappear." You stopped seeing it weeks ago.');
   } });
   R.spot({ id: 'yuki', x: -1.95, z: 1.7, use: async () => {
@@ -1863,6 +2164,7 @@ ROOM_DEFS.classroom = () => {
     else await say('Yuki\'s desk. Yuki used to save you a seat at lunch. Not since the summer.');
   } });
   R.spot({ id: 'vase', x: 0.55, z: -0.3, use: () => say('A vase of white chrysanthemums on a desk. That\'s what a class does when a student has died. The name label on the desk reads 花子 — Hanako.') });
+  journalDesk(R, -0.38, 0.74, -2.62, -0.6, -3.05, 0.1, 0.5);   // west end, from the teacher's side
   R.spot({ id: 'tdesk', x: 0, z: -2.55, r: 1.1, use: () => say('The attendance book. Beside every name for October 13th, a neat red circle: present. Beside yours, in pencil, someone has written 「いない人」 — "the one who isn\'t here."') });
   R.spot({ id: 'board', x: 0, z: -3.1, r: 1.3, use: () => say('「自習」 — "Self-study." In the day-duty column on the right, in careful chalk: 日直 花子. There is no Hanako in this class. Above the board, the clock has stopped at 2:13.') });
   R.spot({ id: 'window', x: -4.1, z: 0, r: 1.3, use: () => say('The school gate is shut. Past it, the town is completely dark. Not one streetlight, not one window.') });
@@ -1883,7 +2185,7 @@ ROOM_DEFS.classroom = () => {
 };
 
 ROOM_DEFS.hall2 = () => {
-  const R = new Room('hall2', { name: '２階 廊下', en: '2F CORRIDOR', surface: 'lino', ambience: [0.14, 0.09, 0], fogNear: 6, fogFar: 22 });
+  const R = new Room('hall2', { name: '２階 廊下', en: '2F CORRIDOR', surface: 'lino', ambience: [0.14, 0.09, 0], acoustics: 'corridor', fogNear: 6, fogFar: 22 });
   const x0 = -14, x1 = 14, z0 = -1.5, z1 = 1.5, h = 3;
   R.floor(x0, z0, x1, z1, mat(0xffffff, { map: TEX.lino }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -1936,7 +2238,7 @@ ROOM_DEFS.hall2 = () => {
   R.spot({ id: 'salt', x: 1.9, z: z0 + 0.35, r: 0.9, when: () => !F.salt_hall, use: async () => {
     F.salt_hall = 1; R.salt.visible = false;
     await say('A small cone of salt on a saucer beside the lavatory door. Morijio — salt set out to keep spirits from crossing a threshold. You scoop it into a handkerchief.');
-    give('salt', 2);
+    give('salt', F.hard ? 1 : 2);
   } });
   R.spot({ id: 'sink', x: 3.0, z: z0 + 0.4, use: () => say('The taps are dry. One of them drips anyway. The drops look red in the hydrant light... no, just rust.') });
   R.spot({ id: 'board', x: -1.8, z: z0 + 0.3, r: 1.1, use: () => say('The corridor notice board. 「廊下を走るな！」 "No running in the corridor!" Beside it, a yellowed poster: 「探しています」 "MISSING: girl, red skirt, bobbed hair." The date on it is 1950.') });
@@ -1952,7 +2254,7 @@ ROOM_DEFS.hall2 = () => {
 };
 
 ROOM_DEFS.toilet = () => {
-  const R = new Room('toilet', { name: '女子トイレ', en: 'GIRLS\' LAVATORY', surface: 'tile', ambience: [0.1, 0.02, 0.015], fogNear: 5, fogFar: 16 });
+  const R = new Room('toilet', { name: '女子トイレ', en: 'GIRLS\' LAVATORY', surface: 'tile', ambience: [0.1, 0.02, 0.015], acoustics: 'tile', fogNear: 5, fogFar: 16 });
   const x0 = -3, x1 = 3, z0 = -2.5, z1 = 2.5, h = 2.8;
   const tile = mat(0xffffff, { map: TEX.tile });
   R.floor(x0, z0, x1, z1, mat(0xffffff, { map: TEX.floortile }), 1.2);
@@ -2010,7 +2312,7 @@ ROOM_DEFS.toilet = () => {
     G.cutscene = true;
     audio.play('knock', centres[2], -1.0);
     await wait(1.6);
-    await say('「花子さん、遊びましょ」', { jp: true, sub: '"Hanako-san... will you come out and play?"' });
+    await say('「花子さん、遊びましょ」', { jp: true, sub: '"Hanako-san... will you come out and play?"', voice: 'v02' });
     G.cutscene = true;
     await wait(1.4);
     audio.play('voice', centres[2], -1.6);
@@ -2072,7 +2374,7 @@ function officeChair(R, x, z, ry) {
 }
 
 ROOM_DEFS.music = () => {
-  const R = new Room('music', { name: '音楽室', en: 'MUSIC ROOM', surface: 'wood', ambience: [0.09, 0.04, 0], fogNear: 7, fogFar: 22 });
+  const R = new Room('music', { name: '音楽室', en: 'MUSIC ROOM', surface: 'wood', ambience: [0.09, 0.04, 0], acoustics: 'room', fogNear: 7, fogFar: 22 });
   const x0 = -5, x1 = 5, z0 = -4, z1 = 4, h = 3.2;
   R.floor(x0, z0, x1, z1, mat(0xffffff, { map: TEX.wood }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -2145,7 +2447,8 @@ ROOM_DEFS.music = () => {
   R.spot({ id: 'salt', x: -4.45, z: 1.6, r: 0.9, when: () => !F.salt_music, use: async () => {
     F.salt_music = 1; R.salt.visible = false;
     await say('Another cone of morijio just inside the door. Someone was very worried about what might come through it.');
-    give('salt', 2);
+    give('salt', F.hard ? 1 : 2);
+    await hardPencil('music');
   } });
   R.spot({ id: 'board', x: -1.3, z: z0 + 0.5, r: 1.0, use: () => say('A melody in chalk on the staff lines. Underneath: 「最後まで弾いてはいけない」 "It must never be played to the end."') });
   R.spot({ id: 'umb', x: 4.3, z: -3.3, r: 1.0, when: () => !F.ofuda, use: () => say('An old red paper umbrella, a wagasa, leaning in the corner. Its paper looks almost warm.') });
@@ -2163,7 +2466,7 @@ ROOM_DEFS.music = () => {
 
 // A straight flight of twelve steps between two floors: the upper door at the north landing, the lower at the south.
 function stairwell(id, name, en, o) {
-  const R = new Room(id, { name, en, surface: 'stair', ambience: [0.13, 0.08, 0], fogNear: 6, fogFar: 20 });
+  const R = new Room(id, { name, en, surface: 'stair', ambience: [0.13, 0.08, 0], acoustics: 'stair', fogNear: 6, fogFar: 20 });
   const x0 = -1.6, x1 = 1.6, z0 = -5.5, z1 = 5.5, top = 3.0, s0 = -3.5, s1 = 2.0, n = 12, run = (s1 - s0) / n, rise = top / n, H = 6.2;
   Object.assign(R, { x0, x1, z0, z1, top, s0, s1, run, rise });
   R.floorY = (x, z) => (z <= s0 ? top : z >= s1 ? 0 : top - Math.min(n, Math.floor((z - s0) / run) + 1) * rise);
@@ -2208,6 +2511,7 @@ ROOM_DEFS.stairs = () => stairwell('stairs', '西階段', 'WEST STAIRWELL', { to
     audio.play('thud'); shake(0.7); audio.play('sting', 0, 0, 0.4);
     await say('You counted the steps on the way down, the way you always do. Ten... eleven... twelve.');
     await say('...and your foot came down on a thirteenth.');
+    await say('「……十三段目？」', { jp: true, sub: '...A thirteenth step?', voice: 'v05' });
     await say('For a moment there are hands on your shoulders, steering you, and a girl\'s voice counting the steps for you, laughing. Then nothing.');
     G.cutscene = false;
   });
@@ -2216,7 +2520,7 @@ ROOM_DEFS.stairs = () => stairwell('stairs', '西階段', 'WEST STAIRWELL', { to
 } });
 
 ROOM_DEFS.entrance = () => {
-  const R = new Room('entrance', { name: '昇降口', en: 'ENTRANCE HALL', surface: 'tile', ambience: [0.13, 0.1, 0], fogNear: 7, fogFar: 24 });
+  const R = new Room('entrance', { name: '昇降口', en: 'ENTRANCE HALL', surface: 'tile', ambience: [0.13, 0.1, 0], acoustics: 'hall', fogNear: 7, fogFar: 24 });
   const x0 = -7, x1 = 7, z0 = -5, z1 = 5, h = 3.2;
   R.floor(x0, z0, x1, 2.6, mat(0xffffff, { map: TEX.floortile }), 1.6);
   R.floor(x0, 2.6, x1, z1, mat(0x8a8078, { map: TEX.floortile }), 0.8);
@@ -2278,7 +2582,7 @@ ROOM_DEFS.entrance = () => {
 };
 
 ROOM_DEFS.staff = () => {
-  const R = new Room('staff', { name: '職員室', en: 'STAFF ROOM', surface: 'lino', ambience: [0.11, 0.03, 0], fogNear: 7, fogFar: 22 });
+  const R = new Room('staff', { name: '職員室', en: 'STAFF ROOM', surface: 'lino', ambience: [0.11, 0.03, 0], acoustics: 'room', fogNear: 7, fogFar: 22 });
   const x0 = -5, x1 = 5, z0 = -4, z1 = 4, h = 3;
   R.floor(x0, z0, x1, z1, mat(0xa0a8a0, { map: TEX.lino }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -2289,7 +2593,7 @@ ROOM_DEFS.staff = () => {
   R.wall('x', z1, x0, x1, -1, { h });
   R.door({ id: 'door', wall: 'x', at: z1, pos: -3.5, inner: -1, kind: 'slide', w: 1.1, to: 'entrance', toDoor: 'staff', snd: 'slide' });
   // two islands of steel desks, facing each other
-  for (const x of [-2.9, -1.85, -0.8]) { officeDesk(R, x, -0.35, -1); officeDesk(R, x, 0.35, 1); officeChair(R, x, -1.0, 0); officeChair(R, x, 1.0, Math.PI); }
+  for (const x of [-2.9, -1.85, -0.8]) { officeDesk(R, x, -0.35, -1); officeDesk(R, x, 0.35, 1, x !== -1.85); officeChair(R, x, -1.0, 0); officeChair(R, x, 1.0, Math.PI); }
   for (const x of [1.6, 2.65, 3.7]) { officeDesk(R, x, -0.35, -1); officeDesk(R, x, 0.35, 1, x !== 2.65); officeChair(R, x, -1.0, 0); if (x !== 2.65) officeChair(R, x, 1.0, Math.PI); }
   R.box(0.44, 0.08, 0.44, M.dark, 2.65, 0.43, 1.05); R.box(0.44, 0.5, 0.06, M.dark, 2.65, 0.51, 1.27); R.cyl(0.03, 0.03, 0.4, 5, M.steel, 2.65, 0.05, 1.05);
   // desk lamp on the night-duty teacher's desk
@@ -2322,10 +2626,11 @@ ROOM_DEFS.staff = () => {
   } });
   R.spot({ id: 'teacher', x: 2.65, z: 1.35, r: 1.1, when: () => !F.noppera_awake && !F.dead_N, use: async () => {
     await say('A teacher is sitting at the lamp-lit desk with his back to you, perfectly still.');
-    await say('「先生…？」', { jp: true, sub: '"Sensei...?"' });
+    await say('「先生…？」', { jp: true, sub: '"Sensei...?"', voice: 'v03' });
     wake('N');
   } });
   R.spot({ id: 'chair', x: 2.65, z: 1.35, r: 1.1, when: () => F.dead_N, use: () => say('A heap of dry leaves on the chair, and a smell like wet fur. Something small, a badger perhaps, scurried away under the desks.') });
+  journalDesk(R, -2.1, 0.73, 0.42, -2.2, 1.1, -0.15, 0.7);   // the empty desk, from its west corner
   R.spot({ id: 'log', x: -0.8, z: 0.8, r: 1.0, use: async () => {
     if (!F.dutylog) { F.dutylog = 1; await say('An open notebook on a desk: 「宿直日誌」, the night-duty log.'); give('dutylog'); showDoc('dutylog'); }
     else showDoc('dutylog');
@@ -2369,7 +2674,7 @@ function corridor(R, x0, x1, opts = {}) {
 }
 
 ROOM_DEFS.hall1 = () => {
-  const R = new Room('hall1', { name: '１階 廊下', en: '1F CORRIDOR', surface: 'lino', ambience: [0.14, 0.09, 0], fogNear: 6, fogFar: 22 });
+  const R = new Room('hall1', { name: '１階 廊下', en: '1F CORRIDOR', surface: 'lino', ambience: [0.14, 0.09, 0], acoustics: 'corridor', fogNear: 6, fogFar: 22 });
   const x0 = -12, x1 = 12, { z0 } = corridor(R, x0, x1, { exitAt: x0 });
   R.door({ id: 'west', wall: 'z', at: x0, pos: 0, inner: +1, kind: 'steel', w: 1.4, to: 'entrance', toDoor: 'east', snd: 'creak' });
   R.door({ id: 'infirmary', wall: 'x', at: z0, pos: -7, inner: +1, kind: 'slide', sign: '保健室', to: 'infirmary', toDoor: 'door', snd: 'slide' });
@@ -2398,7 +2703,7 @@ ROOM_DEFS.hall1 = () => {
 };
 
 ROOM_DEFS.infirmary = () => {
-  const R = new Room('infirmary', { name: '保健室', en: 'INFIRMARY', surface: 'lino', ambience: [0.1, 0.03, 0], fogNear: 6, fogFar: 20 });
+  const R = new Room('infirmary', { name: '保健室', en: 'INFIRMARY', surface: 'lino', ambience: [0.1, 0.03, 0], acoustics: 'room', fogNear: 6, fogFar: 20 });
   const x0 = -4.5, x1 = 4.5, z0 = -3.5, z1 = 3.5, h = 3;
   R.floor(x0, z0, x1, z1, mat(0xb4bcb8, { map: TEX.lino }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -2441,6 +2746,7 @@ ROOM_DEFS.infirmary = () => {
   R.cam([x0, z0, 0, z1], [-4.2, 2.75, -3.2], [2.2, 0.6, 1.6], 58);
   R.cam([0, z0, x1, z1], [4.2, 2.75, 3.1], [-2.5, 0.6, -1.8], 56);
 
+  journalDesk(R, -3.2, 0.75, -2.52, -2.7, -2.9, 0.15);   // east end, from the window side
   R.spot({ id: 'desk', x: -3.6, z: -1.9, r: 1.0, use: async () => {
     if (!F.nurselog) {
       F.nurselog = 1;
@@ -2452,7 +2758,8 @@ ROOM_DEFS.infirmary = () => {
     if (F.cabinet) return say('The medicine cabinet. Nothing left that would help tonight.');
     F.cabinet = 1;
     await say('The medicine cabinet. Bandages, gauze, and a bottle of painkillers. You take what you can carry.');
-    give('bandage', 2); give('painkiller');
+    give('bandage', F.hard ? 1 : 2); give('painkiller');
+    await hardPencil('infirmary');
   } });
   R.spot({ id: 'chart', x: x0 + 0.5, z: 0.2, r: 1.1, use: () => say('The eye chart. The rings get smaller and smaller. The bottom line isn\'t rings at all: 「みつけて」 — "Find me."') });
   R.spot({ id: 'bed1', x: 2.0, z: -2.0, r: 1.0, use: () => say('The sheets are still warm. There is a dent in the pillow, as if someone got up a moment ago.') });
@@ -2486,7 +2793,7 @@ function skeletonModel(R, x, z) {
 }
 
 ROOM_DEFS.science = () => {
-  const R = new Room('science', { name: '理科室', en: 'SCIENCE LAB', surface: 'lino', ambience: [0.11, 0.04, 0], fogNear: 7, fogFar: 22 });
+  const R = new Room('science', { name: '理科室', en: 'SCIENCE LAB', surface: 'lino', ambience: [0.11, 0.04, 0], acoustics: 'room', fogNear: 7, fogFar: 22 });
   const x0 = -5, x1 = 5, z0 = -4, z1 = 4, h = 3;
   R.floor(x0, z0, x1, z1, mat(0x9aa29c, { map: TEX.lino }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -2532,7 +2839,8 @@ ROOM_DEFS.science = () => {
     if (F.salt_lab) return say('The chemicals cabinet. Acids and alcohol. Nothing that helps against the dead.');
     F.salt_lab = 1;
     await say('The chemicals cabinet. A plastic tub labelled 塩化ナトリウム — sodium chloride. Salt is salt.');
-    give('salt', 3);
+    give('salt', F.hard ? 2 : 3);
+    await hardPencil('science');
   } });
   R.spot({ id: 'jars', x: x0 + 0.8, z: -1.2, r: 1.2, use: () => say('Specimen jars: a frog, a snake, a thing with too many fingers. In the last jar, the pale thing inside turns slowly to look at you.') });
   R.spot({ id: 'board', x: -0.5, z: z0 + 0.6, r: 1.2, use: () => say('Chemistry notes. In the corner, in a different, rounder hand: 「こっくりさん　こっくりさん　おいでください」 — the words that call Kokkuri-san.') });
@@ -2541,7 +2849,7 @@ ROOM_DEFS.science = () => {
 };
 
 ROOM_DEFS.gym = () => {
-  const R = new Room('gym', { name: '体育館', en: 'GYMNASIUM', surface: 'wood', ambience: [0.13, 0.1, 0], fogNear: 10, fogFar: 34 });
+  const R = new Room('gym', { name: '体育館', en: 'GYMNASIUM', surface: 'wood', ambience: [0.13, 0.1, 0], acoustics: 'hall', fogNear: 10, fogFar: 34 });
   const x0 = -10, x1 = 10, z0 = -8, z1 = 8, h = 7;
   R.box(20, 0.1, 16, mat(0xffffff, { map: TEX.court }), 0, -0.1, 0, { cast: false });
   R.ceiling(x0, z0, x1, z1, h);
@@ -2638,7 +2946,7 @@ ROOM_DEFS.stairs_e = () => stairwell('stairs_e', '東階段', 'EAST STAIRWELL', 
 } });
 
 ROOM_DEFS.hall3 = () => {
-  const R = new Room('hall3', { name: '３階 廊下', en: '3F CORRIDOR', surface: 'lino', ambience: [0.15, 0.11, 0], fogNear: 5, fogFar: 22 });
+  const R = new Room('hall3', { name: '３階 廊下', en: '3F CORRIDOR', surface: 'lino', ambience: [0.15, 0.11, 0], acoustics: 'corridor', fogNear: 5, fogFar: 22 });
   const x0 = -14, x1 = 14, { z0 } = corridor(R, x0, x1, { exitAt: x0 });
   R.door({ id: 'stairs_e', wall: 'z', at: x1, pos: 0, inner: -1, kind: 'steel', w: 1.2, sign: '東階段', to: 'stairs_e', toDoor: 'top', snd: 'creak' });
   R.door({ id: 'roof', wall: 'z', at: x0, pos: 0, inner: +1, kind: 'steel', w: 1.2, sign: '屋上', to: 'roof', toDoor: 'door', snd: 'creak', lock: 'roofkey',
@@ -2681,7 +2989,7 @@ ROOM_DEFS.hall3 = () => {
 };
 
 ROOM_DEFS.class3b = () => {
-  const R = new Room('class3b', { name: '３年Ｂ組', en: 'CLASSROOM 3-B', surface: 'wood', ambience: [0.1, 0.04, 0], fogNear: 6, fogFar: 20 });
+  const R = new Room('class3b', { name: '３年Ｂ組', en: 'CLASSROOM 3-B', surface: 'wood', ambience: [0.1, 0.04, 0], acoustics: 'room', fogNear: 6, fogFar: 20 });
   const x0 = -4.5, x1 = 4.5, z0 = -3.5, z1 = 3.5, h = 3;
   R.floor(x0, z0, x1, z1, mat(0xffffff, { map: TEX.wood }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -2718,9 +3026,11 @@ ROOM_DEFS.class3b = () => {
   R.spot({ id: 'kokkuri', x: 0, z: 0.75, r: 0.8, use: () => kokkuriScene(R) });
   R.spot({ id: 'kokkuri2', x: 0, z: -0.75, r: 0.8, use: () => kokkuriScene(R) });
   R.spot({ id: 'board', x: x0 + 0.6, z: 0, r: 1.4, use: () => say('The class\'s plan for the festival: 「お化け屋敷」, a haunted house. Beside it, in red chalk and a different hand: 「本物」 — "the real thing." The jobs list includes "kagome kagome."') });
+  journalDesk(R, -2.95, 0.76, -1.95, -2.4, -2.4, 0.1, 0.7);   // east end, from behind the desk
   R.spot({ id: 'tdesk', x: -3.3, z: -1.3, r: 1.0, use: async () => {
     if (F.desk3b) return say('The teacher\'s desk. Empty drawers, and a class photo turned face down.');
     F.desk3b = 1;
+    if (F.hard) { await say('In the teacher\'s drawer: a paper packet of salt from the school kitchen.'); give('salt'); await hardPencil('class3b'); return; }
     await say('In the teacher\'s drawer: a first-aid pouch, and a paper packet of salt from the school kitchen.');
     give('bandage'); give('salt', 2);
   } });
@@ -2735,7 +3045,7 @@ ROOM_DEFS.class3b = () => {
 };
 
 ROOM_DEFS.library = () => {
-  const R = new Room('library', { name: '図書室', en: 'LIBRARY', surface: 'wood', ambience: [0.1, 0.05, 0], fogNear: 6, fogFar: 22 });
+  const R = new Room('library', { name: '図書室', en: 'LIBRARY', surface: 'wood', ambience: [0.1, 0.05, 0], acoustics: 'room', fogNear: 6, fogFar: 22 });
   const x0 = -6, x1 = 6, z0 = -5, z1 = 5, h = 3.2;
   R.floor(x0, z0, x1, z1, mat(0x7a4a4a, { map: TEX.lino }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -2764,6 +3074,7 @@ ROOM_DEFS.library = () => {
   R.cam([-0.8, z0, x1, 0.6], [5.6, 2.9, 4.6], [-0.5, 0.5, -3], 58);
   R.cam([x0, -5, x1, z1], [-5.6, 3.0, 4.6], [3, 0.5, 0], 58);
 
+  journalDesk(R, 2.15, 1.04, 3.6, 2.8, 3.4, -0.2, 0.7);   // east end of the counter
   R.spot({ id: 'counter', x: 1.4, z: 3.0, r: 1.1, use: async () => {
     if (!F.yearbook) {
       F.yearbook = 1;
@@ -2772,7 +3083,7 @@ ROOM_DEFS.library = () => {
     } else await say('The 1950 yearbook, open at Class 2-A. The homeroom teacher smiles stiffly in the corner: a young man named Kuroda.');
   } });
   R.spot({ id: 'ghostbooks', x: -3.4, z: -2.0, r: 1.2, use: () => say('The shelf of 学校の怪談, school ghost stories, is the most worn in the library. Every book falls open at the same story: Toilet Hanako-san.') });
-  R.spot({ id: 'table', x: 2.9, z: -1.6, r: 1.1, use: () => say('Someone has scratched tally marks into the table, in groups of five. Forty-five groups.') });
+  R.spot({ id: 'table', x: 2.9, z: -1.6, r: 1.1, use: async () => { await say('Someone has scratched tally marks into the table, in groups of five. Forty-five groups.'); await hardPencil('library'); } });
   R.trigger([x0, -2.6, -1.4, -1.4], async () => {
     if (F.bookdrop) return;
     F.bookdrop = 1;
@@ -2785,7 +3096,7 @@ ROOM_DEFS.library = () => {
 };
 
 ROOM_DEFS.archive = () => {
-  const R = new Room('archive', { name: '書庫', en: 'ARCHIVE', surface: 'wood', ambience: [0.08, 0.02, 0], fogNear: 4, fogFar: 14 });
+  const R = new Room('archive', { name: '書庫', en: 'ARCHIVE', surface: 'wood', ambience: [0.08, 0.02, 0], acoustics: 'room', fogNear: 4, fogFar: 14 });
   const x0 = -3, x1 = 3, z0 = -2.5, z1 = 2.5, h = 2.8;
   R.floor(x0, z0, x1, z1, mat(0xffffff, { map: TEX.wood }), 2);
   R.ceiling(x0, z0, x1, z1, h);
@@ -2825,7 +3136,7 @@ ROOM_DEFS.archive = () => {
 };
 
 ROOM_DEFS.roof = () => {
-  const R = new Room('roof', { name: '屋上', en: 'ROOFTOP', surface: 'tile', ambience: [0.07, 0.22, 0], fogNear: 16, fogFar: 70 });
+  const R = new Room('roof', { name: '屋上', en: 'ROOFTOP', surface: 'tile', ambience: [0.07, 0.22, 0], acoustics: 'outdoor', fogNear: 16, fogFar: 70 });
   R.skyCol = new THREE.Color(0x060a18); R.scene.background = R.skyCol; R.scene.fog.color = R.skyCol;
   const x0 = -8, x1 = 8, z0 = -7, z1 = 7;
   R.box(16, 0.1, 14, mat(0xffffff, { map: TEX.concrete }), 0, -0.1, 0, { uv: 2, cast: false });
@@ -2879,7 +3190,8 @@ const ITEMS = {
   ofuda: { k: '札', jp: 'お札', en: 'Ofuda', weapon: true, desc: 'A shrine talisman in vermilion ink, peeled from the piano. Hold it up to a spirit at close range. Mr. Kuroda wrote that only this can send "the girl" home.' },
   onigiri: { k: '飯', jp: 'おにぎり', en: 'Onigiri', heal: 35, desc: 'A rice ball with a pickled plum inside, left over from lunch. Restores some strength.' },
   ramune: { k: '泡', jp: 'ラムネ', en: 'Ramune', heal: 25, desc: 'Ice-cold marble soda from the vending machine. Restores a little strength.' },
-  firstaid: { k: '薬', jp: '救急箱', en: 'First-aid kit', heal: 100, desc: 'Bandages, disinfectant, and a roll of tape. Restores all strength.' },
+  firstaid: { k: '薬', jp: '救急箱', en: 'First-aid kit', heal: 100, desc: 'Bandages, disinfectant, and a roll of tape. Restores all strength.',
+    descHard: 'Bandages, disinfectant, and a roll of tape. Restores a good deal of strength.' },
   staffkey: { k: '鍵', jp: '職員室の鍵', en: 'Staff room key', desc: 'A small brass key on a red tag that reads 「職員室」. It opens the staff room on the ground floor.' },
   entrancekey: { k: '錠', jp: '昇降口の鍵', en: 'Entrance key', desc: 'A heavy iron key for the padlock on the main doors.' },
   bandage: { k: '包', jp: '包帯', en: 'Bandage', heal: 20, desc: 'A roll of bandage from the infirmary. Restores a little strength.' },
@@ -2898,6 +3210,7 @@ const ITEMS = {
   kuroda: { k: '譜', jp: '黒田先生のメモ', en: 'Mr. Kuroda\'s note', doc: 'kuroda', desc: 'A warning scrawled on staff paper by the music teacher.' },
   dutylog: { k: '誌', jp: '宿直日誌', en: 'Night-duty log', doc: 'dutylog', desc: 'The log kept by the teacher on night duty.' },
   shoenote: { k: '紙', jp: '下駄箱の手紙', en: 'Note in your shoe', doc: 'shoenote', desc: 'A note someone left in your outdoor shoe.' },
+  pencil: { k: '筆', jp: '鉛筆', en: 'Pencil', count: true, desc: 'A short pencil. In Nightmare, writing in a class journal saves your progress.' },
 };
 const WEAPON_ORDER = ['hands', 'shinai', 'salt', 'ofuda'];
 
@@ -2992,8 +3305,9 @@ function has(id) { return (G.inv[id] || 0) > 0; }
 function give(id, n = 1) {
   G.inv[id] = (G.inv[id] || 0) + n;
   audio.play('pickup');
-  toast(`${ITEMS[id].jp}　${ITEMS[id].en}${n > 1 || ITEMS[id].count ? ' ×' + n : ''}`);
+  toast(`${ITEMS[id].jp}　${tr(ITEMS[id].en)}${n > 1 || ITEMS[id].count ? ' ×' + n : ''}`);
   updateHUD();
+  if (ITEMS[id].doc) syncMeta();
 }
 function take(id, n = 1) { G.inv[id] = Math.max(0, (G.inv[id] || 0) - n); if (!G.inv[id]) delete G.inv[id]; updateHUD(); }
 function equip(id) { G.equipped = id; player.m.shinai.visible = id === 'shinai'; updateHUD(); }
@@ -3011,7 +3325,7 @@ function updateHUD() {
   hud.hp.classList.toggle('low', G.hp < 30);
   const it = ITEMS[G.equipped];
   hud.equip.querySelector('b').textContent = it.k;
-  hud.equip.querySelector('.n').textContent = it.en + (it.count ? ' ×' + (G.inv[G.equipped] || 0) : '');
+  hud.equip.querySelector('.n').textContent = tr(it.en) + (it.count ? ' ×' + (G.inv[G.equipped] || 0) : '');
 }
 let toastEl = null, toastT = 0;
 function toast(text) {
@@ -3020,24 +3334,27 @@ function toast(text) {
 }
 function showRoomCard(R) {
   hud.card.querySelector('.jp').textContent = R.name;
-  hud.card.querySelector('.en').textContent = R.en;
+  hud.card.querySelector('.en').textContent = tr(R.en);
   hud.card.classList.add('on');
   clearTimeout(showRoomCard.t);
   showRoomCard.t = setTimeout(() => hud.card.classList.remove('on'), 2600);
 }
 function setPrompt(text) {
-  if (text) { hud.prompt.innerHTML = `<kbd>${isTouch ? '調' : 'E'}</kbd>${text}`; hud.prompt.classList.add('on'); }
+  setPrompt.text = text;
+  if (text) { hud.prompt.innerHTML = `<kbd>${esc(glyph('interact'))}</kbd>${esc(tr(text))}`; hud.prompt.classList.add('on'); }
   else hud.prompt.classList.remove('on');
 }
 
 // ── message box: say() blocks the game until dismissed, note() is a passing caption ──
 const msgP = hud.msg.querySelector('p');
 function esc(s) { return s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
-function say(text, o = {}) {
+function say(text, o = {}) {   // o: { jp: the line is Japanese, sub: its English subtitle, voice: a VOICE id spoken with it }
   return new Promise((resolve) => {
-    G.dialog = { text, o, shown: 0, resolve };
+    const t = dlgText(text);
+    G.dialog = { text: t, src: text, subSrc: o.sub, o: { ...o, sub: tr(o.sub) }, shown: 0, rate: textRate(t), resolve };   // src: re-translated on a language change
     hud.msg.classList.add('on');
     renderDialog();
+    if (o.voice) audio.speak(o.voice);
   });
 }
 function renderDialog() {
@@ -3050,25 +3367,27 @@ function advanceDialog() {
   const d = G.dialog; if (!d) return;
   if (d.shown < d.text.length) { d.shown = d.text.length; renderDialog(); return; }
   G.dialog = null; hud.msg.classList.remove('on');
+  if (d.o.voice) audio.stopVoice();
   d.resolve();
 }
 let noteT = 0;
-function note(text, secs = 3, jp = false) {
+function note(text, secs = 3, jp = false, sub) {   // sub: English under a Japanese line, as in say()
   if (G.dialog) return;
-  msgP.innerHTML = jp ? `<span class="jp">${esc(text)}</span>` : esc(text);
+  text = tr(text);
+  msgP.innerHTML = jp ? `<span class="jp">${esc(text)}</span>${sub ? esc(tr(sub)) : ''}` : esc(text);
   hud.msg.classList.add('on'); noteT = secs;
 }
-function ask(text, options) {
+function ask(text, options, sel = 0) {   // sel: the option selected when it opens
   return new Promise((resolve) => {
-    msgP.innerHTML = esc(text); hud.msg.classList.add('on');
+    msgP.innerHTML = esc(tr(text)); hud.msg.classList.add('on');
     const box = $('choice'), opts = box.querySelector('.opts');
     opts.innerHTML = '';
     options.forEach((o, i) => {
-      const b = document.createElement('button'); b.className = 'btn' + (i === 0 ? ' sel' : ''); b.textContent = o;
+      const b = document.createElement('button'); b.className = 'btn' + (i === sel ? ' sel' : ''); b.textContent = tr(o);
       b.onclick = () => finish(i); opts.appendChild(b);
     });
     box.hidden = false;
-    G.choice = { sel: 0, n: options.length, finish };
+    G.choice = { sel, n: options.length, finish };
     function finish(i) { box.hidden = true; G.choice = null; hud.msg.classList.remove('on'); resolve(i); }
   });
 }
@@ -3086,10 +3405,27 @@ function showDoc(id) {
 function renderDoc() {
   const d = DOCS[G.docOpen.id], pg = G.docOpen.page;
   $('doctitle').textContent = d.title;
-  $('docbody').innerHTML = d.pages[pg].map(([jp, en, cls]) => `<p class="${cls || ''}">${esc(jp)}</p><p class="en">${esc(en)}</p>`).join('');
+  $('docbody').innerHTML = d.pages[pg].map(([jp, en, cls]) => `<p class="${cls || ''}">${esc(jp)}</p><p class="en">${esc(tr(en))}</p>`).join('');
   $('docpage').textContent = d.pages.length > 1 ? `${pg + 1} / ${d.pages.length}` : '';
   $('docprev').style.visibility = pg > 0 ? 'visible' : 'hidden';
-  $('docnext').textContent = pg < d.pages.length - 1 ? '次 →' : '閉じる ×';
+  $('docbody').scrollTop = 0;
+  docNextLabel();
+}
+// long pages (big text sizes) scroll: ▼ on the next button while text is hidden below; interact/→ scroll a screen before turning the page
+const docMore = () => { const b = $('docbody'); return b.scrollTop + b.clientHeight < b.scrollHeight - 2; };
+function docNextLabel() {
+  if (!G.docOpen) return;
+  $('docnext').textContent = docMore() ? '続き ▼' : G.docOpen.page < DOCS[G.docOpen.id].pages.length - 1 ? '次 →' : '閉じる ×';
+}
+function docScroll(lines) {
+  const b = $('docbody'), lh = parseFloat(getComputedStyle(b).lineHeight) || 20;
+  b.scrollTop += lines === 'page' ? Math.max(lh, b.clientHeight - lh) : lines === '-page' ? -Math.max(lh, b.clientHeight - lh) : lines * lh;
+  docNextLabel();
+}
+function docStep(d) {
+  if (d > 0 && docMore()) docScroll('page');
+  else if (d < 0 && $('docbody').scrollTop > 0) docScroll('-page');
+  else docNav(d);
 }
 function docNav(d) {
   const doc = DOCS[G.docOpen.id], np = G.docOpen.page + d;
@@ -3099,7 +3435,8 @@ function docNav(d) {
 }
 function closeDoc() { G.docOpen = null; $('doc').hidden = true; }
 $('docprev').onclick = () => docNav(-1);
-$('docnext').onclick = () => docNav(1);
+$('docnext').onclick = () => docStep(1);
+$('docbody').addEventListener('scroll', docNextLabel);
 
 // ── inventory screen ──
 const inv = { sel: 0, list: [], ecgX: 0, ecgY: 20 };
@@ -3119,19 +3456,19 @@ function renderInv() {
   inv.list.forEach((id, i) => {
     const it = ITEMS[id], li = document.createElement('li'), b = document.createElement('button');
     b.className = i === inv.sel ? 'sel' : '';
-    b.innerHTML = `<span class="k">${it.k}</span><span>${esc(it.en)}${G.equipped === id ? ' <span class="eq">装備中</span>' : ''}</span><span class="c">${it.count ? '×' + G.inv[id] : ''}</span>`;
+    b.innerHTML = `<span class="k">${it.k}</span><span>${esc(tr(it.en))}${G.equipped === id ? ' <span class="eq">装備中</span>' : ''}</span><span class="c">${it.count ? '×' + G.inv[id] : ''}</span>`;
     b.onclick = () => { if (inv.sel === i) invAction(0); else { inv.sel = i; renderInv(); } };
     li.appendChild(b); ul.appendChild(li);
   });
   const id = inv.list[inv.sel], it = ITEMS[id];
   $('invbig').textContent = it.k;
-  $('invname').innerHTML = `${esc(it.en)}<small>${esc(it.jp)}</small>`;
-  $('invdesc').textContent = it.desc;
+  $('invname').innerHTML = `${esc(tr(it.en))}<small>${esc(it.jp)}</small>`;
+  $('invdesc').textContent = tr(F.hard && it.descHard || it.desc);
   const acts = invActs(id), box = $('invacts'); box.innerHTML = '';
-  acts.forEach(([label], i) => { const b = document.createElement('button'); b.className = 'btn'; b.textContent = label; b.onclick = () => invAction(i); box.appendChild(b); });
+  acts.forEach(([label], i) => { const b = document.createElement('button'); b.className = 'btn'; b.textContent = tr(label); b.onclick = () => invAction(i); box.appendChild(b); });
   const cond = G.hp > 60 ? ['良好 · Fine', '#6fd08c'] : G.hp > 30 ? ['注意 · Hurt', '#e8a24a'] : ['危険 · Danger', '#e0484c'];
-  $('condtxt').textContent = cond[0]; $('condtxt').style.color = cond[1];
-  $('goal').innerHTML = `<b>目的</b>${esc(currentGoal())}`;
+  $('condtxt').textContent = tr(cond[0]); $('condtxt').style.color = cond[1];
+  $('goal').innerHTML = `<b>目的</b>${esc(tr(currentGoal()))}`;
 }
 function currentGoal() {
   if (!F.loop) {
@@ -3155,7 +3492,7 @@ function invActs(id) {
   const it = ITEMS[id], a = [];
   if (it.weapon && G.equipped !== id) a.push(['装備 Equip', () => { equip(id); renderInv(); }]);
   if (it.heal) a.push(['使う Use', () => {
-    const before = G.hp; G.hp = Math.min(100, G.hp + it.heal); take(id); audio.play('pickup');
+    const before = G.hp; G.hp = Math.min(100, G.hp + (id === 'firstaid' && F.hard ? 60 : it.heal)); take(id); audio.play('pickup');
     toast(`体力 +${Math.round(G.hp - before)}`); renderInv();
   }]);
   if (it.doc) a.push(['読む Read', () => { showDoc(it.doc); }]);
@@ -3179,10 +3516,12 @@ function drawECG(dt) {
 }
 
 // ── pause ──
-function setPause(on) { G.paused = on; $('pause').hidden = !on; if (on) $('pause').querySelector('.btn').focus(); }
+function setPause(on) { G.paused = on; $('pause').hidden = !on; if (on) { pauseInfo(); $('pause').querySelector('.btn').focus(); } }
 $('pause').addEventListener('click', (e) => {
   const act = e.target.dataset?.act;
   if (act === 'resume') setPause(false);
+  if (act === 'settings') openSettings('pause');
+  if (act === 'records') openRecords('pause');
   if (act === 'restart') { setPause(false); toTitle(); }
 });
 
@@ -3200,6 +3539,9 @@ let ofudaMesh = null;
 const smooth = (t) => { t = clamp(t, 0, 1); return t * t * (3 - 2 * t); };
 const turnTo = (e, target, rate, dt) => { e.rot += clamp(angDiff(e.rot, target), -rate * dt, rate * dt); };
 const moveFwd = (e, sp, dt) => { e.x += Math.sin(e.rot) * sp * dt; e.z += Math.cos(e.rot) * sp * dt; };
+// modern controls: the camera yaw is latched while a direction is held, so reverse-angle cuts don't flip her around
+let moveLatch = null;
+function relatchMove(rot) { const mv = input.move(); moveLatch = mv.mag > 0.05 ? { a: Math.atan2(mv.x, mv.y), yaw: rot + Math.atan2(mv.x, mv.y) } : null; }
 
 function initPlayer() {
   player.m = buildStudent();
@@ -3228,12 +3570,28 @@ function updatePlayer(dt) {
   p.inv -= dt; p.hurtT = Math.max(0, p.hurtT - dt);
   let fwd = 0, turn = 0;
   if (!G.cutscene && !p.atk && G.mode === 'play') {
-    turn = (input.down('left') ? 1 : 0) - (input.down('right') ? 1 : 0);
-    if (input.down('up')) fwd = input.down('run') ? 3.1 : 1.45;
-    else if (input.down('down')) fwd = -0.85;
+    const mv = input.move(), run = input.down('run');
+    if (CONTROLS === 'modern') {
+      // camera-relative: steer toward the stick direction as seen from the latched camera yaw, no backpedal
+      if (mv.mag > 0.05) {
+        const a = Math.atan2(mv.x, mv.y);
+        if (!moveLatch || Math.abs(angDiff(moveLatch.a, a)) > 0.7) moveLatch = { yaw: camYaw(), a };
+        const target = moveLatch.yaw - a;
+        turnTo(p, target, 9, dt);
+        fwd = (run ? 3.1 : 1.45) * mv.mag * Math.max(0, Math.cos(angDiff(p.rot, target)));
+      } else moveLatch = null;
+    } else if (mv.analog) {
+      turn = -mv.x;
+      fwd = mv.y > 0 ? (run ? 3.1 : 1.45) * mv.y : -0.85 * -mv.y;
+    } else {
+      turn = (input.down('left') ? 1 : 0) - (input.down('right') ? 1 : 0);
+      if (input.down('up')) fwd = run ? 3.1 : 1.45;
+      else if (input.down('down')) fwd = -0.85;
+    }
     if (G.turnOnly) fwd = 0;
     if (p.slowT > 0) fwd *= 0.45;
   }
+  p.fwdIntent = fwd > 0.2;                         // walking forward on purpose: checkDoors reads this
   p.slowT = Math.max(0, (p.slowT || 0) - dt);
   p.rot += turn * (fwd > 2 ? 2.2 : 2.8) * dt;
   p.speed = lerp(p.speed, fwd, 1 - Math.exp(-dt * 10));
@@ -3339,6 +3697,7 @@ function resolveAttack(a) {
 function hurtPlayer(dmg, fx, fz) {
   const p = player;
   if (p.inv > 0 || p.dead || G.mode !== 'play' || G.cutscene) return false;
+  if (F.hard) dmg = Math.round(dmg * 1.5);         // Nightmare
   G.hp = Math.max(0, G.hp - dmg);
   p.inv = 0.9; p.hurtT = 0.4;
   const dx = p.x - fx, dz = p.z - fz, d = Math.hypot(dx, dz) || 1;
@@ -3367,9 +3726,10 @@ const ETYPES = {
   noppera: { hp: 6, r: 0.35, speed: 1.05, aggro: 99, dmg: 18, build: buildNoppera },
 };
 function makeEnemy(s) {
-  const T = ETYPES[s.type], m = T.build();
+  const T0 = ETYPES[s.type], hard = !!F.hard;       // Nightmare: a per-instance scaled copy (ETYPES itself is never touched)
+  const T = hard ? { ...T0, speed: T0.speed * 1.12, hp: T0.hp < 99 ? Math.ceil(T0.hp * 1.5) : T0.hp } : T0, m = T.build();
   const e = { ...s, T, m, hp: T.hp, rot: s.rot ?? rand(-3, 3), state: 'idle', t: 0, ph: rand(0, 10), cd: 1, kx: 0, kz: 0, homeX: s.x, homeZ: s.z,
-    aggro: s.aggro ?? T.aggro, lightBase: T.light || 0, stunT: 0 };
+    aggro: (s.aggro ?? T.aggro) + (hard ? 1.5 : 0), lightBase: T.light || 0, stunT: 0 };
   e.dormant = !!s.dormant && !F['awake_' + s.id];
   if (s.seated && !e.dormant) e.seated = false;
   if (s.standby && !e.dormant) e.standby = false;
@@ -3675,9 +4035,12 @@ function enterRoom(id, doorId, start) {
   player.y = R.floorY(sp.x, sp.z);
   G.enemies = [];
   for (const s of R.spawns) if (!F['dead_' + s.id] && (!s.when || s.when())) G.enemies.push(makeEnemy(s));
+  if (R.journal) R.journal.visible = !!F.hard;       // Nightmare's class journal on the teacher's desk
   R.onEnter?.(doorId);
   audio.setAmbience(...R.ambience);
+  audio.setAcoustics(R.acoustics);
   audio.setBuzz(0);
+  relatchMove(sp.rot);                 // a held direction keeps walking her into the room, not back out of the door
   updatePlayer(0);
   pickCam(true);
 }
@@ -3689,6 +4052,11 @@ function pickCam(force) {
   if (c !== G.cam) { G.cam = c; camera.fov = c.fov; camera.updateProjectionMatrix(); }
 }
 const camRight = new THREE.Vector3();
+// yaw of the active camera definition in the game's rot convention (no shake noise)
+function camYaw() {
+  const o = G.camOverride ? (typeof G.camOverride === 'function' ? G.camOverride() : G.camOverride) : G.cam;
+  return o ? Math.atan2(o.look.x - o.pos.x, o.look.z - o.pos.z) : player.rot;
+}
 function updateCamera(dt) {
   if (G.mode === 'title') {
     camera.fov = 52; camera.updateProjectionMatrix();
@@ -3715,10 +4083,11 @@ function updateCamera(dt) {
 // ── doors, spots, triggers ──
 function checkDoors(dt) {
   G.lockCd -= dt;
-  if (!input.down('up')) return;
+  if (!player.fwdIntent) return;
   for (const d of G.room.doors) {
     if (!inRect(player.x, player.z, d.rect)) continue;
     if (Math.abs(angDiff(player.rot, d.face)) > 1.1) continue;
+    if (G.dawn || G.final || (F.final_started && !F.final_done)) { throttledNote('The door won\'t move. Not until morning.'); return; }   // no leaving the roof mid-finale
     useDoor(d);
     return;
   }
@@ -3744,7 +4113,7 @@ async function useDoor(d) {
     if (d.lock === 'never' || !has(d.lock)) return bump(d.lockMsg || 'It\'s locked.');
     if (!F['unlocked_' + d.lock]) {
       F['unlocked_' + d.lock] = 1; audio.play('kick', player.x, player.z);
-      await say(d.unlockMsg || `You unlock the door with the ${ITEMS[d.lock].en.toLowerCase()}.`);
+      await say(d.unlockMsg || (() => trf('You unlock the door with the {item}.', { item: LANG === 'en' ? ITEMS[d.lock].en.toLowerCase() : tr(ITEMS[d.lock].en) })));
       d.onUnlock?.();
       if (d.stayAfterUnlock) { G.lockCd = 1.5; stepBack(); return; }
     }
@@ -3754,7 +4123,7 @@ async function useDoor(d) {
   audio.play(d.snd || 'creak', player.x, player.z);
   await fadeTo(0, 0.35);
   enterRoom(d.to, d.toDoor);
-  setCheckpoint();
+  if (!F.hard) setCheckpoint();                      // Nightmare saves only in class journals
   try { renderer.compile(G.room.scene, camera); } catch (_) {}
   const first = !F['visited_' + d.to];
   F['visited_' + d.to] = 1;
@@ -3777,16 +4146,22 @@ function nearestSpot() {
 }
 function checkTriggers() { for (const t of G.room.triggers) if (inRect(player.x, player.z, t.rect)) t.fn(); }
 
-// ── saving (checkpoint at every door, and for live page updates) ──
+// ── saving (checkpoint at every door, a class journal in Nightmare, and for live page updates) ──
 const SAVE_KEY = 'yoru-no-gakko-save-2';
-function setCheckpoint() { G.checkpoint = makeSave(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(G.checkpoint)); } catch (_) {} }
+function setCheckpoint() { G.checkpoint = makeSave(); try { localStorage.setItem(SAVE_KEY, JSON.stringify(G.checkpoint)); } catch (_) {} syncMeta(); }
+// a save where she stands (loadSave spawns at pos when door is null)
+function manualSave() {
+  G.checkpoint = { ...makeSave(), door: null, pos: { x: player.x, z: player.z, rot: player.rot } };
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(G.checkpoint)); } catch (_) {}
+  syncMeta();
+}
 function storedSave() { try { const s = localStorage.getItem(SAVE_KEY); return s ? JSON.parse(s) : null; } catch (_) { return null; } }
 function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (_) {} }
 function makeSave() {
   return JSON.parse(JSON.stringify({ room: G.roomId, door: G.doorId, pos: G.spawnPos, hp: G.hp, inv: G.inv, equipped: G.equipped, F, stats: G.stats, t: G.time - G.stats.t0 }));
 }
 function loadSave(s) {
-  F = JSON.parse(JSON.stringify(s.F)); G.inv = { ...s.inv }; G.hp = Math.max(45, s.hp);
+  F = JSON.parse(JSON.stringify(s.F)); G.inv = { ...s.inv }; G.hp = F.hard ? s.hp : Math.max(45, s.hp);   // no mercy heal in Nightmare
   G.stats = { ...s.stats }; G.stats.t0 = G.time - (s.t || 0);
   player.dead = false; resetPose(); resetAct2();
   enterRoom(s.room, s.door, s.pos);
@@ -3795,10 +4170,10 @@ function loadSave(s) {
 }
 
 // ── generic button menus (pause, game over, ending) ──
-function openMenu(el) {
+function openMenu(el, sel = 0) {
   const btns = [...el.querySelectorAll('.btn')];
-  G.menu = { btns, sel: 0 };
-  btns.forEach((b, i) => b.classList.toggle('sel', i === 0));
+  G.menu = { btns, sel };
+  btns.forEach((b, i) => b.classList.toggle('sel', i === sel));
 }
 function menuMove(d) {
   const m = G.menu; m.sel = (m.sel + d + m.btns.length) % m.btns.length;
@@ -3809,26 +4184,45 @@ function openPause() { setPause(true); openMenu($('pause')); }
 // ── title, intro, game over, ending ──
 function showTitle() {
   G.mode = 'title';
-  for (const id of ['over', 'ending', 'intro', 'inv', 'doc', 'pause', 'choice', 'map', 'dial', 'kokkuri']) $(id).hidden = true;
-  G.menu = null; G.dialog = null; G.choice = null; G.invOpen = false; G.docOpen = null; G.paused = false; G.cutscene = false;
+  for (const id of ['over', 'ending', 'intro', 'inv', 'doc', 'pause', 'choice', 'map', 'dial', 'kokkuri', 'settings', 'records']) $(id).hidden = true;
+  G.menu = null; G.settings = null; G.records = null; G.dialog = null; G.choice = null; G.invOpen = false; G.docOpen = null; G.paused = false; G.cutscene = false;
   hud.root.hidden = true; hud.msg.classList.remove('on');
   $('title').hidden = false;
-  $('title').querySelector('.keys').hidden = isTouch;
+  onInputChange();
   F = {}; G.inv = {}; G.hp = 100;
   player.dead = false; resetPose(); resetAct2();
   const save = G.hotSave || storedSave(), menu = $('titlemenu');
-  menu.innerHTML = '';
-  const addBtn = (label, fn) => { const b = document.createElement('button'); b.className = 'btn'; b.textContent = label; b.onclick = (e) => { e.stopPropagation(); fn(); }; menu.appendChild(b); };
-  if (save) addBtn('つづきから · Continue', () => startGame(save));
-  addBtn(save ? 'はじめから · New game' : 'はじめる · Begin', () => startGame(null));
-  openMenu(menu);
+  const add = (tag, cls, label) => { const b = document.createElement(tag); b.className = cls; b.dataset.t = label; b.textContent = tr(label); menu.appendChild(b); return b; };
+  const addBtn = (label, fn) => { add('button', 'btn', label).onclick = (e) => { e.stopPropagation(); fn(); }; };
+  const main = (sel = 0) => {
+    menu.innerHTML = '';
+    if (save) addBtn('つづきから · Continue', () => startGame(save));
+    if (save?.F?.hard) add('div', 'desc hard', '悪夢 · Nightmare');
+    addBtn(save ? 'はじめから · New game' : 'はじめる · Begin', difficulty);
+    if (metaAny()) addBtn('記録 · Records', () => openRecords('title'));
+    addBtn('設定 · Settings', () => openSettings('title'));
+    $('title').classList.toggle('tall', menu.children.length > 3);
+    openMenu(menu, sel);
+  };
+  const difficulty = () => {                        // New game → Normal / Nightmare
+    menu.innerHTML = '';
+    addBtn('通常 · Normal', () => startGame(null, false));
+    addBtn('悪夢 · Nightmare', () => startGame(null, true));
+    add('div', 'desc', 'Harder obake, fewer supplies, saves only in class journals.');
+    addBtn('戻る · Back', () => main(save ? 1 : 0));
+    $('title').classList.add('tall');
+    openMenu(menu);
+    G.menu.back = () => main(save ? 1 : 0);
+  };
+  main();
+  $('title').querySelector('.seal.hard').hidden = !(meta().clears.nightmare > 0);   // Nightmare has been cleared
   enterRoom('hall2', null, { x: -12.5, z: 0, rot: FACE.E });
   player.m.root.visible = false; flash.intensity = 0; playerLamp.intensity = 0;
   G.fadeTarget = 1; G.fadeSpeed = 0.7;
 }
-function toTitle() { G.hotSave = null; audio.pianoStop(false); fadeTo(0, 0.4).then(showTitle); }
+function toTitle() { G.hotSave = null; audio.pianoStop(false); audio.stopVoice(); fadeTo(0, 0.4).then(showTitle); }
 
-async function startGame(resume) {
+async function startGame(resume, hard) {
   if (G.mode !== 'title') return;
   audio.unlock();
   G.mode = 'intro'; G.menu = null;
@@ -3845,7 +4239,7 @@ async function startGame(resume) {
       ['校舎には、もう誰もいないはずだった。', 'There shouldn\'t have been anyone left in the building.'],
       ['それなのに、チャイムが鳴った。', 'And yet, the school chime began to ring.'],
     ];
-    const ps = lines.map(([jp, en]) => { const p = document.createElement('p'); p.innerHTML = `<span class="jp">${jp}</span><span class="en">${en}</span>`; el.insertBefore(p, el.querySelector('.skip')); return p; });
+    const ps = lines.map(([jp, en]) => { const p = document.createElement('p'); p.innerHTML = `<span class="jp">${jp}</span><span class="en">${tr(en)}</span>`; el.insertBefore(p, el.querySelector('.skip')); return p; });
     el.hidden = false; G.skip = false;
     audio.setAmbience(0.08, 0.06, 0);
     for (let i = 0; i < ps.length && !G.skip; i++) {
@@ -3855,6 +4249,7 @@ async function startGame(resume) {
     }
     el.hidden = true;
     F = {}; G.inv = {}; G.hp = 100;
+    if (hard) F.hard = 1;                            // Nightmare (travels in F, so in every save)
     enterRoom('classroom', null, { x: -2.55, z: 2.35, rot: FACE.N });
     F.visited_classroom = 1;
     equip('hands');
@@ -3867,7 +4262,12 @@ async function startGame(resume) {
   await fadeTo(1, 1.4);
   if (!resume) await chapterCard(1);
   showRoomCard(G.room);
-  if (!resume) { await wait(1.8); note(isTouch ? 'I have to get out of here.  (調 examine · 持 items)' : 'I have to get out of here.  (E examine · I items · Space attack)', 5); }
+  if (!resume) {
+    await wait(1.8);
+    const g = { a: glyph('interact'), b: glyph('inv'), c: glyph('attack') };
+    note('「ここから、出なきゃ……」', 6, true, trf(lastDevice === 'touch' ? 'I have to get out of here.  ({a} examine · {b} items)' : 'I have to get out of here.  ({a} examine · {b} items · {c} attack)', g));
+    audio.speak('v01');
+  }
 }
 
 function showGameOver() {
@@ -3875,12 +4275,14 @@ function showGameOver() {
   hud.root.hidden = true;
   const el = $('over');
   el.innerHTML = `<h2>おしまい</h2>
-    <p class="on"><span class="jp">あなたも、七不思議のひとつになった。</span><span class="en">You have become one of the Seven Mysteries.</span></p>
+    <p class="on"><span class="jp">あなたも、七不思議のひとつになった。</span><span class="en">${tr('You have become one of the Seven Mysteries.')}</span></p>
     <div style="display:flex;gap:calc(var(--u)*1.5);flex-wrap:wrap;justify-content:center">
-      <button class="btn" data-act="retry">Try again from the last door</button><button class="btn" data-act="title">Title screen</button></div>`;
+      <button class="btn" data-act="retry">${tr(F.hard ? 'Try again from your last save' : 'Try again from the last door')}</button><button class="btn" data-act="title">${tr('Title screen')}</button></div>`;
   el.hidden = false;
   openMenu(el);
   G.fadeTarget = 1; G.fadeSpeed = 1;
+  // the death counts even though the retry goes back to a save made before it (and so does Continue from the title)
+  if (G.checkpoint) { G.checkpoint.stats.deaths = G.stats.deaths; try { localStorage.setItem(SAVE_KEY, JSON.stringify(G.checkpoint)); } catch (_) {} }
   el.onclick = async (e) => {
     const act = e.target.dataset?.act; if (!act) return;
     el.onclick = null; G.menu = null;
@@ -3896,29 +4298,55 @@ function showGameOver() {
 async function finishGame() {
   G.mode = 'ending'; G.cutscene = true;
   setPrompt(null); bossBar(null);
+  const secs = Math.round(G.time - G.stats.t0), mm = Math.floor(secs / 60), ss = String(secs % 60).padStart(2, '0');
+  const nDocs = docCount(), trueEnd = nDocs === DOC_ORDER.length;   // every page read: 四十二人目
+  recordEnding(trueEnd ? 'true' : 'dawn', secs);                     // before the run's save goes
   clearSave();
   await fadeTo(0, 2.4);
   hud.root.hidden = true;
-  audio.setAmbience(0.03, 0.1, 0);
-  const secs = Math.round(G.time - G.stats.t0), mm = Math.floor(secs / 60), ss = String(secs % 60).padStart(2, '0');
+  audio.setAmbience(0.03, 0.1, 0); audio.setAcoustics('room'); // the epilogue is nowhere in particular: no roof wind
   const el = $('ending');
-  const lines = [
+  // [jp, en, voice?]
+  const lines = trueEnd ? [
+    ['午前五時四十分。体育倉庫の扉を開けたのは、宿直の黒田先生だった。', '5:40 a.m. The one who opened the gym storeroom was Mr. Kuroda, the teacher on night duty.'],
+    ['私は、先生に一通の手紙を渡した。四十五年間、出されなかった手紙。', 'I handed him a letter. One that had waited forty-five years to be sent.'],
+    ['先生は宛名を見て、その場に座りこんだ。「……白石さん」', 'He read the name on the envelope and sank to the floor. "...Shiraishi-san."'],
+    ['校門の外で、ユキが泣きながら私の名前を呼んでいた。', 'Outside the gate, Yuki was crying and calling my name.'],
+    ['その向こうに、髪の長い、背の高い女の人が立っていた。先生は、その人に深く頭を下げたまま、しばらく動かなかった。', 'Beyond her stood a tall woman with very long hair. Mr. Kuroda bowed to her, low, and stayed that way for a long time.'],
+    ['赤いスカートの女の子が、その人のところへ走っていった。一度だけふりかえって、手をふった。', 'A little girl in a red skirt ran to her. She looked back once, and waved.'],
+    ['学校は、昭和二十五年の学級写真を刷りなおした。四十二人の顔が、はじめてそろった。', 'The school reprinted the 1950 class photograph. For the first time, all forty-two faces were there.'],
+    ['私の名前は、橘美咲。あの子の名前は、白石小夜。私たちは、同じ教室の友だちだった。', 'My name is Tachibana Misaki. Her name is Shiraishi Sayo. We were friends, in the same classroom.', 'v15'],
+    ['「小夜ちゃん。また、あした。」', '"See you tomorrow, Sayo."', 'v16'],
+  ] : [
     ['午前五時四十分。体育倉庫の扉を開けたのは、宿直の黒田先生だった。', '5:40 a.m. The one who opened the gym storeroom was Mr. Kuroda, the teacher on night duty.'],
     ['四十五年前、彼はノックの音を聞いて、扉を開けなかった。', 'Forty-five years ago, he heard knocking behind a door, and did not open it.'],
     ['今度は、開けた。', 'This time, he did.'],
     ['校門の外で、ユキが泣きながら私の名前を呼んでいた。一晩中、探してくれていたのだと言った。', 'Outside the gate, Yuki was crying and calling my name. She said she had been looking for me all night.'],
     ['その向こうに、髪の長い、背の高い女の人が立っていた。赤いスカートの女の子が、その人のところへ走っていった。', 'Beyond her stood a tall woman with very long hair. A little girl in a red skirt ran to her, and they were gone.'],
-    ['私の名前は、橘美咲。あの子の名前は、白石小夜。', 'My name is Tachibana Misaki. Her name was Shiraishi Sayo.'],
+    ['私の名前は、橘美咲。あの子の名前は、白石小夜。', 'My name is Tachibana Misaki. Her name was Shiraishi Sayo.', 'v15'],
     ['名前を呼んでくれる人がいるかぎり、人はお化けにはならない。', 'As long as someone calls you by your name, you do not become a ghost.'],
   ];
-  el.innerHTML = lines.map(([jp, en]) => `<p><span class="jp">${jp}</span><span class="en">${en}</span></p>`).join('') +
-    `<p class="fin"><span style="font-family:var(--f-title);font-size:calc(var(--u)*4.4);letter-spacing:.3em">終</span><span class="en">Since that morning, the piano in the music room plays its song all the way to the end.</span></p>
-     <div class="stats fin" style="opacity:0;transition:opacity 1.4s"><span>Time</span><b>${mm}:${ss}</b><span>Obake laid to rest</span><b>${G.stats.purified}</b><span>Times you became a mystery</span><b>${G.stats.deaths}</b></div>
-     <button class="btn fin" data-act="again" style="opacity:0;transition:opacity 1.4s">Back to the title</button>`;
-  el.hidden = false;
+  const fin = trueEnd ? ['青嵐高校の七不思議は、あの朝から、六つになった。', 'Since that morning, Seiran High has only six mysteries.']
+    : ['', 'Since that morning, the piano in the music room plays its song all the way to the end.'];
+  el.innerHTML = lines.map(([jp, en]) => `<p><span class="jp">${jp}</span><span class="en">${tr(en)}</span></p>`).join('') +
+    `<p class="fin"><span style="font-family:var(--f-title);font-size:calc(var(--u)*4.4);letter-spacing:.3em">終</span>${fin[0] ? `<span class="jp" style="display:block">${fin[0]}</span>` : ''}<span class="en">${tr(fin[1])}</span></p>` +
+    (trueEnd ? '' : `<p class="hint-end"><span class="jp">この物語には、まだ読まれていないページがある。</span><span class="en">${tr('Some pages of this story have not been read yet.')}</span></p>`) +
+    `<div class="stats fin" style="opacity:0;transition:opacity 1.4s"><span>${tr('Difficulty')}</span><b>${tr(F.hard ? '悪夢 · Nightmare' : '通常 · Normal')}</b><span>${tr('Time')}</span><b>${mm}:${ss}</b>` +
+    `<span>${tr('資料 · Documents')}</span><b>${nDocs}/${DOC_ORDER.length}</b><span>${tr('Obake laid to rest')}</span><b>${G.stats.purified}</b><span>${tr('Times you became a mystery')}</span><b>${G.stats.deaths}</b></div>
+     <button class="btn fin" data-act="again" style="opacity:0;transition:opacity 1.4s">${tr('Back to the title')}</button>`;
+  el.hidden = false; el.dataset.end = trueEnd ? 'true' : 'dawn';
   G.fadeTarget = 1;
-  const ps = [...el.querySelectorAll('p')];
-  for (let i = 0; i < ps.length; i++) { ps[i].classList.add('on'); if (i === 2) audio.play('rin'); await wait(i === ps.length - 1 ? 1.4 : 3.4); if (i < ps.length - 2 && i % 2 === 1) ps.slice(0, i + 1).forEach((q) => { q.style.display = 'none'; }); }
+  // one line at a time, two to a page; the last page keeps its line with 終 (and the hint)
+  const ps = [...el.querySelectorAll('p')], n = lines.length;
+  ps.forEach((p) => { p.style.display = 'none'; });   // lines still to come take no room (a long ending would push the page off the top)
+  for (let i = 0; i < ps.length; i++) {
+    ps[i].style.display = ''; void ps[i].offsetWidth; ps[i].classList.add('on');
+    if (i === (trueEnd ? 6 : 2)) audio.play('rin');
+    const v = lines[i]?.[2] ? audio.speak(lines[i][2]) : null, en = lines[i]?.[1] || '';
+    await wait(i === ps.length - 1 ? 1.4 : 3.4 + Math.max(0, en.length - 80) * 0.025);
+    if (v) await v;
+    if (i < n - 1 && i % 2 === 1) ps.slice(0, i + 1).forEach((q) => { q.style.display = 'none'; });
+  }
   el.querySelectorAll('div.fin, button.fin').forEach((x) => (x.style.opacity = 1));
   openMenu(el);
   el.onclick = (e) => { if (e.target.dataset?.act === 'again') { el.onclick = null; G.menu = null; el.hidden = true; toTitle(); } };
@@ -3928,13 +4356,17 @@ async function finishGame() {
 function handleInput() {
   const hit = input.hit;
   if (hit('debug')) { const f = $('fps'); f.style.display = f.style.display === 'block' ? 'none' : 'block'; }
-  if (G.storyOpen) { if (hit('interact') || hit('attack') || hit('pause')) G.skip = true; return; }
+  if (G.settings) { settingsInput(hit); return; }   // topmost layer (over the title or the pause panel)
+  if (G.records) { recordsInput(hit); return; }
+  if (G.storyOpen) { if (hit('interact') || hit('attack') || hit('pause') || hit('back')) G.skip = true; return; }
   if (G.dial) { dialInput(hit); return; }
-  if (G.mapOpen) { if (hit('map') || hit('pause') || hit('inv') || hit('interact') || hit('attack')) closeMap(); return; }
+  if (G.mapOpen) { if (hit('map') || hit('pause') || hit('inv') || hit('back') || hit('interact') || hit('attack')) closeMap(); return; }
   if (G.docOpen) {
-    if (hit('interact') || hit('attack') || hit('right')) docNav(1);
-    else if (hit('left')) docNav(-1);
-    else if (hit('pause') || hit('inv')) closeDoc();
+    if (hit('interact') || hit('attack') || hit('right')) docStep(1);
+    else if (hit('left')) docStep(-1);
+    else if (hit('down')) docScroll(2);
+    else if (hit('up')) docScroll(-2);
+    else if (hit('pause') || hit('inv') || hit('back')) closeDoc();
     return;
   }
   if (G.choice) {
@@ -3948,7 +4380,8 @@ function handleInput() {
     if (hit('up') || hit('left')) menuMove(-1);
     if (hit('down') || hit('right')) menuMove(1);
     if (hit('interact') || hit('attack')) G.menu.btns[G.menu.sel].click();
-    if (G.paused && hit('pause')) { setPause(false); G.menu = null; }
+    if (G.paused && (hit('pause') || hit('back'))) { setPause(false); G.menu = null; }
+    else if (G.menu?.back && (hit('pause') || hit('back'))) G.menu.back();   // a submenu (title difficulty) steps back
     return;
   }
   if (G.invOpen) {
@@ -3957,12 +4390,12 @@ function handleInput() {
     if (hit('down')) { inv.sel++; renderInv(); }
     if (hit('interact') || hit('attack')) invAction(0);
     if (hit('cycle')) invAction(1);
-    if (hit('inv') || hit('pause')) closeInv();
+    if (hit('inv') || hit('pause') || hit('back')) closeInv();
     return;
   }
   switch (G.mode) {
     case 'title': if (hit('interact') || hit('attack')) startGame(); break;
-    case 'intro': if (hit('interact') || hit('attack') || hit('pause')) G.skip = true; break;
+    case 'intro': if (hit('interact') || hit('attack') || hit('pause') || hit('back')) G.skip = true; break;
     case 'play':
       if (player.dead || G.transition) break;
       if (hit('pause')) { openPause(); break; }
@@ -3977,8 +4410,19 @@ function handleInput() {
   }
 }
 $('intro').addEventListener('click', () => { G.skip = true; });
-stage.addEventListener('click', (e) => { if (G.dialog && !e.target.closest('.btn')) advanceDialog(); });
+stage.addEventListener('click', (e) => { if (G.dialog && !G.settings && !G.records && !e.target.closest('.btn')) advanceDialog(); });
 $('pause').addEventListener('click', () => { if ($('pause').hidden) G.menu = null; });
+
+// ── device / scheme dependent help: title key list, examine prompt glyph ──
+function onInputChange() {
+  const t = $('title');
+  t.querySelector('.keys:not(.pad)').hidden = lastDevice !== 'kb';
+  t.querySelector('.keys.pad').hidden = lastDevice !== 'pad';
+  t.querySelectorAll('[data-scheme]').forEach((e) => { e.hidden = e.dataset.scheme !== CONTROLS; });
+  document.querySelectorAll('[data-dev]').forEach((e) => { e.hidden = (e.dataset.dev === 'pad') !== (lastDevice === 'pad'); });
+  $('padhint').textContent = tr('🔈 Press a key or click once to enable sound');
+  if (setPrompt.text) setPrompt(setPrompt.text);
+}
 
 // ── per-frame bits ──
 function updateFlickers(dt) {
@@ -3996,25 +4440,38 @@ function updateFlickers(dt) {
     else if (f.kind === 'lamp') f.l.intensity = f.base * rand(0.95, 1);
   }
 }
-let ambT = 12, heartT = 0;
+let ambT = 12, heartT = 0, chimeT = 95, stepsT = 70, metaT = 1;
+const padHintEl = $('padhint'), tPauseEl = touchUI.querySelector('.tpause');
 function updateFrameUI(dt, playing) {
   if (G.dialog) {
     const d = G.dialog, before = Math.floor(d.shown);
-    d.shown = Math.min(d.text.length, d.shown + dt * 48);
+    d.shown = Math.min(d.text.length, d.shown + dt * d.rate);   // characters per second (textRate)
     if (Math.floor(d.shown) !== before) renderDialog();
   }
   if (noteT > 0) { noteT -= dt; if (noteT <= 0 && !G.dialog && !G.choice) hud.msg.classList.remove('on'); }
   if (toastT > 0) { toastT -= dt; if (toastT <= 0 && toastEl) toastEl.classList.remove('on'); }
   if (G.invOpen) drawECG(dt);
+  if (G.mode === 'title') { const h = !(lastDevice === 'pad' && audio.ctx?.state !== 'running'); if (padHintEl.hidden !== h) padHintEl.hidden = h; }
+  if (tPauseEl) { const h = G.mode !== 'play' && G.mode !== 'intro'; if (tPauseEl.hidden !== h) tPauseEl.hidden = h; }   // touch ⏸ only where pause/skip does something
   const s = playing && !G.cutscene && !player.dead ? nearestSpot() : null;
-  if (s !== G.lastSpot) { G.lastSpot = s; setPrompt(s ? '調べる · Examine' : null); }
+  if (s !== G.lastSpot) { G.lastSpot = s; setPrompt(s ? s.label || '調べる · Examine' : null); }
+  if (G.mode === 'play' && (metaT -= dt) <= 0) { metaT = 1; syncMeta(); }   // records pick up mysteries as their flags are set
   if (G.mode === 'play' && !player.dead) {
     if (G.hp < 30) { heartT -= dt; if (heartT <= 0) { audio.play('heart'); heartT = 0.85; } }
     ambT -= dt;
-    if (ambT <= 0) { ambT = rand(18, 40); audio.play(Math.random() < 0.6 ? 'whisper' : 'drip', player.x + rand(-5, 5), player.z + rand(-5, 5)); }
+    if (ambT <= 0 && !audio.voicePlaying()) { ambT = rand(18, 40); audio.play(Math.random() < 0.6 ? 'whisper' : 'drip', player.x + rand(-5, 5), player.z + rand(-5, 5)); }
     if (G.roomId === 'toilet' && Math.random() < dt * 0.7) audio.play('drip', -2.6, rand(-0.2, 2));
+    // far-off layers: the school chime somewhere in the building, footsteps on the floor above (indoors, never over the finale)
+    if (!G.cutscene && !G.dialog && !G.paused && !G.final && !G.dawn && !audio.voicePlaying()) {
+      const inside = G.room.acoustics !== 'outdoor';
+      if ((chimeT -= dt) <= 0) { chimeT = rand(70, 140); if (inside) audio.play('chimeFar'); }
+      if ((stepsT -= dt) <= 0) { stepsT = rand(50, 110); if (inside) audio.play('farSteps'); }
+    }
   }
 }
+
+// which menu/overlay has the input (a new value = a newly opened one; the pad re-arms direction autorepeat)
+const uiContext = () => G.settings || G.records || G.menu || G.choice || G.dial || G.docOpen || (G.invOpen && 'inv') || (G.mapOpen && 'map') || (G.storyOpen && 'story') || G.mode;
 
 // ── main loop ──
 let last = performance.now(), fpsN = 0, fpsT = 0;
@@ -4024,6 +4481,7 @@ setInterval(() => { const n = performance.now(); if (n - last > 250) frame(n); }
 function frame(now) {
   const dt = Math.min(0.05, (now - last) / 1000); last = now;
   G.time += dt;
+  input.poll(uiContext());
   handleInput();
   const playing = G.mode === 'play' && !G.paused && !G.dialog && !G.choice && !G.invOpen && !G.docOpen && !G.transition && !G.dial && !G.mapOpen && !G.storyOpen;
   if (playing || (G.mode === 'play' && player.dead)) {
@@ -4077,6 +4535,21 @@ async function boot() {
   initPlayer();
   initFx();
   equip('hands');
+  loadSettings();                      // language, volumes, brightness, text size, controls
+  // Test hook: loading the page with ?test exposes internals to the headless test harness.
+  if (/[?&]test\b/.test(location.search)) {
+    window.__t = {
+      G, player, input, audio, camera, ITEMS, DOCS, has, give, take, enterRoom, useDoor, setCheckpoint, makeSave, loadSave, startGame, showTitle, finishGame, hurtPlayer,
+      VOICE, VOICE_FILES, getRoom, setControlScheme, glyph, camYaw, showDoc,
+      post, SETTINGS, ZH, tr, trf, setLang, applySettings, loadSettings, openSettings, closeSettings, i18nMissing: trMissing, openPause, say, note,
+      meta, syncMeta, openRecords, closeRecords, manualSave, nearestSpot, docCount, DOC_ORDER, killPlayer, storedSave, useJournal, ETYPES, makeEnemy, AI,
+      get META() { return META; }, set META(v) { META = v; },
+      get LANG() { return LANG; },
+      get CONTROLS() { return CONTROLS; }, get lastDevice() { return lastDevice; },
+      get chimeT() { return chimeT; }, set chimeT(v) { chimeT = v; }, get stepsT() { return stepsT; }, set stepsT(v) { stepsT = v; },
+      get F() { return F; }, set F(v) { F = v; },
+    };
+  }
   const hot = window.claude?.hot;
   try { hot?.snapshot?.(() => (G.mode === 'play' && !player.dead ? { save: makeSave() } : {})); } catch (_) {}
   const start = (data) => { G.hotSave = data?.save || null; showTitle(); requestAnimationFrame(loop); };
@@ -4280,7 +4753,7 @@ Object.assign(AI, {
   rokuro(e, dt, c) {
     const m = e.m, H = m.head.position;
     m.root.position.y = c.fy;
-    const phase2 = e.hp <= 6;
+    const phase2 = e.hp <= e.T.hp / 2;                 // half her hp (6 of 12; 9 of 18 in Nightmare)
     const hover = () => V3(Math.sin(e.ph * 0.9) * 0.5, 2.55 + Math.sin(e.ph * 1.3) * 0.25, 0.45);
     const easeTo = (v, k) => H.lerp(v, 1 - Math.exp(-dt * k));
     switch (e.state) {
@@ -4352,22 +4825,28 @@ function bossBar(o) {
   const el = $('boss');
   if (!o) { el.hidden = true; return; }
   el.hidden = false;
-  el.querySelector('.jp').textContent = o.name; el.querySelector('.en').textContent = o.en;
+  el.querySelector('.jp').textContent = o.name; el.querySelector('.en').textContent = tr(o.en);
   el.querySelector('.bar i').style.width = clamp(o.frac, 0, 1) * 100 + '%';
 }
 let bigT = null;
 function bigText(html, secs, red) {
   const el = $('bigtext'); clearTimeout(bigT);
   if (!html) { el.classList.remove('on'); return; }
+  html = /</.test(html) ? html.replace(/<small>([\s\S]*?)<\/small>/g, (_, s) => `<small>${tr(s)}</small>`) : tr(html);   // the English is in <small>, or is the whole line
   el.innerHTML = `<div>${html}</div>`; el.classList.toggle('red', !!red); el.classList.add('on');
   if (secs) bigT = setTimeout(() => el.classList.remove('on'), secs * 1000);
 }
-async function showStory(lines, hold = 2.8) {
+async function showStory(lines, hold = 2.8) {   // lines: [jp, en, voice?]
   const el = $('intro');
   el.querySelectorAll('p').forEach((p) => p.remove());
-  const ps = lines.map(([jp, en]) => { const p = document.createElement('p'); p.innerHTML = `<span class="jp">${jp}</span><span class="en">${en}</span>`; el.insertBefore(p, el.querySelector('.skip')); return p; });
+  const ps = lines.map(([jp, en]) => { const p = document.createElement('p'); p.innerHTML = `<span class="jp">${jp}</span><span class="en">${tr(en)}</span>`; el.insertBefore(p, el.querySelector('.skip')); return p; });
   el.hidden = false; G.storyOpen = true; G.skip = false;
-  for (const p of ps) { if (G.skip) break; p.classList.add('on'); for (let k = 0; k < hold * 10 && !G.skip; k++) await wait(0.1); }
+  for (let i = 0; i < ps.length && !G.skip; i++) {
+    ps[i].classList.add('on');
+    let spoken = !lines[i][2]; if (!spoken) audio.speak(lines[i][2]).then(() => { spoken = true; });
+    for (let k = 0; (k < hold * 10 || !spoken) && k < 150 && !G.skip; k++) await wait(0.1);   // hold, and let a voiced line finish
+  }
+  if (G.skip) audio.stopVoice();
   el.hidden = true; G.storyOpen = false;
 }
 const CHAPTERS = {
@@ -4405,6 +4884,7 @@ async function loopEvent() {
   await fadeTo(1, 1.6);
   await say('You stepped through the doors, out into the night...');
   await say('...and you are standing in the entrance hall. The same shoe lockers. The same humming vending machine. Behind you, the doors are chained shut again.');
+  await say('「うそ……戻ってる……？」', { jp: true, sub: 'No... I\'m back where I started?', voice: 'v04' });
   audio.play('voice', 0, 4.5, 300);
   await say('「まだ、帰れないよ。まだ、だれもあなたをさがしてないもの」', { jp: true, sub: '"You can\'t go home yet. Nobody is even looking for you."' });
   audio.play('shutter', 7, 2.4); G.room.setShutter('east', false, true); shake(0.3);
@@ -4449,6 +4929,7 @@ async function storeroomScene(R) {
   await fadeTo(1, 0.8);
   await say('Through the gap between the doors, in a stripe of moonlight: a girl in a kendo uniform, curled up on the gym mats. Her lips are blue.');
   audio.play('sting'); shake(0.4); G.flash = 0.5;
+  await say('「……わたし？」', { jp: true, sub: '...That\'s me?', voice: 'v06' });
   await say('It\'s you.');
   G.camOverride = null; G.cam = null;
   await showStory([
@@ -4456,7 +4937,7 @@ async function storeroomScene(R) {
     ['目をつぶって、うしろの正面を当てるまで、目を開けちゃだめだって。', 'I had to keep my eyes shut until I guessed who was right behind me.'],
     ['みんなが歌いながら、私の肩を押して歩かせた。階段を、十二、十三……', 'They sang as they steered me by the shoulders. Down the stairs: twelve, thirteen...'],
     ['目を開けたら、倉庫の扉が閉まる音がした。笑い声が遠ざかっていった。', 'When I opened my eyes, the storeroom door slammed, and their laughter faded away.'],
-    ['私は、眠ってなんかいなかった。', 'I never fell asleep.'],
+    ['私は、眠ってなんかいなかった。', 'I never fell asleep.', 'v07'],
   ], 3.2);
   F.storeroom_seen = 1;
   audio.play('voice', 9, 5, 330);
@@ -4496,6 +4977,8 @@ async function okubiChase(R, door) {
   await wait(1.2);
   G.cutscene = false;
   bigText('走れ！<small>RUN — the rooftop door is at the west end</small>', 2.2);
+  note('「逃げなきゃ！」', 3, true, 'I have to run!');
+  audio.speak('v10');
 }
 
 // ── Kokkuri-san ──
@@ -4544,7 +5027,7 @@ async function kokkuriScene(R) {
   if (c !== 0) { G.cutscene = false; return; }
   const el = $('kokkuri'); buildKokkuriSheet(); el.querySelector('.answer').textContent = ''; el.hidden = false;
   await wait(0.05); coinTo('torii');
-  await say('「こっくりさん、こっくりさん、おいでください」', { jp: true, sub: '"Kokkuri-san, Kokkuri-san, please come."' });
+  await say('「こっくりさん、こっくりさん、おいでください」', { jp: true, sub: '"Kokkuri-san, Kokkuri-san, please come."', voice: 'v08' });
   audio.play('whisper'); coinTo('yes'); await wait(1.3);
   const asked = new Set();
   while (asked.size < QA.length) {
@@ -4586,7 +5069,7 @@ function openDial(code) {
       w.querySelector('.dn').onclick = () => { d.sel = i; dialTurn(-1); };
       wheels.appendChild(w); return w;
     });
-    el.querySelector('.dl-sub').textContent = 'The archive door is held by a four-digit dial padlock.';
+    el.querySelector('.dl-sub').textContent = tr('The archive door is held by a four-digit dial padlock.');
     el.querySelector('[data-act=open]').onclick = () => dialTry();
     el.querySelector('[data-act=cancel]').onclick = () => dialClose(false);
     el.hidden = false; dialRender();
@@ -4598,7 +5081,7 @@ function dialTry() {
   const d = G.dial;
   if (d.vals.join('') === d.code) { dialClose(true); return; }
   audio.play('thud');
-  $('dial').querySelector('.dl-sub').textContent = 'The shackle doesn\'t move. Wrong number.';
+  $('dial').querySelector('.dl-sub').textContent = tr('The shackle doesn\'t move. Wrong number.');
 }
 function dialClose(ok) { $('dial').hidden = true; const r = G.dial.resolve; G.dial = null; r(ok); }
 function dialInput(hit) {
@@ -4608,7 +5091,7 @@ function dialInput(hit) {
   if (hit('up')) dialTurn(1);
   if (hit('down')) dialTurn(-1);
   if (hit('interact') || hit('attack')) dialTry();
-  if (hit('pause') || hit('inv')) dialClose(false);
+  if (hit('pause') || hit('inv') || hit('back')) dialClose(false);
 }
 
 // ── the school map, from the back of the student handbook ──
@@ -4625,7 +5108,7 @@ function openMap() {
   const box = $('map').querySelector('.floors');
   box.innerHTML = MAP_FLOORS.map(([label, rooms]) => `<div class="floor"><span>${label}</span><div class="rooms">${rooms.map(([id, jp, en, x, y, w, h]) => {
     const seen = F['visited_' + id] || G.roomId === id, here = G.roomId === id;
-    return `<div class="rm${seen ? ' seen' : ''}${here ? ' here' : ''}" style="left:${x / 12 * 100}%;top:${y * 50}%;width:${w / 12 * 100}%;height:${h * 50}%">${jp}<small>${here ? '現在地 · you' : en}</small></div>`;
+    return `<div class="rm${seen ? ' seen' : ''}${here ? ' here' : ''}" style="left:${x / 12 * 100}%;top:${y * 50}%;width:${w / 12 * 100}%;height:${h * 50}%">${jp}<small>${tr(here ? '現在地 · you' : en)}</small></div>`;
   }).join('')}</div></div>`).join('');
   $('map').hidden = false; G.mapOpen = true;
 }
@@ -4642,7 +5125,7 @@ async function archiveScene(R) {
   if (c !== 0) { G.cutscene = false; return; }
   audio.play('coin'); await wait(0.7); audio.play('coin'); await wait(0.7);
   bigText('白石　小夜<small>SHIRAISHI SAYO</small>', 3.4);
-  audio.play('rin');
+  audio.play('rin'); audio.speak('v09');
   await wait(3.6);
   F.realname = 1;
   await say('Shiraishi Sayo. Not Hanako. "Hanako" is the name printed on sample forms, the name for a girl who could be anyone. They gave it to her so that her real one would be forgotten.');
@@ -4679,7 +5162,7 @@ async function finaleScene(R) {
   G.camOverride = { pos: V3(0, 7.4, 6.2), look: V3(0, 0, 0.6), fov: 55 };
   await fadeTo(1, 0.6);
   G.cutscene = false;
-  note(isTouch ? 'When the song stops, turn to face whoever is right behind you, and tap 撃.' : 'When the song stops, turn to face whoever is right behind you, and press Space.', 6);
+  note(trf(lastDevice === 'touch' ? 'When the song stops, turn to face whoever is right behind you, and tap {key}.' : 'When the song stops, turn to face whoever is right behind you, and press {key}.', { key: glyph('attack') }), 6);
 }
 function slotAngle(i) { return G.final.angle + i * TAU / 6; }
 function placeCircle() {
@@ -4731,7 +5214,7 @@ function updateFinale(dt) {
       if (f.t > 0.8) { G.fadeTarget = 1; G.fadeSpeed = 3; f.phase = 'answer'; f.t = 0; }
       break;
     case 'answer':
-      if (f.t > rd.win) finaleFail('Too slow.');
+      if (f.t > rd.win * (F.hard ? 0.85 : 1)) finaleFail('Too slow.');
       break;
   }
   placeCircle();
@@ -4747,8 +5230,10 @@ async function finaleAnswer() {
   f.busy = true; f.decoySlot = undefined;
   const calls = ['「花子さん、みーつけた！」', '「花子さん！」', '「小夜ちゃん！」'];
   bigText(calls[f.round], 2, f.round === 2);
-  audio.play(f.round === 2 ? 'rin' : 'giggle', f.R.kids[0].root.position.x, f.R.kids[0].root.position.z);
+  const v = audio.speak(['v11', 'v12', 'v13'][f.round]);
   G.flash = 0.35;
+  await Promise.race([v, wait(1.2)]);               // her shout first, then the answer from the circle
+  audio.play(f.round === 2 ? 'rin' : 'giggle', f.R.kids[0].root.position.x, f.R.kids[0].root.position.z);
   await wait(1.6);
   f.wins++;
   if (f.round === 0) await say('「みつかっちゃった。……でも、それはわたしの名前じゃないよ」', { jp: true, sub: '"You found me. ...But that isn\'t my name."' });
@@ -4801,7 +5286,7 @@ async function finaleWin() {
     R.sun.position.set(24, -4, 8); R.sun.lookAt(0, 2, 0); R.scene.add(R.sun);
   }
   G.final = null;
-  G.dawn = { R, g, t: 0, dur: 45, next: 1.2, which: 0 };
+  G.dawn = { R, g, t: 0, dur: F.hard ? 55 : 45, next: 1.2, which: 0 };
   G.camOverride = () => ({ pos: V3(player.x * 0.35, 6.2, 9.6), look: V3(player.x * 0.5, 1.4, player.z * 0.4 - 3), fov: 64 });
   G.cutscene = false;
 }
@@ -4874,6 +5359,7 @@ async function dawnEnd() {
   R.rings.forEach((r) => (r.visible = false));
   bossBar(null);
   audio.play('dawn'); G.flash = 0.7;
+  await say('「……朝だ。」', { jp: true, sub: '...It\'s morning.', voice: 'v14' });
   await say('The sun clears the rooftops of the town. Its first light falls across the skull, and the skull begins to crumble like ash in a wind.');
   await tween(3, (q) => {
     g.skull.position.y = 5.2 - q * 6; g.skull.scale.setScalar(1 - q * 0.6);
@@ -4918,6 +5404,802 @@ function updateAct2(dt, playing) {
   }
   if (G.final && playing) updateFinale(dt);
   if (G.dawn && playing && !G.cutscene) updateDawn(dt);
+}
+
+// ───────────────────────── i18n: English-keyed lookup into ZH (06g), applied at display time ─────────────────────────
+// LANG: 'en' | 'zh-Hans' | 'zh-Hant'. The Japanese half of every line stays Japanese; only the English half is translated.
+let LANG = 'en';
+const trMissing = new Set(), trDone = new Set();   // keys with no translation; strings already produced by tr/trf (never re-looked-up)
+function tr(s) {
+  if (LANG === 'en' || typeof s !== 'string' || !/[A-Za-z]/.test(s) || trDone.has(s)) return s;   // no Latin letters: pure JP (or already Chinese)
+  const e = ZH[s], t = e && ((LANG === 'zh-Hant' ? e[1] : e[0]) || e[0]);
+  if (!t) { trMissing.add(s); return s; }
+  trDone.add(t);
+  return t;
+}
+// translate a template key, then fill {name} placeholders (values are inserted as given)
+const trfSrc = new Map();   // trf output → [key, vars], so an open dialog showing it can be re-translated
+function trf(key, vars = {}) {
+  const t = tr(key).replace(/\{(\w+)\}/g, (m, n) => (n in vars ? vars[n] : m));
+  if (LANG !== 'en') trDone.add(t);
+  trfSrc.set(t, [key, vars]);
+  return t;
+}
+// typewriter speed (chars/s) from the text itself: Chinese (Han, no kana, more Han than Latin letters) carries more per glyph
+function textRate(t) {
+  const han = (t.match(/[\u3400-\u9fff]/g) || []).length;
+  return han && !/[\u3040-\u30ff]/.test(t) && han > (t.match(/[A-Za-z]/g) || []).length ? 22 : 48;
+}
+// a dialog's text: src is an English key, or a function (trf templates) re-run on a language change
+const dlgText = (src) => (typeof src === 'function' ? src() : trfSrc.has(src) ? trf(...trfSrc.get(src)) : tr(src));
+function langFromNavigator() {
+  const l = String(navigator.language || 'en');
+  if (!/^zh\b/i.test(l)) return 'en';
+  return /^zh-(TW|HK|MO)\b|Hant/i.test(l) ? 'zh-Hant' : 'zh-Hans';
+}
+function applyStaticText() { document.querySelectorAll('[data-t]').forEach((el) => { el.textContent = tr(el.dataset.t); }); }
+function setLang(l) {
+  LANG = l === 'zh-Hans' || l === 'zh-Hant' ? l : 'en';
+  document.documentElement.lang = LANG;
+  applyStaticText();
+  updateHUD();
+  onInputChange();                                 // title pad hint, examine prompt
+  // re-render whatever is open
+  const d = G.dialog;
+  if (d) { const done = d.shown >= d.text.length; d.text = dlgText(d.src); d.rate = textRate(d.text); d.o.sub = tr(d.subSrc); d.shown = done ? d.text.length : Math.min(d.shown, d.text.length); renderDialog(); }
+  if (G.invOpen) renderInv();
+  if (G.docOpen) renderDoc();
+  if (G.mapOpen) openMap();
+  if (G.settings) renderSettings();
+  if (G.records) renderRecords();
+  if (G.paused) pauseInfo();
+}
+
+// ───────────────────────── settings: brightness, volumes, text size, controls, subtitles ─────────────────────────
+const SETTINGS_KEY = 'yoru-no-gakko-settings-1';
+const SETTINGS = { bright: 0, music: 8, sound: 8, voice: 9, text: 1, controls: 'tank', lang: 'en' };
+const TEXT_SIZES = [0.9, 1, 1.15, 1.3];
+const BRIGHT_GAMMA = [1.25, 1.12, 1, 0.88, 0.76], BRIGHT_GAIN = [0.9, 0.95, 1, 1.06, 1.12];
+const SET_ROWS = [
+  { k: 'bright', label: '明るさ · Brightness', min: -2, max: 2, meter: true },
+  { k: 'music', label: '音楽 · Music', min: 0, max: 10 },
+  { k: 'sound', label: '効果音 · Sound', min: 0, max: 10 },
+  { k: 'voice', label: '声 · Voice', min: 0, max: 10 },
+  { k: 'text', label: '文字の大きさ · Text size', opts: [[0, '小 · Small'], [1, '中 · Normal'], [2, '大 · Large'], [3, '特大 · Larger']] },
+  { k: 'controls', label: '操作 · Controls', opts: [['tank', 'クラシック · Tank (classic)'], ['modern', 'モダン · Modern (camera-relative)']] },
+  { k: 'lang', label: '字幕 · Subtitles', raw: true, opts: [['en', 'English'], ['zh-Hans', '简体中文'], ['zh-Hant', '繁體中文']] },
+];
+
+function loadSettings() {
+  SETTINGS.controls = isTouch ? 'modern' : 'tank';
+  SETTINGS.lang = langFromNavigator();
+  let s = null;
+  try { s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || 'null'); } catch (_) {}
+  if (s && typeof s === 'object') for (const r of SET_ROWS) {
+    const v = s[r.k];
+    if (r.opts ? r.opts.some(([o]) => o === v) : Number.isInteger(v) && v >= r.min && v <= r.max) SETTINGS[r.k] = v;
+  }
+  applySettings();
+}
+function saveSettings() { try { localStorage.setItem(SETTINGS_KEY, JSON.stringify(SETTINGS)); } catch (_) {} }
+function applySettings() {
+  const S = SETTINGS;
+  audio.setVolume('music', S.music / 10); audio.setVolume('sound', S.sound / 10); audio.setVolume('voice', S.voice / 10);
+  post.uniforms.gamma.value = BRIGHT_GAMMA[S.bright + 2]; post.uniforms.bright.value = BRIGHT_GAIN[S.bright + 2];
+  document.documentElement.style.setProperty('--ts', TEXT_SIZES[S.text]);
+  if (S.controls !== CONTROLS) setControlScheme(S.controls);
+  if (S.lang !== LANG || document.documentElement.lang !== LANG) setLang(S.lang);
+}
+// step a row by d; wrap = cycle past the ends (interact), else numbers stop at their ends
+function settingStep(r, d, wrap) {
+  const S = SETTINGS, old = S[r.k];
+  if (r.opts) { const i = r.opts.findIndex(([o]) => o === old), n = r.opts.length; S[r.k] = r.opts[(i + d + n) % n][0]; }
+  else { let v = old + d; if (v > r.max) v = wrap ? r.min : r.max; if (v < r.min) v = wrap ? r.max : r.min; S[r.k] = v; }
+  if (S[r.k] === old) return;
+  saveSettings(); applySettings(); renderSettings();
+  audio.play('kick');
+}
+
+// ── settings screen (over the title or the pause panel) ──
+function openSettings(from) {
+  const el = $('settings'), box = el.querySelector('.rows');
+  if (!box.children.length) {
+    SET_ROWS.forEach((r, i) => {
+      const row = document.createElement('div'); row.className = 'row';
+      row.innerHTML = `<span class="lbl" data-t="${r.label}"></span><button class="arr" data-d="-1">◀</button><span class="val"></span><button class="arr" data-d="1">▶</button>`;
+      row.onclick = (e) => {   // ◀ ▶ step, the value cycles forward, the label just selects
+        e.stopPropagation(); if (!G.settings) return; G.settings.sel = i;
+        const d = +e.target.closest('[data-d]')?.dataset.d;
+        if (d) settingStep(r, d); else if (e.target.closest('.val')) settingStep(r, 1, true); else renderSettings();
+      };
+      box.appendChild(row);
+    });
+    el.querySelector('.back').onclick = (e) => { e.stopPropagation(); closeSettings(); };
+    applyStaticText();
+  }
+  G.settings = { sel: 0, from, menu: G.menu };
+  G.menu = null;
+  el.hidden = false;
+  renderSettings();
+}
+function closeSettings() {
+  const s = G.settings; if (!s) return;
+  G.settings = null; $('settings').hidden = true;
+  if (s.from === 'title' ? G.mode === 'title' : G.paused) G.menu = s.menu || null;   // back to the menu it came from, selection kept
+}
+function renderSettings() {
+  const s = G.settings; if (!s) return;
+  const el = $('settings'), rows = el.querySelectorAll('.row');
+  SET_ROWS.forEach((r, i) => {
+    const v = SETTINGS[r.k], row = rows[i], val = row.querySelector('.val');
+    row.classList.toggle('sel', s.sel === i);
+    if (r.opts) { const o = r.opts.find(([k]) => k === v); val.textContent = r.raw ? o[1] : tr(o[1]); }
+    else {
+      const n = r.max - r.min, on = v - r.min;
+      val.innerHTML = `<span class="cells">${Array.from({ length: n + (r.meter ? 1 : 0) }, (_, k) => `<i class="${(r.meter ? k <= on : k < on) ? 'on' : ''}"></i>`).join('')}</span>` + (r.meter ? '' : `<b>${v}</b>`);
+    }
+    row.querySelector('[data-d="-1"]').style.visibility = !r.opts && v <= r.min ? 'hidden' : '';
+    row.querySelector('[data-d="1"]').style.visibility = !r.opts && v >= r.max ? 'hidden' : '';
+  });
+  el.querySelector('.back').classList.toggle('sel', s.sel === SET_ROWS.length);
+}
+function settingsInput(hit) {
+  const s = G.settings, n = SET_ROWS.length + 1, r = SET_ROWS[s.sel];
+  if (hit('pause') || hit('back')) { closeSettings(); return; }
+  if (hit('up')) { s.sel = (s.sel + n - 1) % n; renderSettings(); }
+  else if (hit('down')) { s.sel = (s.sel + 1) % n; renderSettings(); }
+  else if (r && hit('left')) settingStep(r, -1);
+  else if (r && hit('right')) settingStep(r, 1);
+  else if (hit('interact') || hit('attack')) { if (r) settingStep(r, 1, true); else closeSettings(); }
+}
+
+// ───────────────────────── Chinese text: { 'English key': ['简体', '繁體'] } (Traditional only so far; Simplified falls back to English) ─────────────────────────
+const ZH = {
+  "CLASSROOM 2-A": [null, "二年A班教室"],
+  "Your desk by the window. Your bag still hangs on its hook.": [null, "你靠窗的座位。書包還掛在掛鉤上。"],
+  "Inside: the onigiri you never finished at lunch, and your student handbook, with the school map in the back.": [null, "裡面有午餐時沒吃完的飯糰，還有你的學生手冊，封底附著校園地圖。"],
+  "And your pencil case. There is one pencil left in it.": [null, "還有你的鉛筆盒。裡面只剩一枝鉛筆。"],
+  "Your desk. Scratched into the corner, very small: 「消えろ」 — \"Disappear.\" You stopped seeing it weeks ago.": [null, "你的座位。桌角刻著很小的字：「消えろ」——「消失吧」。好幾個星期前，你就已經對它視而不見了。"],
+  "Yuki's desk. A notebook pokes out of the drawer: \"The Seven Mysteries of Seiran High.\"": [null, "由紀的座位。抽屜裡露出一本筆記本：「青嵐高中七大不可思議」。"],
+  "Yuki's desk. Yuki used to save you a seat at lunch. Not since the summer.": [null, "由紀的座位。由紀以前午餐時總會幫你留位子。從夏天以後就不再了。"],
+  "A vase of white chrysanthemums on a desk. That's what a class does when a student has died. The name label on the desk reads 花子 — Hanako.": [null, "一張課桌上擺著一瓶白菊花。班上有學生過世時，大家就會這麼做。桌上的名牌寫著：花子。"],
+  "The attendance book. Beside every name for October 13th, a neat red circle: present. Beside yours, in pencil, someone has written 「いない人」 — \"the one who isn't here.\"": [null, "點名簿。十月十三日那一欄，每個名字旁都畫著工整的紅圈：出席。只有你的名字旁，有人用鉛筆寫著「いない人」——「不在這裡的人」。"],
+  "「自習」 — \"Self-study.\" In the day-duty column on the right, in careful chalk: 日直 花子. There is no Hanako in this class. Above the board, the clock has stopped at 2:13.": [null, "黑板上寫著「自習」——自主學習。右側的值日生欄裡，用粉筆工工整整地寫著：日直 花子。這個班上沒有叫花子的人。黑板上方的時鐘停在兩點十三分。"],
+  "The school gate is shut. Past it, the town is completely dark. Not one streetlight, not one window.": [null, "校門緊閉。門外的小鎮一片漆黑。沒有一盞路燈，沒有一扇亮著的窗。"],
+  "Your cubby. Textbooks and a gym bag.": [null, "你的置物格。課本和一個體育服袋。"],
+  "Your cubby. Your kendo shinai is still here in its cloth bag. The bamboo feels solid in your hands.": [null, "你的置物格。你的劍道竹刀還裝在布套裡。竹子握在手中，沉穩而踏實。"],
+  "The back door rattles open. Something glowing drifts in...": [null, "後門喀啦一聲滑開了。有什麼發著光的東西飄了進來……"],
+  "2F CORRIDOR": [null, "二樓走廊"],
+  "Classroom 2-B. The door won't move. Something heavy is leaning against it from the inside, and it is breathing.": [null, "二年B班教室。門推不動。有個沉重的東西從裡面抵著門——而且它在呼吸。"],
+  "The east stairs. A fire shutter, 防火シャッター, is pulled down across them. There is a keyhole in the control box beside it.": [null, "東側樓梯。一道防火捲門，防火シャッター，拉下來擋住了去路。旁邊的控制箱上有個鑰匙孔。"],
+  "You turn the key in the shutter's control box. With a grinding roar, the fire shutter begins to roll up into the ceiling.": [null, "你把鑰匙插進捲門的控制箱轉動。伴隨著一陣刺耳的轟鳴，防火捲門開始往天花板捲上去。"],
+  "A small cone of salt on a saucer beside the lavatory door. Morijio — salt set out to keep spirits from crossing a threshold. You scoop it into a handkerchief.": [null, "廁所門邊的小碟子上，堆著一小座圓錐形的鹽。盛鹽——擺在門口、不讓亡靈越過門檻的鹽。你用手帕把它捧了起來。"],
+  "The taps are dry. One of them drips anyway. The drops look red in the hydrant light... no, just rust.": [null, "水龍頭是乾的。其中一個卻仍在滴水。在消防栓的燈光下，水滴看起來是紅的……不，只是鐵鏽。"],
+  "The corridor notice board. 「廊下を走るな！」 \"No running in the corridor!\" Beside it, a yellowed poster: 「探しています」 \"MISSING: girl, red skirt, bobbed hair.\" The date on it is 1950.": [null, "走廊的公布欄。「廊下を走るな！」「走廊上禁止奔跑！」旁邊貼著一張泛黃的海報：「探しています」「尋人：女孩，紅裙，妹妹頭。」上面的日期是一九五〇年。"],
+  "The fire hydrant cabinet, 消火栓. Its red lamp is the only warm light on this floor.": [null, "消防栓箱，消火栓。它的紅燈是這層樓唯一溫暖的光。"],
+  "Lost-and-found umbrellas. Nobody ever comes back for them. They say an umbrella left for a hundred years opens its eye.": [null, "失物招領的雨傘。從來沒有人回來拿。聽說一把傘被遺忘一百年，就會睜開眼睛。"],
+  "Across the courtyard, the other wing of the school. In one window on the third floor, a paper lantern is bobbing. There is no one holding it.": [null, "中庭對面，是學校的另一棟校舍。三樓的一扇窗裡，有一盞紙燈籠在晃動。沒有人提著它。"],
+  "GIRLS' LAVATORY": [null, "女生廁所"],
+  "For an instant, in the mirror, a small girl in a red skirt is standing right behind you.": [null, "有那麼一瞬間，鏡子裡，一個穿紅裙的小女孩就站在你正後方。"],
+  "You spin around. The lavatory is empty.": [null, "你猛然回頭。廁所裡空無一人。"],
+  "Your own face, pale and tired. Only yours.": [null, "你自己的臉，蒼白而疲憊。只有你。"],
+  "The first stall. Empty. The toilet-paper roll is turning slowly, all by itself.": [null, "第一間隔間。空的。捲筒衛生紙正自己緩緩轉動著。"],
+  "The second stall. Empty. On the partition, in red marker: 「三回ノック」 — \"Knock three times.\"": [null, "第二間隔間。空的。隔板上用紅色麥克筆寫著：「三回ノック」——「敲三下」。"],
+  "The third stall. Only an ordinary toilet now, and the smell of old water.": [null, "第三間隔間。現在只是普通的馬桶，還有一股陳年積水的氣味。"],
+  "The third stall stands open. Cold air pours out of it like breath.": [null, "第三間隔間的門敞開著。冷風從裡面湧出，像是呼出的氣息。"],
+  "The third stall. The door is shut tight and cold air seeps from beneath it. Knock three times?": [null, "第三間隔間。門緊緊關著，冷氣從門縫底下滲出來。要敲三下嗎？"],
+  "Knock": [null, "敲門"],
+  "Leave it": [null, "不要管它"],
+  "\"Hanako-san... will you come out and play?\"": [null, "「花子……出來一起玩好嗎？」"],
+  "「はーい」 ...Ye-es...": [null, "「はーい」……來——了……"],
+  "A small frosted window, too high to climb out of. Moonlight comes through it the colour of skimmed milk.": [null, "一扇小小的毛玻璃窗，高得爬不出去。透進來的月光，是脫脂牛奶的顏色。"],
+  "A small brass key on a red tag, lying where Hanako vanished. The tag reads 「職員室」 — Staff Room.": [null, "花子消失的地方，躺著一把繫著紅色吊牌的小黃銅鑰匙。吊牌上寫著「職員室」——教職員室。"],
+  "MUSIC ROOM": [null, "音樂教室"],
+  "The piano is silent now. Scratched into the lid: 「最後まで弾くな」 \"Never play it to the end.\"": [null, "鋼琴現在安靜了。琴蓋上刻著：「最後まで弾くな」「絕對不要彈到最後」。"],
+  "The piano is playing. The keys sink and rise under no one's fingers, over and over, the same children's tune.": [null, "鋼琴正在彈奏。琴鍵在沒有任何手指的情況下沉下又彈起，一遍又一遍，都是同一首童謠。"],
+  "Pasted inside the open lid is a strip of old paper. Reach in and take it?": [null, "掀開的琴蓋內側貼著一條舊紙片。要伸手進去拿嗎？"],
+  "Take it": [null, "拿走"],
+  "An ofuda: a shrine talisman inked in vermilion. As it comes away, the piano slams one enormous chord and goes silent.": [null, "一張符咒：用朱墨寫成的神社護符。紙片剝落的瞬間，鋼琴猛然砸出一個巨大的和弦，隨即歸於沉寂。"],
+  "In the corner, the old red umbrella opens a single eye.": [null, "角落裡，那把舊紅傘睜開了一隻眼睛。"],
+  "Beethoven, Bach, Mozart, Chopin, Taki Rentarō. Every pair of painted eyes is glowing red, and every one is fixed on you.": [null, "貝多芬、巴哈、莫札特、蕭邦、瀧廉太郎。每一雙畫出來的眼睛都泛著紅光，全都直直盯著你。"],
+  "The composers: Beethoven, Bach, Mozart, Chopin and Taki Rentarō. The legend says their eyes follow you around the room. They don't. Probably.": [null, "作曲家們：貝多芬、巴哈、莫札特、蕭邦，還有瀧廉太郎。傳說他們的眼睛會跟著你在教室裡移動。其實沒有。大概吧。"],
+  "The music teacher's desk. Mr. Kuroda's handwriting on a sheet of staff paper, pressed hard enough to tear it.": [null, "音樂老師的辦公桌。一張五線譜上是黑田老師的筆跡，下筆重得幾乎把紙劃破。"],
+  "Mr. Kuroda's desk. A metronome ticks once, then stops.": [null, "黑田老師的辦公桌。節拍器滴答響了一聲，便停了。"],
+  "Another cone of morijio just inside the door. Someone was very worried about what might come through it.": [null, "門內側又有一座盛鹽。有人非常擔心會有什麼東西從這扇門進來。"],
+  "A melody in chalk on the staff lines. Underneath: 「最後まで弾いてはいけない」 \"It must never be played to the end.\"": [null, "五線譜上用粉筆寫著一段旋律。下方寫著：「最後まで弾いてはいけない」「絕對不可以彈到最後」。"],
+  "An old red paper umbrella, a wagasa, leaning in the corner. Its paper looks almost warm.": [null, "一把舊的紅色紙傘——和傘——靠在角落。傘紙看起來幾乎是溫熱的。"],
+  "WEST STAIRWELL": [null, "西側樓梯間"],
+  "You counted the steps on the way down, the way you always do. Ten... eleven... twelve.": [null, "下樓時你數著階梯，就像你一向做的那樣。十……十一……十二。"],
+  "...and your foot came down on a thirteenth.": [null, "……然後你的腳踩上了第十三階。"],
+  "...A thirteenth step?": [null, "……第十三階？"],
+  "For a moment there are hands on your shoulders, steering you, and a girl's voice counting the steps for you, laughing. Then nothing.": [null, "有那麼一刻，有雙手搭在你的肩上，推著你往前走，還有一個女孩的聲音替你數著階梯，笑著。然後，什麼都沒有了。"],
+  "Through the window, the moon hangs over the sports ground. Something pale is standing in the middle of the running track, facing the school.": [null, "窗外，月亮懸在操場上空。有個蒼白的東西站在跑道正中央，面向著學校。"],
+  "ENTRANCE HALL": [null, "玄關"],
+  "The staff room. Locked. On school days the day-duty student, the 日直, carries this key.": [null, "教職員室。鎖著。平常上課的日子，這把鑰匙由值日生——日直——保管。"],
+  "A fire shutter, 防火シャッター, has been pulled down across the east passage. It won't move an inch.": [null, "一道防火捲門，防火シャッター，拉下來擋住了東側通道。它紋風不動。"],
+  "The chain is back, wound three times through the handles. The doors won't open. Not until morning.": [null, "鐵鍊又回來了，在門把之間纏了三圈。門打不開。天亮之前都打不開。"],
+  "The main doors are chained through their handles. A heavy padlock holds the chain. The key will be in the staff room.": [null, "大門的門把被鐵鍊纏住，鐵鍊上掛著一把沉重的大鎖。鑰匙應該在教職員室。"],
+  "You fit the entrance key into the padlock. It turns stiffly... and the chain slithers to the floor.": [null, "你把玄關鑰匙插進大鎖。鑰匙卡卡地轉動……鐵鍊嘩啦一聲滑落到地上。"],
+  "Your shoe locker, labelled 橘. Your outdoor shoes aren't in it. Someone has hidden them again. In their place is a folded note in a child's handwriting.": [null, "你的鞋櫃，名牌寫著「橘」。你的外出鞋不在裡面。又有人把它們藏起來了。原本放鞋的地方，擺著一張折起來的紙條，上面是小孩子的字跡。"],
+  "Your empty shoe locker. If you get out, you'll walk home in your indoor shoes. You have before.": [null, "你空蕩蕩的鞋櫃。如果你出得去，就得穿著室內鞋走回家。你以前也這樣走過。"],
+  "A vending machine, still humming. You find a ¥100 coin in your skirt pocket. Clunk. A bottle of ramune rolls out, ice cold.": [null, "一台自動販賣機，還在嗡嗡作響。你在裙子口袋裡摸到一枚一百圓硬幣。喀咚。一瓶冰涼的彈珠汽水滾了出來。"],
+  "The machine hums. Every button now reads 売切 — \"sold out\".": [null, "機器嗡嗡作響。現在每個按鈕上都顯示著「売切」——「售完」。"],
+  "The school newspaper. A headline from 1950 has been pinned over this month's: 「女子生徒、校内で行方不明」 \"Schoolgirl goes missing inside school building.\"": [null, "校刊。一則一九五〇年的頭條被釘在這個月的校刊上面：「女子生徒、校内で行方不明」「女學生於校內失蹤」。"],
+  "STAFF ROOM": [null, "教職員室"],
+  "The key cabinet. One hook is empty now.": [null, "鑰匙櫃。現在有一個掛鉤空了。"],
+  "A glass-fronted key cabinet. On the hook labelled 「昇降口」, Entrance, the key is still hanging. You take it.": [null, "一個玻璃門的鑰匙櫃。標著「昇降口」——玄關——的掛鉤上，鑰匙還掛著。你把它拿了下來。"],
+  "Behind you, a chair creaks.": [null, "你身後，有張椅子嘎吱作響。"],
+  "A teacher is sitting at the lamp-lit desk with his back to you, perfectly still.": [null, "一位老師坐在檯燈照亮的辦公桌前，背對著你，一動也不動。"],
+  "\"Sensei...?\"": [null, "「老師……？」"],
+  "A heap of dry leaves on the chair, and a smell like wet fur. Something small, a badger perhaps, scurried away under the desks.": [null, "椅子上是一堆乾枯的落葉，還有一股像濕毛皮的氣味。有個小東西——也許是隻貉——從辦公桌底下竄走了。"],
+  "An open notebook on a desk: 「宿直日誌」, the night-duty log.": [null, "桌上攤著一本筆記本：「宿直日誌」，值夜日誌。"],
+  "October's calendar. 「13（金）宿直：黒田」 \"Fri 13th, night duty: Kuroda.\" Across the corner, in red: 「顔を見るな」 \"Don't look at his face.\"": [null, "十月的月曆。「13（金）宿直：黒田」——「十三號星期五，值夜：黑田。」角落裡用紅筆斜斜寫著：「顔を見るな」——「別看他的臉。」"],
+  "A first-aid kit, 救急箱. You take it.": [null, "一個急救箱，救急箱。你把它帶走。"],
+  "A computer, still on. 「C:\\>_」 The cursor blinks as if it's waiting for you to type your name.": [null, "一台電腦，還開著。「C:\\＞_」游標一閃一閃，像是在等你輸入自己的名字。"],
+  "1F CORRIDOR": [null, "一樓走廊"],
+  "The science lab. Locked. The school nurse keeps the spare key to the lab, because of the chemicals.": [null, "理化實驗室。上了鎖。因為有化學藥品，備用鑰匙由保健老師保管。"],
+  "The doors to the gymnasium passage are locked. A note is taped to them: 「体育館の鍵 → 理科室」 \"Gym key: science lab.\"": [null, "通往體育館的走廊門上了鎖。門上貼著一張紙條：「体育館の鍵 → 理科室」——「體育館鑰匙：理化實驗室。」"],
+  "In the courtyard stands the bronze statue of Ninomiya Kinjirō, reading as he carries his firewood. This afternoon he faced the gate. Now he is facing you.": [null, "中庭立著二宮金次郎的銅像，背著柴薪，邊走邊讀書。今天下午他還面向校門。現在，他面向著你。"],
+  "You press the drinking-fountain tap. Nothing, then a gurgle, then a thin stream of water. It is warm, like someone's hand.": [null, "你按下飲水機的開關。先是一片寂靜，接著咕嚕一聲，流出一道細細的水。水是溫的，像某人的手。"],
+  "The nurse's newsletter, 保健だより: \"If something is wrong, tell a teacher!\" Underneath, very small, in pencil: 「言ったよ」 — \"I did.\"": [null, "保健室的通訊，保健だより：「身體不舒服的話，要告訴老師喔！」底下用鉛筆寫著很小的字：「言ったよ」——「我說了。」"],
+  "INFIRMARY": [null, "保健室"],
+  "The nurse's desk. Under the blotter: an old record book with a brittle brown cover, and a key on a tag marked 理科室, Science Lab.": [null, "保健老師的辦公桌。墊板底下壓著一本封面發脆、泛褐的舊紀錄簿，還有一把鑰匙，吊牌上寫著「理科室」——理化實驗室。"],
+  "The nurse's desk. The old record book's last page is dated 1950. After that, nothing is written in it for forty-five years.": [null, "保健老師的辦公桌。舊紀錄簿的最後一頁寫著一九五〇年。在那之後，整整四十五年，什麼也沒寫。"],
+  "The medicine cabinet. Nothing left that would help tonight.": [null, "藥品櫃。已經沒有什麼今晚派得上用場的東西了。"],
+  "The medicine cabinet. Bandages, gauze, and a bottle of painkillers. You take what you can carry.": [null, "藥品櫃。繃帶、紗布，還有一瓶止痛藥。你拿走了帶得動的。"],
+  "The eye chart. The rings get smaller and smaller. The bottom line isn't rings at all: 「みつけて」 — \"Find me.\"": [null, "視力表。圓環愈來愈小。最底下那一行根本不是圓環：「みつけて」——「找到我。」"],
+  "The sheets are still warm. There is a dent in the pillow, as if someone got up a moment ago.": [null, "床單還是溫的。枕頭上有個凹痕，像是有人剛剛才起身。"],
+  "Long black hairs on the pillow. Very, very long. They trail off the bed and across the floor, toward the door.": [null, "枕頭上有幾根黑色的長髮。很長，非常長。一路從床上垂下，橫過地板，延伸到門口。"],
+  "You step onto the scale. The needle does not move at all.": [null, "你站上體重計。指針一動也不動。"],
+  "SCIENCE LAB": [null, "理化實驗室"],
+  "The skeleton grins at you. Its jaw is wired shut.": [null, "骨骼標本對著你咧嘴笑。它的下顎用鐵絲綁死了。"],
+  "The skeleton model. Hanging from its finger bones on a loop of red string: a key tagged 体育館, Gymnasium.": [null, "骨骼模型。指骨上勾著一圈紅繩，吊著一把鑰匙，吊牌上寫著「体育館」——體育館。"],
+  "Across the room, something plastic creaks.": [null, "房間另一頭，有什麼塑膠的東西嘎吱作響。"],
+  "The chemicals cabinet. Acids and alcohol. Nothing that helps against the dead.": [null, "化學藥品櫃。酸液和酒精。沒有一樣對付得了死者。"],
+  "The chemicals cabinet. A plastic tub labelled 塩化ナトリウム — sodium chloride. Salt is salt.": [null, "化學藥品櫃。一個塑膠桶，標籤寫著「塩化ナトリウム」——氯化鈉。鹽就是鹽。"],
+  "Specimen jars: a frog, a snake, a thing with too many fingers. In the last jar, the pale thing inside turns slowly to look at you.": [null, "標本罐：一隻青蛙、一條蛇、一個手指多得不對勁的東西。最後一個罐子裡，那蒼白的東西慢慢轉過來看著你。"],
+  "Chemistry notes. In the corner, in a different, rounder hand: 「こっくりさん　こっくりさん　おいでください」 — the words that call Kokkuri-san.": [null, "化學筆記。角落裡有另一種字跡，圓圓的：「こっくりさん　こっくりさん　おいでください」——召喚狐狗狸的咒語。"],
+  "GYMNASIUM": [null, "體育館"],
+  "The equipment storeroom. A padlock hangs on the outside of the door.": [null, "器材倉庫。門外掛著一把掛鎖。"],
+  "The stage. A single folding chair sits in the middle of it, facing the empty hall, as if someone had been made to sit there and be looked at.": [null, "舞台。正中央擺著一張摺疊椅，面向空蕩蕩的館內，彷彿曾有人被迫坐在那裡，任人注視。"],
+  "A basket of volleyballs. One of them is rolling slowly back and forth, all on its own.": [null, "一籃排球。其中一顆正緩緩地前後滾動，沒有人碰它。"],
+  "Where the nurse fell, a small steel key on a ring stamped 防火シャッター 東階段 — Fire shutter, East stairs.": [null, "保健老師倒下的地方，有一把小鋼製鑰匙，鑰匙圈上刻著「防火シャッター 東階段」——東側樓梯防火鐵捲門。"],
+  "EAST STAIRWELL": [null, "東側樓梯間"],
+  "Something is bouncing down the stairs toward you. One step at a time.": [null, "有什麼東西正沿著樓梯朝你彈跳下來。一階，又一階。"],
+  "A child's temari ball, wound with red and gold thread. It is warm, as if someone was holding it a moment ago.": [null, "一顆孩子玩的手鞠球，纏著紅色與金色的絲線。它是溫的，像是有人剛剛才握過。"],
+  "3F CORRIDOR": [null, "三樓走廊"],
+  "The door to the rooftop stairs. Locked, with a rusted sign: 「立入禁止」 — \"No entry.\"": [null, "通往頂樓的樓梯門。上了鎖，掛著生鏽的牌子：「立入禁止」——「禁止進入。」"],
+  "Classroom 3-A. Behind the door, many children are chanting very softly: 「かごめ、かごめ」. When you touch the handle, they stop.": [null, "三年A班教室。門後，許多孩子正輕聲唱著：「かごめ、かごめ」。你一碰門把，歌聲就停了。"],
+  "Self-portraits by the first-year class. On every one of them, the face has been scribbled out in black crayon.": [null, "一年級學生的自畫像。每一張的臉，都被黑色蠟筆塗掉了。"],
+  "From up here you can see the whole town. Every window is dark. Only the school is awake.": [null, "從這裡可以望見整座小鎮。每一扇窗都是暗的。只有學校還醒著。"],
+  "CLASSROOM 3-B": [null, "三年B班教室"],
+  "The class's plan for the festival: 「お化け屋敷」, a haunted house. Beside it, in red chalk and a different hand: 「本物」 — \"the real thing.\" The jobs list includes \"kagome kagome.\"": [null, "班上的校慶企劃：「お化け屋敷」，鬼屋。旁邊用紅色粉筆、換了一種字跡寫著：「本物」——「真的。」工作分配表上還列著「籠中鳥」。"],
+  "The teacher's desk. Empty drawers, and a class photo turned face down.": [null, "老師的講桌。抽屜是空的，還有一張翻面蓋著的班級合照。"],
+  "In the teacher's drawer: a paper packet of salt from the school kitchen.": [null, "老師的抽屜裡：一小包學校廚房的紙包鹽。"],
+  "In the teacher's drawer: a first-aid pouch, and a paper packet of salt from the school kitchen.": [null, "老師的抽屜裡：一個急救包，還有一小包學校廚房的紙包鹽。"],
+  "LIBRARY": [null, "圖書室"],
+  "On the lending counter, a 1950 yearbook lies open, as if someone had just been reading it.": [null, "借閱櫃台上，一本一九五〇年的畢業紀念冊攤開著，彷彿有人剛才還在讀。"],
+  "The 1950 yearbook, open at Class 2-A. The homeroom teacher smiles stiffly in the corner: a young man named Kuroda.": [null, "一九五〇年的畢業紀念冊，翻在二年A班那一頁。角落裡，班導師僵硬地笑著：一個名叫黑田的年輕男子。"],
+  "The shelf of 学校の怪談, school ghost stories, is the most worn in the library. Every book falls open at the same story: Toilet Hanako-san.": [null, "「学校の怪談」——校園鬼故事——那一格書架，是整間圖書室裡翻得最舊的。每一本書都會自己翻開到同一個故事：廁所裡的花子。"],
+  "Someone has scratched tally marks into the table, in groups of five. Forty-five groups.": [null, "有人在桌面上刻了計數的記號，五條一組。一共四十五組。"],
+  "Behind you, a book slides off the shelf and falls open at a page of children's songs: 「うしろの正面だあれ」 — \"Who is right behind you?\"": [null, "你身後，一本書從書架上滑落，翻開在一頁童謠上：「うしろの正面だあれ」——「站在你正後方的是誰？」"],
+  "ARCHIVE": [null, "書庫"],
+  "In a biscuit tin on the shelf: a letter, sealed and never sent. It is addressed to 「白石家」 — the Shiraishi family.": [null, "架上的餅乾鐵盒裡：一封封好卻從未寄出的信。收件人是「白石家」——白石家。"],
+  "On a nail by the boxes hangs a key tagged 屋上, Rooftop. Your hand stops short of it, as if you haven't earned it yet. The record book on the table is open.": [null, "箱子旁的釘子上掛著一把鑰匙，吊牌寫著「屋上」——頂樓。你的手在碰到它之前停住了，彷彿你還沒有資格拿。桌上的紀錄簿攤開著。"],
+  "On a nail by the boxes: a key tagged 屋上 — Rooftop — and tied to it, a child's red hair ribbon.": [null, "箱子旁的釘子上：一把吊牌寫著「屋上」——頂樓——的鑰匙，上面綁著一條孩子的紅色髮帶。"],
+  "Somewhere below, something enormous shifts its weight. The whole school creaks.": [null, "樓下某處，有什麼巨大的東西挪動了一下身子。整座學校都嘎吱作響。"],
+  "ROOFTOP": [null, "頂樓"],
+  "Bare hands": [null, "空手"],
+  "A front kick from kendo footwork. It barely troubles a spirit, but it is better than nothing.": [null, "劍道步法中的正面踢擊。對靈體幾乎沒有作用，但總比什麼都沒有好。"],
+  "Shinai": [null, "竹刀"],
+  "Your bamboo kendo sword. Hard enough to knock a haunted object senseless, but it passes straight through true spirits.": [null, "你的劍道竹刀。夠硬，足以把作祟的物品打得失去作用，但會直接穿過真正的靈體。"],
+  "Purifying salt": [null, "淨鹽"],
+  "Salt from a morijio pile. Thrown at a spirit it burns: blue flames go out, and stronger ghosts are stunned for a few seconds. Each throw uses one handful.": [null, "取自盛鹽堆的鹽。撒向靈體會灼燒它們：鬼火會熄滅，較強的鬼魂會暈眩數秒。每次投擲用掉一把。"],
+  "Ofuda": [null, "符咒"],
+  "A shrine talisman in vermilion ink, peeled from the piano. Hold it up to a spirit at close range. Mr. Kuroda wrote that only this can send \"the girl\" home.": [null, "用朱墨寫成的神社護符，從鋼琴上撕下來的。在近距離對著靈體舉起。黑田老師寫過，只有它能送「那個女孩」回家。"],
+  "Onigiri": [null, "飯糰"],
+  "A rice ball with a pickled plum inside, left over from lunch. Restores some strength.": [null, "午餐剩下的飯糰，裡面包著梅干。恢復一些體力。"],
+  "Ramune": [null, "彈珠汽水"],
+  "Ice-cold marble soda from the vending machine. Restores a little strength.": [null, "販賣機買的冰涼彈珠汽水。恢復少許體力。"],
+  "First-aid kit": [null, "急救箱"],
+  "Bandages, disinfectant, and a roll of tape. Restores all strength.": [null, "繃帶、消毒水和一捲膠帶。恢復全部體力。"],
+  "Bandages, disinfectant, and a roll of tape. Restores a good deal of strength.": [null, "繃帶、消毒水和一捲膠帶。恢復大量體力。"],
+  "Staff room key": [null, "教職員室鑰匙"],
+  "A small brass key on a red tag that reads 「職員室」. It opens the staff room on the ground floor.": [null, "一把小小的黃銅鑰匙，繫著紅色吊牌，上面寫著「職員室」。可以打開一樓的教職員室。"],
+  "Entrance key": [null, "玄關鑰匙"],
+  "A heavy iron key for the padlock on the main doors.": [null, "一把沉重的鐵鑰匙，用來開正門的掛鎖。"],
+  "Bandage": [null, "繃帶"],
+  "A roll of bandage from the infirmary. Restores a little strength.": [null, "保健室拿來的一捲繃帶。恢復少許體力。"],
+  "Painkillers": [null, "止痛藥"],
+  "A strip of painkillers. Restores a good deal of strength.": [null, "一排止痛藥。恢復大量體力。"],
+  "Student handbook": [null, "學生手冊"],
+  "Your student handbook. The rules nobody follows, and a floor map of the school in the back. (M)": [null, "你的學生手冊。裡面寫著沒人遵守的校規，封底附有學校的樓層地圖。（M）"],
+  "Science lab key": [null, "理化實驗室鑰匙"],
+  "A spare key from the nurse's desk, on a tag marked 理科室.": [null, "從保健老師辦公桌拿來的備用鑰匙，吊牌上寫著「理科室」。"],
+  "Gym key": [null, "體育館鑰匙"],
+  "A key on a loop of red string, taken from the skeleton's fingers. Tagged 体育館.": [null, "繫在一圈紅繩上的鑰匙，從骨骼標本的指間取下。吊牌寫著「体育館」。"],
+  "Fire shutter key": [null, "防火鐵捲門鑰匙"],
+  "A small steel key stamped 防火シャッター 東階段: the fire shutter over the east stairs, 2F.": [null, "一把小鋼製鑰匙，刻著「防火シャッター 東階段」：二樓東側樓梯的防火鐵捲門。"],
+  "Rooftop key": [null, "頂樓鑰匙"],
+  "A key tagged 屋上, with a child's red hair ribbon tied through the ring.": [null, "一把掛著「屋上」牌子的鑰匙，鑰匙圈上繫著一條小孩子的紅色髮帶。"],
+  "Infirmary record, 1950": [null, "保健室日誌，1950年"],
+  "The school nurse's record book from 1950.": [null, "1950年的保健室護理老師紀錄簿。"],
+  "Class photographs, 1950": [null, "班級照片，1950年"],
+  "Class 2-A, 1950. One face scratched out.": [null, "1950年，二年A班。其中一張臉被刮掉了。"],
+  "Kokkuri-san's answers": [null, "狐狗狸的回答"],
+  "What the coin spelled out, copied into your handbook.": [null, "硬幣拼出來的字，你抄進了學生手冊裡。"],
+  "The 1950 list": [null, "1950年的名單"],
+  "The original seven mysteries, written by children in 1950.": [null, "最初的七大不可思議，由1950年的孩子們寫下。"],
+  "Kuroda's letter": [null, "黑田老師的信"],
+  "A letter to the Shiraishi family, sealed and never sent.": [null, "寫給白石家的信，封好了，卻始終沒有寄出。"],
+  "The Seven Mysteries": [null, "七大不可思議"],
+  "Yuki's notebook of school ghost stories.": [null, "由紀記錄學校鬼故事的筆記本。"],
+  "Mr. Kuroda's note": [null, "黑田老師的字條"],
+  "A warning scrawled on staff paper by the music teacher.": [null, "音樂老師潦草寫在五線譜紙上的警告。"],
+  "Night-duty log": [null, "值夜日誌"],
+  "The log kept by the teacher on night duty.": [null, "值夜老師留下的紀錄。"],
+  "Note in your shoe": [null, "鞋子裡的字條"],
+  "A note someone left in your outdoor shoe.": [null, "有人塞在你室外鞋裡的字條。"],
+  "Pencil": [null, "鉛筆"],
+  "A short pencil. In Nightmare, writing in a class journal saves your progress.": [null, "一枝短短的鉛筆。在噩夢難度下，在班級日誌上書寫可以保存進度。"],
+  "1. Second-floor girls' lavatory, third stall. Knock three times, say \"Hanako-san, let's play,\" and someone answers.": [null, "一、二樓女生廁所，第三間。敲門三次，說「花子，我們來玩吧」，就會有人回應。"],
+  "2. At midnight the music-room piano plays by itself. They say Mr. Kuroda sealed it with an ofuda.": [null, "二、午夜時分，音樂教室的鋼琴會自己彈奏。聽說黑田老師用符咒把它封住了。"],
+  "3. At night, the west stairs have one step too many.": [null, "三、到了晚上，西側樓梯會多出一階。"],
+  "4. In the staff room there is a teacher with no face.": [null, "四、教職員室裡，有一位沒有臉的老師。"],
+  "5. The festival lanterns and the lost-property umbrellas open their eyes at night.": [null, "五、祭典的燈籠和失物招領的雨傘，到了晚上會睜開眼睛。"],
+  "6. The blue fireballs in the corridor go out if you throw salt at them.": [null, "六、走廊上的藍色鬼火，只要朝它撒鹽就會熄滅。"],
+  "7. Whoever learns the seventh mystery": [null, "七、知道第七個不可思議的人"],
+  "(the rest of the page has been torn out)": [null, "（這一頁剩下的部分被撕掉了）"],
+  "If anyone is reading this:": [null, "如果有人正在讀這封信："],
+  "Never remove the seal from the piano.": [null, "絕對不要撕下鋼琴上的封印。"],
+  "I have set salt at the doorways. Salt works on the fireballs.": [null, "我在門口都放了鹽。鹽對鬼火有用。"],
+  "But against that girl, salt will only hold her back for a moment.": [null, "但對那個女孩，鹽只能擋住她一下子。"],
+  "Only the ofuda can send her home. Get close, and hold it up straight at her.": [null, "只有符咒能送她回家。靠近她，把符咒正對著她舉起來。"],
+  "— Kuroda": [null, "——黑田"],
+  "Friday, October 13th. Night duty: Kuroda.": [null, "10月13日，星期五。值夜：黑田。"],
+  "1:00 a.m. The children's song in the corridor again.": [null, "凌晨1:00。走廊上又傳來那首童謠。"],
+  "1:40. Knocking, from the direction of the gym. The wind. It must be the wind.": [null, "1:40。體育館那邊傳來敲擊聲。是風。一定是風。"],
+  "1:30. Someone has written \"Hanako\" in the day-duty column. I did not write it.": [null, "1:30。有人在值日生那一欄寫了「花子」。不是我寫的。"],
+  "2:00. Someone whispered in my ear that the day-duty student has the staff room key.": [null, "2:00。有人在我耳邊低語，說值日生身上有教職員室的鑰匙。"],
+  "2:13. I looked in the mirror.": [null, "2:13。我照了鏡子。"],
+  "I have no face.": [null, "我沒有臉。"],
+  "Oct 2. Shiraishi, 2-A. Bruises on both arms. She says she fell.": [null, "10月2日。白石，二年A班。雙臂都有瘀青。她說是跌倒的。"],
+  "Oct 6. Shiraishi again. I write down \"fell.\"": [null, "10月6日。又是白石。我寫下「跌倒」。"],
+  "Oct 10. Shiraishi: \"It's like nobody can see me.\" I told her she was imagining it.": [null, "10月10日。白石說：「好像誰都看不見我一樣。」我告訴她那是她想太多了。"],
+  "Oct 16. On the principal's instruction, I wrote \"heart condition.\"": [null, "10月16日。依校長指示，我寫了「心臟疾病」。"],
+  "I saw. I pretended I didn't.": [null, "我看見了。我假裝沒看見。"],
+  "Class 2-A. Homeroom teacher: Kuroda.": [null, "二年A班。班導師：黑田。"],
+  "Forty-one pupils stand in rows, smiling.": [null, "四十一名學生排成幾列，笑著。"],
+  "The face of the forty-second has been scratched away with a pin.": [null, "第四十二個人的臉，被人用大頭針刮掉了。"],
+  "Her name has been painted out with correction fluid.": [null, "她的名字被立可白塗掉了。"],
+  "Over it, in small pencil letters: \"Hanako.\"": [null, "上面用鉛筆寫著小小的字：「花子」。"],
+  "Hanako: the name printed on sample forms. The name for a girl who could be anyone.": [null, "花子：印在填寫範例上的名字。一個可以是任何人的女孩的名字。"],
+  "\"Am I dead?\" → No... not yet.": [null, "「我死了嗎？」→ 不……還沒有。"],
+  "\"Who are you?\" → Sa-yo.": [null, "「你是誰？」→ 小——夜。"],
+  "\"What is the seventh mystery?\" → Archive. 0-2-1-3.": [null, "「第七個不可思議是什麼？」→ 書庫。0-2-1-3。"],
+  "\"Is anyone looking for me?\" → No.": [null, "「有人在找我嗎？」→ 沒有。"],
+  "(A child's handwriting, dated one week after the festival.)": [null, "（小孩子的筆跡，日期是祭典過後一週。）"],
+  "1. In the third stall, there is Hanako-san.": [null, "一、第三間廁所裡，有花子。"],
+  "2. The music-room piano plays by itself at night.": [null, "二、音樂教室的鋼琴，晚上會自己彈奏。"],
+  "3. If you shut your eyes, the west stairs have one step more.": [null, "三、閉上眼睛的話，西側樓梯會多出一階。"],
+  "7. Shiraishi Sayo of 2-A turned into Toilet Hanako.": [null, "七、二年A班的白石小夜，變成了廁所裡的花子。"],
+  "It's funny, so let's tell everyone.": [null, "很好笑，所以我們告訴大家吧。"],
+  "On the night of October 13th, I heard knocking from the second-floor girls' lavatory.": [null, "10月13日晚上，我聽見二樓女生廁所傳來敲門聲。"],
+  "I thought it was children playing a prank, and I went home.": [null, "我以為是孩子們在惡作劇，就回家了。"],
+  "I know you came to the school every day for a year, Mrs. Shiraishi. I left by the back door so I would not have to see you.": [null, "白石太太，我知道妳整整一年每天都到學校來。為了不見到妳，我總是從後門離開。"],
+  "I have been listening for that knocking ever since.": [null, "從那以後，我一直在聽那個敲門聲。"],
+  "I do not have the courage to send this letter. — Kuroda": [null, "我沒有勇氣寄出這封信。——黑田"],
+  "You can't go home yet.": [null, "你還不能回家喔。"],
+  "We haven't played together yet, have we?": [null, "我們還沒有一起玩過吧？"],
+  "— Ha-na-ko": [null, "——花、子"],
+  "良好 · Fine": [null, "良好 · 良好"],
+  "注意 · Hurt": [null, "注意 · 受傷"],
+  "危険 · Danger": [null, "危険 · 危險"],
+  "Find a way out of the school.": [null, "找到離開學校的方法。"],
+  "Get into the staff room. The day-duty student (日直) carries its key.": [null, "進入教職員室。值日生（日直）身上帶著那裡的鑰匙。"],
+  "Find the entrance key in the staff room.": [null, "在教職員室裡找到玄關的鑰匙。"],
+  "Unlock the main doors in the entrance hall.": [null, "打開玄關的正門。"],
+  "The school won't let you go. Go through the east passage and search the ground floor.": [null, "學校不肯放你走。穿過東側通道，搜索一樓。"],
+  "Search the science lab.": [null, "搜索理化實驗室。"],
+  "Something is knocking in the gymnasium.": [null, "體育館裡有什麼東西在敲擊。"],
+  "Look inside the gym storeroom.": [null, "查看體育館的倉庫。"],
+  "Raise the fire shutter over the east stairs on the second floor.": [null, "拉起二樓東側樓梯的防火鐵捲門。"],
+  "Go up to the third floor. Someone left Kokkuri-san unfinished.": [null, "上三樓去。有人沒把狐狗狸玩完。"],
+  "Open the library archive (書庫). Kokkuri-san told you the code.": [null, "打開圖書室的書庫。狐狗狸告訴了你密碼。"],
+  "Search the archive. Learn her real name.": [null, "搜索書庫。查出她真正的名字。"],
+  "Go up to the roof. Find her, and call her by her name.": [null, "上頂樓去。找到她，叫出她的名字。"],
+  "Survive until morning.": [null, "撐到早上。"],
+  "装備 Equip": [null, "装備 裝備"],
+  "使う Use": [null, "使う 使用"],
+  "読む Read": [null, "読む 閱讀"],
+  "地図 Map": [null, "地図 地圖"],
+  "You're out of salt.": [null, "鹽用完了。"],
+  "You hold up the ofuda. Nothing close enough reacts to it.": [null, "你舉起符咒。附近沒有任何東西對它起反應。"],
+  "Your foot passes through the flame. It doesn't even burn.": [null, "你的腳穿過了火焰。連一點燙都沒有。"],
+  "The shinai passes straight through the flame.": [null, "竹刀直直穿過了火焰。"],
+  "Your foot meets nothing but cold air.": [null, "你的腳只踢到一片冰冷的空氣。"],
+  "The shinai passes through her like smoke. She doesn't even flinch.": [null, "竹刀像穿過煙霧般穿過了她。她連眉頭都沒皺一下。"],
+  "The ofuda flares. The creature recoils, but the talisman isn't meant for it.": [null, "符咒亮起光芒。那東西向後退縮，但這張符並不是為它準備的。"],
+  "The lantern's flame gutters out. It drops to the floor as plain paper.": [null, "燈籠的火苗搖曳熄滅，落在地上，只剩一張普通的紙。"],
+  "The umbrella folds shut with a snap and lies still.": [null, "傘啪的一聲收攏，靜靜躺著不動了。"],
+  "The faceless teacher crumples into a heap of dry leaves.": [null, "無臉的老師塌成一堆乾枯的落葉。"],
+  "\"...Play with me again sometime.\"": [null, "「……下次再陪我玩喔。」"],
+  "Something small clinks onto the tiles.": [null, "有個小東西叮的一聲落在磁磚上。"],
+  "He turns his head all the way around. Where his face should be, there is nothing at all.": [null, "他把頭整個轉了過來。本該是臉的地方，什麼都沒有。"],
+  "The door won't move. Not until morning.": [null, "門紋風不動。天亮之前都不會動。"],
+  "It won't open.": [null, "打不開。"],
+  "The last wheel clicks into place, and the padlock drops open.": [null, "最後一個轉輪喀的一聲對上，掛鎖應聲彈開。"],
+  "It's locked.": [null, "鎖住了。"],
+  "つづきから · Continue": [null, "つづきから · 繼續"],
+  "悪夢 · Nightmare": [null, "悪夢 · 噩夢"],
+  "はじめから · New game": [null, "はじめから · 新遊戲"],
+  "はじめる · Begin": [null, "はじめる · 開始"],
+  "記録 · Records": [null, "記録 · 紀錄"],
+  "設定 · Settings": [null, "設定 · 設定"],
+  "通常 · Normal": [null, "通常 · 普通"],
+  "Harder obake, fewer supplies, saves only in class journals.": [null, "妖怪更強、補給更少，只能在班級日誌存檔。"],
+  "戻る · Back": [null, "戻る · 返回"],
+  "After kendo practice, I fell asleep at my desk.": [null, "劍道練習結束後，我趴在桌上睡著了。"],
+  "When I woke up, it was two in the morning.": [null, "醒來的時候，已經是凌晨兩點。"],
+  "There shouldn't have been anyone left in the building.": [null, "校舍裡照理說不該還有任何人。"],
+  "And yet, the school chime began to ring.": [null, "然而，學校的鐘聲卻響了起來。"],
+  "You have become one of the Seven Mysteries.": [null, "你也成為了七大不可思議之一。"],
+  "Try again from your last save": [null, "從上次存檔處重新開始"],
+  "Try again from the last door": [null, "從上一扇門重新開始"],
+  "Title screen": [null, "標題畫面"],
+  "5:40 a.m. The one who opened the gym storeroom was Mr. Kuroda, the teacher on night duty.": [null, "清晨五點四十分。打開體育館倉庫的，是值夜的黑田老師。"],
+  "I handed him a letter. One that had waited forty-five years to be sent.": [null, "我交給他一封信。一封等了四十五年才寄出的信。"],
+  "He read the name on the envelope and sank to the floor. \"...Shiraishi-san.\"": [null, "他讀著信封上的名字，癱坐在地上。「……白石同學。」"],
+  "Outside the gate, Yuki was crying and calling my name.": [null, "校門外，由紀一邊哭，一邊喊著我的名字。"],
+  "Beyond her stood a tall woman with very long hair. Mr. Kuroda bowed to her, low, and stayed that way for a long time.": [null, "她身後站著一個留著長長頭髮的高大女人。黑田老師向她深深鞠躬，久久沒有抬起頭。"],
+  "A little girl in a red skirt ran to her. She looked back once, and waved.": [null, "一個穿紅裙子的小女孩朝她跑去。她回頭看了一眼，揮了揮手。"],
+  "The school reprinted the 1950 class photograph. For the first time, all forty-two faces were there.": [null, "學校重新沖印了一九五〇年的班級合照。四十二張臉，第一次全都在上面。"],
+  "My name is Tachibana Misaki. Her name is Shiraishi Sayo. We were friends, in the same classroom.": [null, "我的名字是橘美咲。她的名字是白石小夜。我們是同一間教室的朋友。"],
+  "\"See you tomorrow, Sayo.\"": [null, "「明天見，小夜。」"],
+  "Forty-five years ago, he heard knocking behind a door, and did not open it.": [null, "四十五年前，他聽見門後傳來敲門聲，卻沒有打開。"],
+  "This time, he did.": [null, "這一次，他打開了。"],
+  "Outside the gate, Yuki was crying and calling my name. She said she had been looking for me all night.": [null, "校門外，由紀一邊哭，一邊喊著我的名字。她說她找了我一整夜。"],
+  "Beyond her stood a tall woman with very long hair. A little girl in a red skirt ran to her, and they were gone.": [null, "她身後站著一個留著長長頭髮的高大女人。一個穿紅裙子的小女孩朝她跑去，然後她們就消失了。"],
+  "My name is Tachibana Misaki. Her name was Shiraishi Sayo.": [null, "我的名字是橘美咲。她的名字，曾是白石小夜。"],
+  "As long as someone calls you by your name, you do not become a ghost.": [null, "只要還有人呼喚你的名字，你就不會變成幽靈。"],
+  "Since that morning, Seiran High has only six mysteries.": [null, "從那天早上起，青嵐高中的不可思議只剩下六個。"],
+  "Since that morning, the piano in the music room plays its song all the way to the end.": [null, "從那天早上起，音樂教室的鋼琴總會把那首曲子彈到最後。"],
+  "Some pages of this story have not been read yet.": [null, "這個故事裡，還有尚未被讀過的頁面。"],
+  "Difficulty": [null, "難度"],
+  "Time": [null, "時間"],
+  "資料 · Documents": [null, "資料 · 資料"],
+  "Obake laid to rest": [null, "安息的妖怪"],
+  "Times you became a mystery": [null, "成為不可思議的次數"],
+  "Back to the title": [null, "返回標題"],
+  "You don't have a map of the school.": [null, "你沒有學校的地圖。"],
+  "🔈 Press a key or click once to enable sound": [null, "🔈 按任意鍵或點擊一次以開啟聲音"],
+  "調べる · Examine": [null, "調べる · 調查"],
+  "The model collapses. Its plastic organs scatter across the floor like dropped marbles.": [null, "人體模型散落一地。塑膠內臟像打翻的彈珠般滾滿地板。"],
+  "The cloth goes limp and drifts to the floor: just a strip of old cotton.": [null, "布軟軟地垂下，飄落在地上：不過是一條舊棉布。"],
+  "She doesn't stop. She doesn't even slow down. Salt might.": [null, "她沒有停下。連放慢都沒有。也許鹽會有用。"],
+  "She flinches, just for a moment. RUN.": [null, "她瑟縮了一下，只有一瞬間。快跑。"],
+  "It's like hitting a wall. She is far too big. RUN.": [null, "像是打在一堵牆上。她實在太巨大了。快跑。"],
+  "ROKUROKUBI": [null, "轆轤首"],
+  "Her head sways high above you, out of reach. Wait for it to come down.": [null, "她的頭在你頭頂高處搖晃，根本搆不到。等它降下來。"],
+  "The cloth wraps around your throat! You can barely move.": [null, "布纏住了你的喉嚨！你幾乎動彈不得。"],
+  "Her hair pours over you, cold and heavy — and flings you down the corridor.": [null, "她的頭髮朝你傾瀉而下，冰冷又沉重——把你甩到了走廊的另一頭。"],
+  "Her neck goes slack, and she folds to the floor like a dropped coat. Something small clatters across the boards.": [null, "她的脖子一鬆，像掉落的外套般癱倒在地。有個小東西喀啦喀啦地滾過木地板。"],
+  "CHAPTER ONE — THE SEVEN MYSTERIES": [null, "第一章——七大不可思議"],
+  "CHAPTER TWO — THE ONE WHO ISN'T HERE": [null, "第二章——不在這裡的人"],
+  "CHAPTER THREE — NAMES": [null, "第三章——名字"],
+  "FINAL CHAPTER — DAWN": [null, "終章——黎明"],
+  "You stepped through the doors, out into the night...": [null, "你穿過那扇門，走進了夜色裡……"],
+  "...and you are standing in the entrance hall. The same shoe lockers. The same humming vending machine. Behind you, the doors are chained shut again.": [null, "……然後，你站在玄關。同樣的鞋櫃，同樣嗡嗡作響的自動販賣機。在你身後，門又被鐵鍊鎖上了。"],
+  "No... I'm back where I started?": [null, "不……我又回到原點了？"],
+  "\"You can't go home yet. Nobody is even looking for you.\"": [null, "「你還不能回家。根本還沒有人在找你。」"],
+  "On the east wall, the fire shutter grinds up into the ceiling by itself. Beyond it, a dark passage leads deeper into the ground floor.": [null, "東側牆上的防火鐵捲門自己轟隆隆地捲進了天花板。門後，一條漆黑的通道通往一樓更深處。"],
+  "Behind the far curtain, someone is sitting on the bed, perfectly still.": [null, "最裡面那道簾子後，有人坐在床上，一動也不動。"],
+  "Her neck keeps growing — up over the curtain rail — and her face tilts down to look at you.": [null, "她的脖子不斷伸長——越過了簾子的橫桿——她的臉低低垂下，看著你。"],
+  "The lamp behind the curtain goes out. The curtain sways. The bed is empty.": [null, "簾子後的燈熄了。簾子輕輕搖晃。床上空無一人。"],
+  "The equipment storeroom. From inside comes a faint knocking — three times — then nothing. You'll have to get past the nurse to reach it.": [null, "器材倉庫。裡面傳來微弱的敲擊聲——三下——然後就沒了。你得先過了護士那一關，才到得了那裡。"],
+  "Through the gap in the storeroom doors: you, curled up on the gym mats. Still breathing. For now.": [null, "透過倉庫門的縫隙：是你，蜷縮在體操墊上。還有呼吸。暫時還有。"],
+  "The equipment storeroom. A padlock hangs on the outside of the door. From inside, very weakly, someone knocks. Three times.": [null, "器材倉庫。門外掛著一把掛鎖。裡面有人非常虛弱地敲著門。三下。"],
+  "You reach for the padlock. Your fingers pass straight through it, as if one of you isn't really here.": [null, "你伸手去摸那把鎖。手指卻直接穿了過去，彷彿你們之中有一個並不真的在這裡。"],
+  "Through the gap between the doors, in a stripe of moonlight: a girl in a kendo uniform, curled up on the gym mats. Her lips are blue.": [null, "透過兩扇門之間的縫隙，在一道月光裡：一個穿著劍道服的女孩，蜷縮在體操墊上。她的嘴唇發紫。"],
+  "...That's me?": [null, "……那是我？"],
+  "It's you.": [null, "是你。"],
+  "After practice, the girls in my class said, \"Let's play kagome kagome.\"": [null, "練習結束後，班上的女生們說：「來玩籠中鳥吧。」"],
+  "I had to keep my eyes shut until I guessed who was right behind me.": [null, "在猜出站在我正後方的是誰之前，我都得一直閉著眼睛。"],
+  "They sang as they steered me by the shoulders. Down the stairs: twelve, thirteen...": [null, "她們一邊唱，一邊扶著我的肩膀帶我走。走下樓梯：十二、十三……"],
+  "When I opened my eyes, the storeroom door slammed, and their laughter faded away.": [null, "等我睜開眼睛，倉庫的門砰地關上了，她們的笑聲漸漸遠去。"],
+  "I never fell asleep.": [null, "我根本沒有睡著。"],
+  "\"Just like what happened to me.\"": [null, "「就跟我那時候一樣。」"],
+  "If no one finds you before morning, you won't wake up. Whatever is keeping you here is waiting upstairs, in the seventh mystery.": [null, "如果天亮前沒有人找到你，你就再也醒不過來了。把你困在這裡的東西，正在樓上等著——在第七個不可思議裡。"],
+  "From the far end of the corridor: teke... teke... teke...": [null, "走廊的另一頭傳來：テケ……テケ……テケ……"],
+  "Something without legs is coming down the corridor on its elbows. Get into a room!": [null, "有個沒有腿的東西正用手肘撐著，沿著走廊爬過來。快躲進教室！"],
+  "I have to run!": [null, "我得快跑！"],
+  "「わたしは、死んだの？」 Am I dead?": [null, "「わたしは、死んだの？」 我死了嗎？"],
+  "No... not yet.": [null, "不……還沒有。"],
+  "「あなたは、だれ？」 Who are you?": [null, "「あなたは、だれ？」 你是誰？"],
+  "\"Sa... yo.\" Sayonara? Or a name?": [null, "「さ……よ。」是「さよなら」（再見）？還是一個名字？"],
+  "「七つ目の不思議は？」 What is the seventh mystery?": [null, "「七つ目の不思議は？」 第七個不可思議是什麼？"],
+  "\"Archive.\" Then four numbers: 0, 2, 1, 3. Like the stopped clocks: 2:13.": [null, "「書庫。」接著是四個數字：0、2、1、3。就像那些停住的時鐘：2:13。"],
+  "「だれか、わたしをさがしてる？」 Is anyone looking for me?": [null, "「だれか、わたしをさがしてる？」 有人在找我嗎？"],
+  "The coin drifts toward はい... hesitates... and slides to いいえ. No.": [null, "硬幣朝「はい」滑去……遲疑了一下……然後滑向「いいえ」。不。"],
+  "The Kokkuri-san sheet has been torn in half. The coin is gone.": [null, "狐狗狸的紙被撕成了兩半。硬幣不見了。"],
+  "The Kokkuri-san sheet. The coin rests on the torii, where it belongs.": [null, "狐狗狸的紙。硬幣靜靜停在鳥居上，回到了它該在的地方。"],
+  "Four desks pushed together. On them, a sheet of paper: a red torii, 「はい」 and 「いいえ」, the numbers 0 to 9, and the whole kana table. A ¥10 coin waits on the torii, and four candles are burning.": [null, "四張課桌併在一起。上面鋪著一張紙：一座紅色鳥居、「はい」和「いいえ」、數字0到9，還有整張假名表。一枚十圓硬幣擱在鳥居上，四根蠟燭正燃燒著。"],
+  "Someone was playing Kokkuri-san here and never finished. A spirit that is called and never sent home stays.": [null, "有人在這裡玩狐狗狸，卻沒有玩完。被召喚來卻沒被送走的靈，會一直留下來。"],
+  "Put your finger on the coin?": [null, "把手指放到硬幣上？"],
+  "Put a finger on it": [null, "放上一根手指"],
+  "\"Kokkuri-san, Kokkuri-san, please come.\"": [null, "「狐狗狸大人，狐狗狸大人，請您降臨。」"],
+  "Ask Kokkuri-san...": [null, "問狐狗狸……"],
+  "How do you end it?": [null, "要怎麼結束？"],
+  "「お帰りください」 Please go home": [null, "「お帰りください」 請您回去"],
+  "Take your finger off the coin": [null, "把手指從硬幣上拿開"],
+  "\"Kokkuri-san, Kokkuri-san, please go home.\"": [null, "「狐狗狸大人，狐狗狸大人，請您回去。」"],
+  "You lift your finger. The coin keeps moving without you, faster and faster, round and round the sheet.": [null, "你抬起手指。硬幣卻自己繼續移動，越來越快，繞著紙一圈又一圈地轉。"],
+  "The candle flames tear loose and float up into the dark.": [null, "燭火掙脫了燭芯，飄向黑暗之中。"],
+  "The coin slides home to the torii and stops. The candles gutter out, one by one.": [null, "硬幣滑回鳥居，停了下來。蠟燭一根接一根地熄滅。"],
+  "The archive door is held by a four-digit dial padlock.": [null, "書庫的門被一把四位數的密碼鎖鎖著。"],
+  "The shackle doesn't move. Wrong number.": [null, "鎖環紋風不動。號碼錯了。"],
+  "Roof": [null, "頂樓"],
+  "Library": [null, "圖書室"],
+  "Archive": [null, "書庫"],
+  "E stairs": [null, "東樓梯"],
+  "3F corridor": [null, "三樓走廊"],
+  "W stairs": [null, "西樓梯"],
+  "Lavatory": [null, "廁所"],
+  "Music": [null, "音樂教室"],
+  "2F corridor": [null, "二樓走廊"],
+  "Entrance": [null, "玄關"],
+  "Staff": [null, "教職員室"],
+  "Infirmary": [null, "保健室"],
+  "Science": [null, "理化實驗室"],
+  "Gym": [null, "體育館"],
+  "1F corridor": [null, "一樓走廊"],
+  "現在地 · you": [null, "現在地 · 你"],
+  "The 1950 register, open on the table. Under the scraped-away paint, her name: 白石 小夜. Shiraishi Sayo.": [null, "1950年的點名簿，攤開在桌上。刮掉的修正液底下，是她的名字：白石 小夜。白石小夜。"],
+  "A candle is burning on the table, though no one could have lit it. Beside it lies an attendance register from 1950, open at Class 2-A.": [null, "桌上點著一根蠟燭，但不可能有人點過它。旁邊放著一本1950年的點名簿，翻開在二年A班那一頁。"],
+  "One line has been painted over with correction fluid, thick and white, as if someone wanted to be very sure.": [null, "其中一行被修正液塗掉了，塗得又厚又白，彷彿有人想確保它絕對看不見。"],
+  "Scrape the paint away?": [null, "把修正液刮掉？"],
+  "Scrape it off with your nail": [null, "用指甲刮掉"],
+  "Shiraishi Sayo. Not Hanako. \"Hanako\" is the name printed on sample forms, the name for a girl who could be anyone. They gave it to her so that her real one would be forgotten.": [null, "白石小夜。不是花子。「花子」是印在填寫範例上的名字，是一個誰都可能是的女孩的名字。他們把這個名字給了她，好讓她真正的名字被遺忘。"],
+  "Tucked into the register is a sheet of school paper, yellow and soft with age. A list, in children's handwriting.": [null, "點名簿裡夾著一張學校的信紙，泛黃，因年代久遠而變得綿軟。是一張名單，寫著孩子的字跡。"],
+  "She is standing in the middle of the roof with her back to you, humming. Her red skirt stirs in a wind you can't feel.": [null, "她背對著你，站在頂樓正中央，哼著歌。她的紅裙在一陣你感覺不到的風裡輕輕擺動。"],
+  "\"You came.\"": [null, "「你來了。」"],
+  "\"Let's play kagome kagome. That day, everyone went away before the song was over.\"": [null, "「來玩籠中鳥吧。那一天，歌還沒唱完，大家就都走掉了。」"],
+  "\"Who is right behind you? Guess — and call me by my name.\"": [null, "「站在你正後方的是誰？猜猜看——然後，叫我的名字。」"],
+  "Too slow.": [null, "太慢了。"],
+  "That one was right in front of you. Not behind.": [null, "那個是在你正前方。不是後面。"],
+  "Wrong child.": [null, "不是這個孩子。"],
+  "\"You found me. ...But that isn't my name.\"": [null, "「你找到我了。……可是，那不是我的名字。」"],
+  "\"No. That's what they all called me. ...Once more.\"": [null, "「不對。那是大家這樣叫我的。……再一次。」"],
+  "\"...At last. Someone called me by my name.\"": [null, "「……終於，有人叫了我的名字。」"],
+  "For the first time, you see her face under the heavy fringe. She is just a girl, a little younger than you, and she is smiling.": [null, "你第一次看見她厚重瀏海下的臉。她只是個女孩，比你還小一點，正微笑著。"],
+  "\"Thank you, Misaki. But it isn't over. Everything this school ever buried won't let go of us.\"": [null, "「謝謝你，美咲。可是還沒結束。這所學校埋葬過的一切，不會放過我們。」"],
+  "Beyond the fence, something enormous has hauled itself up the side of the school: a skeleton the size of the building, made of everything the school ever buried.": [null, "圍欄另一頭，某個巨大的東西沿著校舍外牆爬了上來：一具和建築一樣大的骷髏，由這所學校埋葬過的一切所組成。"],
+  "\"Keep away from it until morning!\"": [null, "「離它遠一點，撐到早上！」"],
+  "UNTIL DAWN": [null, "撐到黎明"],
+  "...It's morning.": [null, "……天亮了。"],
+  "The sun clears the rooftops of the town. Its first light falls across the skull, and the skull begins to crumble like ash in a wind.": [null, "太陽越過鎮上的屋頂。第一道光落在頭骨上，頭骨開始崩解，如同風中的灰燼。"],
+  "Somewhere far below you, a door is opening.": [null, "在你腳下很深很深的地方，有一扇門正在打開。"],
+  "明るさ · Brightness": [null, "明るさ · 亮度"],
+  "音楽 · Music": [null, "音楽 · 音樂"],
+  "効果音 · Sound": [null, "効果音 · 音效"],
+  "声 · Voice": [null, "声 · 語音"],
+  "文字の大きさ · Text size": [null, "文字の大きさ · 文字大小"],
+  "小 · Small": [null, "小 · 小"],
+  "中 · Normal": [null, "中 · 普通"],
+  "大 · Large": [null, "大 · 大"],
+  "特大 · Larger": [null, "特大 · 特大"],
+  "操作 · Controls": [null, "操作 · 操作"],
+  "クラシック · Tank (classic)": [null, "クラシック · 坦克式（經典）"],
+  "モダン · Modern (camera-relative)": [null, "モダン · 現代（依鏡頭方向）"],
+  "字幕 · Subtitles": [null, "字幕 · 字幕"],
+  "I have to get out of here...": [null, "我得離開這裡……"],
+  "Shiraishi... Sayo...": [null, "白石……小夜……"],
+  "Found you, Hanako-san!": [null, "找到妳了，花子！"],
+  "Hanako-san!": [null, "花子！"],
+  "Sayo!": [null, "小夜！"],
+  "See you tomorrow, Sayo.": [null, "明天見，小夜。"],
+  "Toilet Hanako-san": [null, "廁所裡的花子"],
+  "The piano that plays by itself": [null, "會自己彈奏的鋼琴"],
+  "The west stairs with one step too many": [null, "多出一階的西側樓梯"],
+  "The teacher with no face": [null, "沒有臉的老師"],
+  "Lanterns and umbrellas that open their eyes": [null, "會睜開眼睛的燈籠與雨傘"],
+  "Blue fireballs that go out with salt": [null, "遇鹽即滅的鬼火"],
+  "Shiraishi Sayo": [null, "白石小夜"],
+  "Dawn": [null, "黎明"],
+  "The Forty-Second Face": [null, "第四十二張臉"],
+  "七不思議 · SEVEN MYSTERIES": [null, "七不思議 · 七大不可思議"],
+  "結末 · ENDINGS": [null, "結末 · 結局"],
+  "悪夢クリア · Nightmare cleared": [null, "悪夢クリア · 噩夢通關"],
+  "最速 通常 · Best time, Normal": [null, "最速 通常 · 最快紀錄（普通）"],
+  "最速 悪夢 · Best time, Nightmare": [null, "最速 悪夢 · 最快紀錄（噩夢）"],
+  "資料 · DOCUMENTS": [null, "資料 · 資料"],
+  "There is a pencil stub here too. You take it.": [null, "這裡還有一截鉛筆頭。你拿走了。"],
+  "学級日誌 · Class journal": [null, "学級日誌 · 班級日誌"],
+  "You need a pencil to write in the journal.": [null, "要在日誌上寫字，需要一支鉛筆。"],
+  "Write in the class journal? It uses a pencil.": [null, "要在班級日誌上寫字嗎？會用到鉛筆。"],
+  "Write": [null, "寫下"],
+  "学級日誌 · Progress saved": [null, "学級日誌 · 已儲存進度"],
+  "You write the date and your name in the journal.": [null, "你在日誌上寫下日期和自己的名字。"],
+  "持ち物 · ITEMS": [null, "持ち物 · 物品"],
+  "↑↓ choose · E / Enter use · M map · I / Esc close": [null, "↑↓ 選擇 · E / Enter 使用 · M 地圖 · I / Esc 關閉"],
+  "↑↓ choose · A use · Back map · B close": [null, "↑↓ 選擇 · A 使用 · Back 地圖 · B 關閉"],
+  "開ける · Open": [null, "開ける · 打開"],
+  "やめる · Leave it": [null, "やめる · 不理它"],
+  "← → choose a wheel · ↑ ↓ turn it · E open · Esc leave": [null, "← → 選擇轉盤 · ↑ ↓ 轉動 · E 打開 · Esc 離開"],
+  "← → choose a wheel · ↑ ↓ turn it · A open · B leave": [null, "← → 選擇轉盤 · ↑ ↓ 轉動 · A 打開 · B 離開"],
+  "校内案内図 · SCHOOL MAP": [null, "校内案内図 · 校園地圖"],
+  "M / Esc close": [null, "M / Esc 關閉"],
+  "Back / B close": [null, "Back / B 關閉"],
+  "Resume": [null, "繼續"],
+  "Settings": [null, "設定"],
+  "Records": [null, "紀錄"],
+  "Restart from title": [null, "回到標題畫面"],
+  "E / tap to skip": [null, "E / 點擊以跳過"],
+  "A to skip": [null, "按 A 跳過"],
+  "a night-school survival horror": [null, "一款夜間校園生存恐怖遊戲"],
+  "walk / back up": [null, "前進 / 後退"],
+  "back · close": [null, "返回 · 關閉"],
+  "attack · use weapon": [null, "攻擊 · 使用武器"],
+  "examine · open": [null, "調查 · 打開"],
+  "switch weapon": [null, "切換武器"],
+  "school map": [null, "校園地圖"],
+  "記録 · RECORDS": [null, "記録 · 紀錄"],
+  "↑↓ scroll · Esc back": [null, "↑↓ 捲動 · Esc 返回"],
+  "↑↓ scroll · B back": [null, "↑↓ 捲動 · B 返回"],
+  "設定 · SETTINGS": [null, "設定 · 設定"],
+  "↑↓ choose · ← → change · Esc back": [null, "↑↓ 選擇 · ← → 調整 · Esc 返回"],
+  "↑↓ choose · ← → change · B back": [null, "↑↓ 選擇 · ← → 調整 · B 返回"],
+  "Cold night air on your face.": [null, "冷冽的夜風拂過你的臉。"],
+  "RUN — the rooftop door is at the west end": [null, "快跑——頂樓的門在西側盡頭"],
+  "SHIRAISHI SAYO": [null, "白石小夜"],
+  "WHO IS RIGHT BEHIND YOU?": [null, "站在你正後方的是誰？"],
+  "turn": [null, "轉向"],
+  "walk": [null, "行走"],
+  "run": [null, "奔跑"],
+  "items": [null, "物品"],
+  "pause": [null, "暫停"],
+  "attack": [null, "攻擊"],
+  "examine": [null, "調查"],
+  "switch": [null, "切換"],
+  "I have to get out of here.  ({a} examine · {b} items · {c} attack)": [null, "我得離開這裡。（{a} 調查 · {b} 物品 · {c} 攻擊）"],
+};
+
+// ───────────────────────── voice lines (Misaki): audio/voice/<id>.mp3 ─────────────────────────
+// jp is the spoken line, en the subtitle (a tr() key). Data only; played with audio.speak(id).
+const VOICE = {
+  v01: { jp: 'ここから、出なきゃ……', en: 'I have to get out of here...' },
+  v02: { jp: '花子さん、遊びましょ', en: '"Hanako-san... will you come out and play?"' },
+  v03: { jp: '先生……？', en: '"Sensei...?"' },
+  v04: { jp: 'うそ……戻ってる……？', en: 'No... I\'m back where I started?' },
+  v05: { jp: '……十三段目？', en: '...A thirteenth step?' },
+  v06: { jp: '……わたし？', en: '...That\'s me?' },
+  v07: { jp: '私は、眠ってなんかいなかった。', en: 'I never fell asleep.' },
+  v08: { jp: 'こっくりさん、こっくりさん、おいでください。', en: '"Kokkuri-san, Kokkuri-san, please come."' },
+  v09: { jp: 'しらいし……さよ……', en: 'Shiraishi... Sayo...' },
+  v10: { jp: '逃げなきゃ！', en: 'I have to run!' },
+  v11: { jp: '花子さん、みーつけた！', en: 'Found you, Hanako-san!' },
+  v12: { jp: '花子さん！', en: 'Hanako-san!' },
+  v13: { jp: '小夜ちゃん！', en: 'Sayo!' },
+  v14: { jp: '……朝だ。', en: '...It\'s morning.' },
+  v15: { jp: '私の名前は、橘美咲。あの子の名前は、白石小夜。', en: 'My name is Tachibana Misaki. Her name was Shiraishi Sayo.' },
+  v16: { jp: '小夜ちゃん。また、あした。', en: 'See you tomorrow, Sayo.' },
+};
+// Ids whose mp3 is in audio/voice/. Only these are fetched (all prefetched after the first unlock);
+// drop an id here if its file is missing, so the console stays free of 404s.
+const VOICE_FILES = Object.keys(VOICE);
+
+// ───────────────────────── replay: cross-run records, the records screen, Nightmare pencils and class journals ─────────────────────────
+const META_KEY = 'yoru-no-gakko-meta-1';
+const DOC_ORDER = ['note7', 'shoenote', 'kuroda', 'dutylog', 'nurselog', 'yearbook', 'kokkurinote', 'oldlist', 'letter'];   // story order
+const anyFlag = (re) => Object.keys(F).some((k) => F[k] && re.test(k));
+// the seven mysteries as Yuki's notebook (note7) lists them; the seventh is the name the 1950 list gives back
+const MYSTERIES = [
+  ['トイレの花子さん', 'Toilet Hanako-san', () => F.hanako_awake],
+  ['ひとりでに鳴るピアノ', 'The piano that plays by itself', () => F.ofuda],
+  ['一段多い西階段', 'The west stairs with one step too many', () => F.step13],
+  ['顔のない先生', 'The teacher with no face', () => F.noppera_awake],
+  ['目を開ける提灯と傘', 'Lanterns and umbrellas that open their eyes', () => anyFlag(/^(awake|dead)_[LK]\d/)],
+  ['塩で消える青い火の玉', 'Blue fireballs that go out with salt', () => anyFlag(/^(awake|dead)_W\d/)],
+  ['白石小夜', 'Shiraishi Sayo', () => F.realname],
+];
+const ENDINGS = [['dawn', '夜明け', 'Dawn'], ['true', '四十二人目', 'The Forty-Second Face']];
+const KANJI_NUM = '一二三四五六七';
+
+let META = null;
+function meta() {
+  if (META) return META;
+  let m = null;
+  try { m = JSON.parse(localStorage.getItem(META_KEY) || 'null'); } catch (_) {}
+  const o = (v) => (v && typeof v === 'object' && !Array.isArray(v) ? v : {});
+  m = o(m);
+  return (META = { docs: o(m.docs), mysteries: o(m.mysteries), endings: o(m.endings), clears: o(m.clears), best: o(m.best) });
+}
+function saveMeta() { try { localStorage.setItem(META_KEY, JSON.stringify(meta())); } catch (_) {} }
+const metaAny = () => { const m = meta(); return [m.docs, m.mysteries, m.endings, m.clears].some((o) => Object.keys(o).length > 0); };
+const docCount = () => DOC_ORDER.filter(has).length;
+const mmss = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+// merge what this run has found into the records (docs are never taken away, so has() is "found")
+function syncMeta() {
+  const m = meta(); let ch = false;
+  for (const id of DOC_ORDER) if (has(id) && !m.docs[id]) { m.docs[id] = 1; ch = true; }
+  MYSTERIES.forEach(([, , found], i) => { if (!m.mysteries[i + 1] && found()) { m.mysteries[i + 1] = 1; ch = true; } });
+  if (ch) saveMeta();
+}
+function recordEnding(kind, secs) {
+  syncMeta();
+  const m = meta(), d = F.hard ? 'nightmare' : 'normal';
+  m.endings[kind] = 1; m.clears[d] = (m.clears[d] || 0) + 1;
+  if (!(m.best[d] <= secs)) m.best[d] = secs;
+  saveMeta();
+}
+
+// ── records screen (over the title or the pause panel; input like settings) ──
+function openRecords(from) {
+  syncMeta();
+  G.records = { from, menu: G.menu };
+  G.menu = null;
+  $('records').hidden = false;
+  renderRecords();
+  $('records').querySelector('.body').scrollTop = 0;
+  recordsMore();
+}
+// fade the bottom edge while there is more to scroll to
+function recordsMore() { const b = $('records').querySelector('.body'); b.classList.toggle('more', b.scrollTop + b.clientHeight < b.scrollHeight - 2); }
+$('records').querySelector('.body').addEventListener('scroll', recordsMore);
+addEventListener('resize', () => { if (G.records) recordsMore(); });
+function closeRecords() {
+  const r = G.records; if (!r) return;
+  G.records = null; $('records').hidden = true;
+  if (r.from === 'title' ? G.mode === 'title' : G.paused) G.menu = r.menu || null;
+}
+function renderRecords() {
+  const m = meta(), q = '<span class="q">？？？</span>';
+  const li = (n, ok, jp, en) => `<li class="${ok ? 'on' : ''}"><i>${n}</i>${ok ? `<b>${esc(jp)}</b><span class="en">${esc(tr(en))}</span>` : q}</li>`;
+  const nd = DOC_ORDER.filter((id) => m.docs[id]).length;
+  const best = (d) => (m.best[d] >= 0 ? mmss(m.best[d]) : '—');
+  $('records').querySelector('.body').innerHTML =
+    `<div><h3>${esc(tr('七不思議 · SEVEN MYSTERIES'))}</h3><ol>${MYSTERIES.map(([jp, en], i) => li(KANJI_NUM[i], m.mysteries[i + 1], jp, en)).join('')}</ol>
+      <h3>${esc(tr('結末 · ENDINGS'))}</h3><ol>${ENDINGS.map(([k, jp, en], i) => li(i + 1, m.endings[k], jp, en)).join('')}</ol>
+      <div class="stats"><span>${esc(tr('悪夢クリア · Nightmare cleared'))}</span><b>${m.clears.nightmare ? '✓' : '—'}</b>
+        <span>${esc(tr('最速 通常 · Best time, Normal'))}</span><b>${best('normal')}</b><span>${esc(tr('最速 悪夢 · Best time, Nightmare'))}</span><b>${best('nightmare')}</b></div></div>
+    <div><h3>${esc(tr('資料 · DOCUMENTS'))} <span class="n">${nd}/${DOC_ORDER.length}</span></h3><ol>${DOC_ORDER.map((id, i) => li(i + 1, m.docs[id], ITEMS[id].jp, ITEMS[id].en)).join('')}</ol></div>`;
+  recordsMore();
+}
+function recordsInput(hit) {
+  const b = $('records').querySelector('.body');
+  if (hit('pause') || hit('back') || hit('interact') || hit('attack')) { closeRecords(); return; }
+  if (hit('up')) b.scrollTop -= b.clientHeight * 0.3;
+  if (hit('down')) b.scrollTop += b.clientHeight * 0.3;
+}
+$('records').querySelector('.back').onclick = (e) => { e.stopPropagation(); closeRecords(); };
+
+// the pause panel's line: this run's documents, and the difficulty
+function pauseInfo() {
+  $('pause').querySelector('.pinfo').innerHTML = `${esc(tr('資料 · Documents'))} <b>${docCount()}/${DOC_ORDER.length}</b>` +
+    (F.hard ? `<span class="hard">${esc(tr('悪夢 · Nightmare'))}</span>` : '');
+}
+
+// ── Nightmare: pencils, and class journals (学級日誌) on teachers' desks that save where you stand ──
+async function hardPencil(tag, text = 'There is a pencil stub here too. You take it.') {
+  if (!F.hard || F['pencil_' + tag]) return;
+  F['pencil_' + tag] = 1;
+  await say(text);
+  give('pencil');
+}
+function journalDesk(R, bx, by, bz, sx, sz, ry = 0, r = 0.6) {   // book on the desk top at (bx, by, bz); the spot at (sx, sz), clear of the desk's own spot
+  const g = new THREE.Group(); g.position.set(bx, by, bz); g.rotation.y = ry;
+  const cover = new THREE.Mesh(B(0.22, 0.03, 0.3), mat(0x9a3a2c)); cover.position.y = 0.015; g.add(cover);
+  const label = new THREE.Mesh(B(0.11, 0.004, 0.05), M.paper); label.position.set(0, 0.031, -0.07); g.add(label);
+  g.visible = false; R.scene.add(g); R.journal = g;
+  R.spot({ id: 'journal', x: sx, z: sz, r, label: '学級日誌 · Class journal', when: () => F.hard, use: useJournal });
+}
+async function useJournal() {
+  if (!has('pencil')) return say('You need a pencil to write in the journal.');
+  const c = await ask('Write in the class journal? It uses a pencil.', ['Write', 'Leave it'], 1);   // 'Leave it' first: a mashed E never spends a pencil
+  if (c !== 0) return;
+  take('pencil'); manualSave(); audio.play('pickup');
+  toast(tr('学級日誌 · Progress saved'));
+  await say('You write the date and your name in the journal.');
 }
 
 boot();

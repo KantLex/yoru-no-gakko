@@ -1,7 +1,7 @@
 <title>Yoru no Gakkō</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Klee+One:wght@400;600&family=Yuji+Syuku&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Klee+One:wght@400;600&family=Yuji+Syuku&family=Noto+Sans+SC:wght@400;600&family=Noto+Sans+TC:wght@400;600&display=swap">
 <style>
 /* Layout: one 16:10 letterboxed stage; DOM overlays sit on the pixel canvas, sized in stage units (--u = 1% of stage width). */
 :root {
@@ -18,9 +18,14 @@
   --f-title: "Yuji Syuku", "Hiragino Mincho ProN", "Yu Mincho", serif;
   --f-ui: "DotGothic16", "Osaka-Mono", "MS Gothic", monospace;
   --f-hand: "Klee One", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+  --f-sub: var(--f-ui);   /* secondary (translated) text: subtitles, labels, descriptions */
+  --f-subh: var(--f-hand); /* ...on the handwritten notebook pages */
   --u: 8px;
+  --ts: 1;                /* text-size setting, multiplies the reading-text sizes */
   color-scheme: dark;
 }
+:root:lang(zh-Hans) { --f-sub: "Noto Sans SC", var(--f-ui); --f-subh: "Noto Sans SC", var(--f-hand); }
+:root:lang(zh-Hant) { --f-sub: "Noto Sans TC", var(--f-ui); --f-subh: "Noto Sans TC", var(--f-hand); }
 html, body { height: 100%; }
 [hidden] { display: none !important; }
 body { background: var(--void); color: var(--chalk); font-family: var(--f-ui); overflow: hidden; margin: 0;
@@ -45,20 +50,20 @@ body { background: var(--void); color: var(--chalk); font-family: var(--f-ui); o
 #equip b { display: grid; place-items: center; width: calc(var(--u)*3.4); height: calc(var(--u)*3.4); font-weight: 400;
   font-size: calc(var(--u)*2.2); color: var(--chalk); border: 1px solid rgba(255,255,255,.25); background: rgba(0,0,0,.35); }
 #equip .n { color: var(--chalk); }
-#prompt { position: absolute; left: 50%; bottom: calc(var(--u)*15); transform: translateX(-50%); font-size: calc(var(--u)*1.7);
+#prompt { position: absolute; left: 50%; bottom: calc(var(--u)*15); transform: translateX(-50%); font-size: calc(var(--u)*1.7*var(--ts));
   color: var(--chalk); background: rgba(0,0,0,.55); padding: calc(var(--u)*0.4) calc(var(--u)*1.2); white-space: nowrap; opacity: 0; transition: opacity .2s; }
 #prompt.on { opacity: 1; }
 #prompt kbd { font-family: inherit; color: var(--lantern); margin-right: calc(var(--u)*0.6); }
-#toast { position: absolute; left: 50%; top: calc(var(--u)*2); transform: translateX(-50%); font-size: calc(var(--u)*1.7); white-space: nowrap;
+#toast { position: absolute; left: 50%; top: calc(var(--u)*2); transform: translateX(-50%); font-size: calc(var(--u)*1.7*var(--ts)); white-space: nowrap;
   color: var(--lantern); background: rgba(0,0,0,.6); border: 1px solid rgba(232,162,74,.35); padding: calc(var(--u)*0.4) calc(var(--u)*1.4); opacity: 0; transition: opacity .3s; }
 #toast.on { opacity: 1; }
 #roomcard { position: absolute; left: 0; right: 0; top: 30%; text-align: center; opacity: 0; transition: opacity 1.2s; text-shadow: 0 0 12px #000, 0 0 3px #000; }
 #roomcard.on { opacity: 1; }
 #roomcard .jp { font-family: var(--f-title); font-size: calc(var(--u)*6.4); letter-spacing: .25em; color: var(--chalk); }
-#roomcard .en { font-size: calc(var(--u)*1.7); letter-spacing: .5em; color: var(--dim); margin-top: calc(var(--u)*0.5); }
+#roomcard .en { font-size: calc(var(--u)*1.7*var(--ts)); letter-spacing: .5em; color: var(--dim); margin-top: calc(var(--u)*0.5); }
 #msg { position: absolute; left: 8%; right: 8%; bottom: calc(var(--u)*3); min-height: calc(var(--u)*9); padding: calc(var(--u)*1.4) calc(var(--u)*2.2);
   background: linear-gradient(rgba(6,8,14,.88), rgba(6,8,14,.94)); border: 1px solid rgba(159,180,255,.28); box-shadow: 0 0 0 1px #000;
-  font-size: calc(var(--u)*2.05); line-height: 1.5; color: var(--chalk); opacity: 0; transition: opacity .25s; }
+  font-size: calc(var(--u)*2.05*var(--ts)); line-height: 1.5; color: var(--chalk); opacity: 0; transition: opacity .25s; }
 #msg.on { opacity: 1; }
 #msg .jp { display: block; font-family: var(--f-hand); font-weight: 600; color: var(--lantern); font-size: 1.05em; }
 #msg .more { position: absolute; right: calc(var(--u)*1.2); bottom: calc(var(--u)*0.6); color: var(--dim); font-size: .75em; animation: pulse 1s infinite; }
@@ -67,13 +72,13 @@ body { background: var(--void); color: var(--chalk); font-family: var(--f-ui); o
 .panel { background: rgba(8,10,16,.93); pointer-events: auto; }
 .center { display: grid; place-items: center; }
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
-.btn { font-family: var(--f-ui); font-size: calc(var(--u)*2); padding: calc(var(--u)*0.7) calc(var(--u)*2); color: var(--chalk);
+.btn { font-family: var(--f-sub); font-size: calc(var(--u)*2); padding: calc(var(--u)*0.7) calc(var(--u)*2); color: var(--chalk);
   border: 1px solid rgba(159,180,255,.35); background: rgba(0,0,0,.4); }
 .btn:hover, .btn:focus-visible, .btn.sel { background: var(--chalk); color: var(--void); outline: none; }
 
 #choice { display: flex; align-items: flex-end; justify-content: center; padding-bottom: calc(var(--u)*14); pointer-events: auto; }
 #choice .opts { display: flex; flex-direction: column; align-items: stretch; gap: calc(var(--u)*0.8); max-width: 72%; }
-#choice .opts .btn { text-align: left; font-size: calc(var(--u)*1.85); }
+#choice .opts .btn { text-align: left; font-size: calc(var(--u)*1.85*var(--ts)); }
 
 /* Title */
 #title { background: radial-gradient(ellipse at 50% 60%, rgba(7,8,12,.15), rgba(7,8,12,.85) 75%); display: flex; flex-direction: column;
@@ -86,23 +91,26 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 #title .keys { margin-top: calc(var(--u)*3.5); font-size: calc(var(--u)*1.45); color: var(--dim); line-height: 1.8;
   display: grid; grid-template-columns: auto auto; gap: 0 calc(var(--u)*2.5); text-align: left; }
 #title .keys b { color: var(--chalk); font-weight: 400; }
+#title .padhint { position: absolute; left: 0; right: 0; bottom: calc(var(--u)*2.2); font-size: calc(var(--u)*1.4); color: var(--lantern); }
 #title .seal { position: absolute; right: calc(var(--u)*4); bottom: calc(var(--u)*3.5); width: calc(var(--u)*7); height: calc(var(--u)*7);
   border: 2px solid var(--shu); color: var(--shu); font-family: var(--f-title); font-size: calc(var(--u)*2.4); display: grid; place-items: center;
   line-height: 1; transform: rotate(-6deg); opacity: .8; writing-mode: vertical-rl; }
+#title .seal.hard { right: calc(var(--u)*13); bottom: calc(var(--u)*3.8); width: calc(var(--u)*4.2); height: calc(var(--u)*4.2); font-size: calc(var(--u)*1.6);
+  background: var(--shu); color: #f3e6dc; transform: rotate(9deg); }
 
 /* Intro / ending text screens */
 .story { background: #000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u)*2.2);
   padding: 0 10%; text-align: center; pointer-events: auto; }
 .story p { margin: 0; opacity: 0; transition: opacity 1.4s; }
 .story p.on { opacity: 1; }
-.story .jp { font-family: var(--f-hand); font-size: calc(var(--u)*2.6); color: var(--chalk); }
-.story .en { font-size: calc(var(--u)*1.7); color: var(--dim); margin-top: calc(var(--u)*0.4); display: block; }
+.story .jp { font-family: var(--f-hand); font-size: calc(var(--u)*2.6*var(--ts)); color: var(--chalk); }
+.story .en { font-size: calc(var(--u)*1.7*var(--ts)); color: var(--dim); margin-top: calc(var(--u)*0.4); display: block; }
 .story .skip { position: absolute; bottom: calc(var(--u)*2.5); right: calc(var(--u)*3); font-size: calc(var(--u)*1.4); color: var(--dim); opacity: .7; }
 #ending { gap: calc(var(--u)*1.3); }
-#ending .jp { font-size: calc(var(--u)*2.2); }
+#ending .jp { font-size: calc(var(--u)*2.2*var(--ts)); }
 #ending h2, #over h2 { font-family: var(--f-title); font-weight: 400; font-size: calc(var(--u)*6.5); margin: 0; letter-spacing: .15em; }
 #over h2 { color: var(--shu); }
-#over .en, #ending .en { font-size: calc(var(--u)*1.8); }
+#over .en, #ending .en { font-size: calc(var(--u)*1.8*var(--ts)); }
 .stats { font-size: calc(var(--u)*1.6); color: var(--dim); display: grid; grid-template-columns: auto auto; gap: calc(var(--u)*0.4) calc(var(--u)*3);
   font-variant-numeric: tabular-nums; text-align: left; }
 .stats b { color: var(--chalk); font-weight: 400; text-align: right; }
@@ -123,7 +131,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 #inv .big { font-family: var(--f-title); font-size: calc(var(--u)*7); color: var(--chalk); line-height: 1; }
 #inv .name { font-size: calc(var(--u)*2.3); }
 #inv .name small { display: block; color: var(--dim); font-size: .7em; margin-top: calc(var(--u)*0.3); }
-#inv .desc { font-size: calc(var(--u)*1.75); line-height: 1.6; color: #b9bfcc; }
+#inv .desc { font-size: calc(var(--u)*1.75*var(--ts)); line-height: 1.6; color: #b9bfcc; }
 #inv .acts { display: flex; gap: calc(var(--u)*1); flex-wrap: wrap; }
 #inv .cond { margin-top: auto; display: flex; align-items: center; gap: calc(var(--u)*1.2); font-size: calc(var(--u)*1.6); color: var(--dim); }
 #inv .cond canvas { width: calc(var(--u)*18); height: calc(var(--u)*4); border: 1px solid rgba(255,255,255,.15); background: #000; }
@@ -133,12 +141,12 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 /* Document: a page torn from a ruled school notebook */
 #doc { display: grid; place-items: center; background: rgba(0,0,0,.72); pointer-events: auto; }
 #doc .page { position: relative; width: 70%; height: 86%; background: var(--paper); color: var(--pencil); font-family: var(--f-hand);
-  padding: calc(var(--u)*3) calc(var(--u)*3.5) calc(var(--u)*3) calc(var(--u)*7); box-shadow: 0 calc(var(--u)*1) calc(var(--u)*4) #000;
+  padding: calc(var(--u)*3*var(--ts)) calc(var(--u)*3.5) calc(var(--u)*3) calc(var(--u)*7); box-shadow: 0 calc(var(--u)*1) calc(var(--u)*4) #000;
   background-image: linear-gradient(90deg, transparent calc(var(--u)*5.2), rgba(176,40,44,.55) calc(var(--u)*5.2), rgba(176,40,44,.55) calc(var(--u)*5.35), transparent calc(var(--u)*5.35)),
-                    repeating-linear-gradient(transparent 0, transparent calc(var(--u)*3.3), var(--rule) calc(var(--u)*3.3), var(--rule) calc(var(--u)*3.4));
+                    repeating-linear-gradient(transparent 0, transparent calc(var(--u)*3.3*var(--ts)), var(--rule) calc(var(--u)*3.3*var(--ts)), var(--rule) calc(var(--u)*3.4*var(--ts)));
   transform: rotate(-.6deg); overflow: hidden; display: flex; flex-direction: column; }
-#doc .page h4 { margin: 0 0 calc(var(--u)*0.6); font-size: calc(var(--u)*2.4); font-weight: 600; line-height: calc(var(--u)*3.4); }
-#doc .body { font-size: calc(var(--u)*1.9); line-height: calc(var(--u)*3.4); overflow-y: auto; flex: 1; min-height: 0; }
+#doc .page h4 { margin: 0 0 calc(var(--u)*0.6*var(--ts)); font-size: calc(var(--u)*2.4); font-weight: 600; line-height: calc(var(--u)*3.4*var(--ts)); }
+#doc .body { font-size: calc(var(--u)*1.9*var(--ts)); line-height: calc(var(--u)*3.4*var(--ts)); overflow-y: auto; flex: 1; min-height: 0; }
 #doc .body p { margin: 0; }
 #doc .body .en { color: #5b5a66; font-size: .82em; }
 #doc .body .torn { color: var(--shu); }
@@ -160,11 +168,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 #boss .bar i { display: block; height: 100%; width: 100%; background: linear-gradient(90deg, #6d1418, var(--shu)); transition: width .25s; }
 
 /* Big centred line, for sung words and shouted names */
-#bigtext { display: grid; place-items: center; pointer-events: none; font-family: var(--f-title); font-size: calc(var(--u)*5.2); color: var(--chalk);
+#bigtext { display: grid; place-items: center; pointer-events: none; font-family: var(--f-title); font-size: calc(var(--u)*5.2*var(--ts)); color: var(--chalk);
   text-shadow: 0 0 calc(var(--u)*1.5) #000, 0 0 4px #000; letter-spacing: .12em; text-align: center; opacity: 0; transition: opacity .35s; }
 #bigtext.on { opacity: 1; }
 #bigtext.red { color: #ff6a60; }
-#bigtext small { display: block; font-family: var(--f-ui); font-size: .32em; color: var(--dim); letter-spacing: .2em; margin-top: calc(var(--u)*0.8); }
+#bigtext small { display: block; font-family: var(--f-sub); font-size: .32em; color: var(--dim); letter-spacing: .2em; margin-top: calc(var(--u)*0.8); }
 
 /* Dial padlock */
 #dial { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u)*1.6); }
@@ -219,6 +227,65 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 #goal b { color: var(--dim); font-weight: 400; margin-right: calc(var(--u)*0.6); }
 #title .menu { margin-top: calc(var(--u)*4.5); display: flex; flex-direction: column; gap: calc(var(--u)*1); align-items: center; }
 #title .menu .btn { min-width: calc(var(--u)*24); }
+#pause .btn { min-width: calc(var(--u)*24); }
+#pause .pinfo { margin-top: calc(var(--u)*1.2); font-size: calc(var(--u)*1.5); color: var(--dim); }
+#pause .pinfo b { color: var(--chalk); font-weight: 400; margin-left: calc(var(--u)*0.4); }
+#pause .pinfo .hard { color: var(--shu); margin-left: calc(var(--u)*2.5); }
+#title .menu .desc { font-size: max(11px, calc(var(--u)*1.45*var(--ts))); color: var(--dim); margin: calc(var(--u)*-0.5) 0 calc(var(--u)*0.3); max-width: max(calc(var(--u)*44), 88%); }
+#title .menu .desc.hard { color: var(--shu); }
+/* four or more rows in the menu (Continue + its Nightmare tag, New game, Records, Settings): tighten so the key help clears the bottom and the sound hint */
+#title.tall .menu { margin-top: calc(var(--u)*2); gap: calc(var(--u)*0.7); }
+#title.tall .keys { margin-top: calc(var(--u)*1.5); line-height: 1.55; }
+#title.tall .padhint { bottom: calc(var(--u)*0.9); }
+
+/* Records (over the title and the pause panel) */
+#records { display: flex; flex-direction: column; align-items: center; gap: calc(var(--u)*0.6); padding: calc(var(--u)*2.6) calc(var(--u)*5) calc(var(--u)*1.6);
+  background: rgba(8,10,16,.97); }
+#records h2 { font-family: var(--f-title); font-weight: 400; font-size: calc(var(--u)*3.6); margin: 0; letter-spacing: .3em; }
+#records .body { flex: 1; min-height: 0; width: 100%; overflow-y: auto; display: grid; grid-template-columns: 1.4fr 1fr; gap: 0 calc(var(--u)*4); align-content: start; }
+#records .body > div { min-width: 0; }
+#records h3 { font-weight: 400; margin: calc(var(--u)*1.2) 0 calc(var(--u)*0.5); font-size: calc(var(--u)*1.45); color: var(--dim); letter-spacing: .25em; }
+#records h3 .n { color: var(--chalk); letter-spacing: 0; margin-left: calc(var(--u)*0.6); }
+#records ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: calc(var(--u)*0.25); }
+#records li { display: flex; align-items: baseline; gap: calc(var(--u)*0.9); font-size: calc(var(--u)*1.6*var(--ts)); line-height: 1.35; }
+#records li i { font-style: normal; color: var(--dim); min-width: 1.4em; font-family: var(--f-title); }
+#records li b { font-weight: 400; font-family: var(--f-hand); color: var(--chalk); white-space: nowrap; }
+#records li .en { color: var(--dim); font-size: .85em; min-width: 0; }   /* long names wrap under themselves */
+#records .body.more { -webkit-mask-image: linear-gradient(#000 82%, transparent); mask-image: linear-gradient(#000 82%, transparent); }   /* more below */
+#records li .q { color: #474c5a; letter-spacing: .2em; }
+#records .stats { margin-top: calc(var(--u)*1.4); font-size: calc(var(--u)*1.5*var(--ts)); width: max-content; }
+#records .back { margin-top: calc(var(--u)*0.6); min-width: calc(var(--u)*20); }
+#records .hint { color: var(--dim); font-size: calc(var(--u)*1.35); }
+#ending .hint-end .jp { font-size: calc(var(--u)*1.8*var(--ts)); color: var(--dim); }
+#ending .hint-end .en { font-size: calc(var(--u)*1.5*var(--ts)); color: #5d6475; }
+
+/* Settings (over the title and the pause panel) */
+#settings { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: calc(var(--u)*0.6); background: rgba(8,10,16,.97); }
+#settings h2 { font-family: var(--f-title); font-weight: 400; font-size: calc(var(--u)*4); margin: 0 0 calc(var(--u)*1.2); letter-spacing: .3em; }
+#settings .rows { display: flex; flex-direction: column; gap: calc(var(--u)*0.4); width: calc(var(--u)*80); }
+#settings .row { display: grid; grid-template-columns: 1fr auto minmax(calc(var(--u)*30), auto) auto; align-items: center; cursor: pointer;
+  font-size: calc(var(--u)*1.75*var(--ts)); padding: calc(var(--u)*0.35) calc(var(--u)*1.4); border: 1px solid transparent; white-space: nowrap; }
+#settings .row.sel { border-color: var(--moon); background: rgba(159,180,255,.1); }
+#settings .lbl { color: var(--dim); }
+#settings .row.sel .lbl { color: var(--chalk); }
+#settings .arr { color: var(--dim); font-size: .9em; padding: calc(var(--u)*0.3) calc(var(--u)*1.4); }
+#settings .row.sel .arr { color: var(--lantern); }
+#settings .val { cursor: pointer; text-align: center; display: flex; justify-content: center; align-items: center; gap: calc(var(--u)*1); }
+#settings .val b { font-weight: 400; min-width: 2ch; text-align: right; font-variant-numeric: tabular-nums; }
+#settings .cells { display: inline-flex; gap: calc(var(--u)*0.3); }
+#settings .cells i { width: calc(var(--u)*1.3*var(--ts)); height: calc(var(--u)*1.3*var(--ts)); background: rgba(255,255,255,.12); outline: 1px solid rgba(255,255,255,.1); }
+#settings .cells i.on { background: var(--chalk); }
+#settings .back { margin-top: calc(var(--u)*1.2); min-width: calc(var(--u)*20); }
+#settings .hint { color: var(--dim); font-size: calc(var(--u)*1.35); margin-top: calc(var(--u)*0.6); }
+
+/* Translated text: its own font stack (Noto Sans SC/TC first under zh), and no Latin-caps letter-spacing for Hanzi */
+.en, #msg p, #toast, #prompt, .hint, .skip, #title .sub, #title .keys, #title .padhint, #equip .n, #inv h3, #inv li button, #inv .name, #inv .desc,
+#inv .cond, #goal, #map h3, #map .rm small, #dial .dl-sub, .stats, #settings .row, #touch button small, #records h3, #pause .pinfo, #title .menu .desc { font-family: var(--f-sub); }
+#doc .body .en { font-family: var(--f-subh); }
+:lang(zh-Hans) #roomcard .en, :lang(zh-Hant) #roomcard .en { letter-spacing: .15em; }
+:lang(zh-Hans) #boss .bn .en, :lang(zh-Hant) #boss .bn .en, :lang(zh-Hans) #bigtext small, :lang(zh-Hant) #bigtext small { letter-spacing: .08em; }
+:lang(zh-Hans) #inv h3, :lang(zh-Hant) #inv h3, :lang(zh-Hans) #map h3, :lang(zh-Hant) #map h3, :lang(zh-Hans) #settings h2, :lang(zh-Hant) #settings h2,
+:lang(zh-Hans) #records h2, :lang(zh-Hant) #records h2, :lang(zh-Hans) #records h3, :lang(zh-Hant) #records h3 { letter-spacing: .1em; }
 
 /* Touch controls */
 #touch { position: fixed; left: 0; right: 0; bottom: 0; height: 0; pointer-events: none; z-index: 5; }
@@ -228,8 +295,9 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 #touch button { position: absolute; width: 52px; height: 52px; border-radius: 50%; background: rgba(20,24,36,.55); border: 1px solid rgba(159,180,255,.35);
   color: var(--chalk); font-family: var(--f-title); font-size: 20px; display: grid; place-items: center; touch-action: none; }
 #touch button.on { background: rgba(159,180,255,.35); }
-#touch button small { position: absolute; bottom: -16px; font-family: var(--f-ui); font-size: 10px; color: var(--dim); white-space: nowrap; }
+#touch button small { position: absolute; bottom: -16px; font-family: var(--f-sub); font-size: 10px; color: var(--dim); white-space: nowrap; }
 #touch .pad button { border-radius: 10px; font-family: var(--f-ui); font-size: 18px; }
+#touch .tpause { position: fixed; width: 40px; height: 40px; border-radius: 10px; font-family: var(--f-ui); font-size: 16px; pointer-events: auto; }
 @media (prefers-reduced-motion: reduce) { #title .start, #hp.low .bar i, #msg .more { animation: none; } }
 </style>
 
@@ -252,7 +320,7 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
     </div>
     <div id="choice" class="layer" hidden><div class="opts"></div></div>
     <div id="inv" class="layer panel" hidden>
-      <div><h3>持ち物 · ITEMS</h3><ul id="invlist"></ul><div id="goal"></div></div>
+      <div><h3 data-t="持ち物 · ITEMS">持ち物 · ITEMS</h3><ul id="invlist"></ul><div id="goal"></div></div>
       <div class="detail">
         <div class="big kanji" id="invbig"></div>
         <div class="name" id="invname"></div>
@@ -260,44 +328,69 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
         <div class="acts" id="invacts"></div>
         <div class="cond"><canvas id="ecg" width="180" height="40"></canvas><div>状態 <b id="condtxt"></b></div></div>
       </div>
-      <div class="hint">↑↓ choose · E / Enter use · M map · I / Esc close</div>
+      <div class="hint" data-dev="kb" data-t="↑↓ choose · E / Enter use · M map · I / Esc close">↑↓ choose · E / Enter use · M map · I / Esc close</div><div class="hint" data-dev="pad" data-t="↑↓ choose · A use · Back map · B close" hidden>↑↓ choose · A use · Back map · B close</div>
     </div>
     <div id="dial" class="layer panel" hidden>
       <div class="dl-title">書庫</div>
       <div class="dl-sub">The archive door is held by a four-digit dial padlock.</div>
       <div class="wheels"></div>
-      <div class="dl-acts"><button class="btn" data-act="open">開ける · Open</button><button class="btn" data-act="cancel">やめる · Leave it</button></div>
-      <div class="hint">← → choose a wheel · ↑ ↓ turn it · E open · Esc leave</div>
+      <div class="dl-acts"><button class="btn" data-act="open" data-t="開ける · Open">開ける · Open</button><button class="btn" data-act="cancel" data-t="やめる · Leave it">やめる · Leave it</button></div>
+      <div class="hint" data-dev="kb" data-t="← → choose a wheel · ↑ ↓ turn it · E open · Esc leave">← → choose a wheel · ↑ ↓ turn it · E open · Esc leave</div><div class="hint" data-dev="pad" data-t="← → choose a wheel · ↑ ↓ turn it · A open · B leave" hidden>← → choose a wheel · ↑ ↓ turn it · A open · B leave</div>
     </div>
-    <div id="map" class="layer panel" hidden><h3>校内案内図 · SCHOOL MAP</h3><div class="floors"></div><div class="hint">M / Esc close</div></div>
+    <div id="map" class="layer panel" hidden><h3 data-t="校内案内図 · SCHOOL MAP">校内案内図 · SCHOOL MAP</h3><div class="floors"></div><div class="hint" data-dev="kb" data-t="M / Esc close">M / Esc close</div><div class="hint" data-dev="pad" data-t="Back / B close" hidden>Back / B close</div></div>
     <div id="doc" class="layer" hidden>
       <div class="page"><h4 id="doctitle"></h4><div class="body" id="docbody"></div>
         <div class="nav"><button id="docprev">← 前</button><span id="docpage"></span><button id="docnext">次 →</button></div></div>
     </div>
     <div id="pause" class="layer panel" hidden>
       <h2>一時停止</h2>
-      <button class="btn" data-act="resume">Resume</button>
-      <button class="btn" data-act="restart">Restart from title</button>
+      <button class="btn" data-act="resume" data-t="Resume">Resume</button>
+      <button class="btn" data-act="settings" data-t="Settings">Settings</button>
+      <button class="btn" data-act="records" data-t="Records">Records</button>
+      <button class="btn" data-act="restart" data-t="Restart from title">Restart from title</button>
+      <div class="pinfo"></div>
     </div>
-    <div id="intro" class="layer story" hidden><div class="skip">E / tap to skip</div></div>
+    <div id="intro" class="layer story" hidden><div class="skip" data-dev="kb" data-t="E / tap to skip">E / tap to skip</div><div class="skip" data-dev="pad" data-t="A to skip" hidden>A to skip</div></div>
     <div id="over" class="layer story" hidden></div>
     <div id="ending" class="layer story" hidden></div>
     <div id="title" class="layer">
       <h1>夜の学校</h1>
       <div class="roma">YORU NO GAKKŌ</div>
-      <div class="sub">a night-school survival horror</div>
+      <div class="sub" data-t="a night-school survival horror">a night-school survival horror</div>
       <div class="menu" id="titlemenu"></div>
       <div class="keys">
-        <span><b>↑ ↓</b> walk / back up</span><span><b>← →</b> turn</span>
-        <span><b>Shift</b> run</span><span><b>Space</b> attack · use weapon</span>
-        <span><b>E</b> examine · open</span><span><b>I</b> items · <b>Q</b> switch weapon</span>
-        <span><b>M</b> school map</span><span><b>Esc</b> pause</span>
+        <span data-scheme="tank"><b>↑ ↓</b> <span data-t="walk / back up">walk / back up</span></span><span data-scheme="tank"><b>← →</b> <span data-t="turn">turn</span></span>
+        <span data-scheme="modern" hidden><b>↑ ↓ ← →</b> <span data-t="walk">walk</span></span><span data-scheme="modern" hidden><b>Backspace</b> <span data-t="back · close">back · close</span></span>
+        <span><b>Shift</b> <span data-t="run">run</span></span><span><b>Space</b> <span data-t="attack · use weapon">attack · use weapon</span></span>
+        <span><b>E</b> <span data-t="examine · open">examine · open</span></span><span><b>I</b> <span data-t="items">items</span> · <b>Q</b> <span data-t="switch weapon">switch weapon</span></span>
+        <span><b>M</b> <span data-t="school map">school map</span></span><span><b>Esc</b> <span data-t="pause">pause</span></span>
       </div>
+      <div class="keys pad" hidden>
+        <span><b>L-stick</b> <span data-t="walk">walk</span></span><span><b>B</b> / <b>LT</b> <span data-t="run">run</span></span>
+        <span><b>A</b> <span data-t="examine · open">examine · open</span></span><span><b>X</b> / <b>RT</b> <span data-t="attack">attack</span></span>
+        <span><b>Y</b> <span data-t="items">items</span> · <b>LB</b> <span data-t="switch weapon">switch weapon</span></span><span><b>Back</b> <span data-t="school map">school map</span></span>
+        <span><b>Start</b> <span data-t="pause">pause</span></span><span><b>B</b> <span data-t="back · close">back · close</span></span>
+      </div>
+      <div class="padhint" id="padhint" data-t="🔈 Press a key or click once to enable sound" hidden>🔈 Press a key or click once to enable sound</div>
       <div class="seal">七不思議</div>
+      <div class="seal hard" title="悪夢" hidden>悪夢</div>
+    </div>
+    <div id="records" class="layer panel" hidden>
+      <h2 data-t="記録 · RECORDS">記録 · RECORDS</h2>
+      <div class="body"></div>
+      <button class="btn back sel" data-t="戻る · Back">戻る · Back</button>
+      <div class="hint" data-dev="kb" data-t="↑↓ scroll · Esc back">↑↓ scroll · Esc back</div><div class="hint" data-dev="pad" data-t="↑↓ scroll · B back" hidden>↑↓ scroll · B back</div>
+    </div>
+    <div id="settings" class="layer panel" hidden>
+      <h2 data-t="設定 · SETTINGS">設定 · SETTINGS</h2>
+      <div class="rows"></div>
+      <button class="btn back" data-t="戻る · Back">戻る · Back</button>
+      <div class="hint" data-dev="kb" data-t="↑↓ choose · ← → change · Esc back">↑↓ choose · ← → change · Esc back</div><div class="hint" data-dev="pad" data-t="↑↓ choose · ← → change · B back" hidden>↑↓ choose · ← → change · B back</div>
     </div>
     <div id="fps"></div>
   </div>
   <div id="touch" hidden>
+    <button class="tpause" data-k="pause" aria-label="pause">⏸︎</button>
     <div class="pad">
       <button data-k="up" style="left:49px;top:0">▲</button>
       <button data-k="left" style="left:0;top:49px">◀</button>
@@ -305,11 +398,11 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
       <button data-k="down" style="left:49px;top:98px">▼</button>
     </div>
     <div class="acts">
-      <button data-k="run" data-toggle="1" style="left:0;top:0">走<small>run</small></button>
-      <button data-k="inv" style="left:104px;top:0">持<small>items</small></button>
-      <button data-k="interact" style="left:0;top:86px">調<small>examine</small></button>
-      <button data-k="attack" style="left:104px;top:86px">撃<small>attack</small></button>
-      <button data-k="cycle" style="left:52px;top:44px">替<small>switch</small></button>
+      <button data-k="run" data-toggle="1" style="left:0;top:0">走<small data-t="run">run</small></button>
+      <button data-k="inv" style="left:104px;top:0">持<small data-t="items">items</small></button>
+      <button data-k="interact" style="left:0;top:86px">調<small data-t="examine">examine</small></button>
+      <button data-k="attack" style="left:104px;top:86px">撃<small data-t="attack">attack</small></button>
+      <button data-k="cycle" style="left:52px;top:44px">替<small data-t="switch">switch</small></button>
     </div>
   </div>
 </div>

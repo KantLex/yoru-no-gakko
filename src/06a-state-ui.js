@@ -7,7 +7,8 @@ const ITEMS = {
   ofuda: { k: '札', jp: 'お札', en: 'Ofuda', weapon: true, desc: 'A shrine talisman in vermilion ink, peeled from the piano. Hold it up to a spirit at close range. Mr. Kuroda wrote that only this can send "the girl" home.' },
   onigiri: { k: '飯', jp: 'おにぎり', en: 'Onigiri', heal: 35, desc: 'A rice ball with a pickled plum inside, left over from lunch. Restores some strength.' },
   ramune: { k: '泡', jp: 'ラムネ', en: 'Ramune', heal: 25, desc: 'Ice-cold marble soda from the vending machine. Restores a little strength.' },
-  firstaid: { k: '薬', jp: '救急箱', en: 'First-aid kit', heal: 100, desc: 'Bandages, disinfectant, and a roll of tape. Restores all strength.' },
+  firstaid: { k: '薬', jp: '救急箱', en: 'First-aid kit', heal: 100, desc: 'Bandages, disinfectant, and a roll of tape. Restores all strength.',
+    descHard: 'Bandages, disinfectant, and a roll of tape. Restores a good deal of strength.' },
   staffkey: { k: '鍵', jp: '職員室の鍵', en: 'Staff room key', desc: 'A small brass key on a red tag that reads 「職員室」. It opens the staff room on the ground floor.' },
   entrancekey: { k: '錠', jp: '昇降口の鍵', en: 'Entrance key', desc: 'A heavy iron key for the padlock on the main doors.' },
   bandage: { k: '包', jp: '包帯', en: 'Bandage', heal: 20, desc: 'A roll of bandage from the infirmary. Restores a little strength.' },
@@ -26,6 +27,7 @@ const ITEMS = {
   kuroda: { k: '譜', jp: '黒田先生のメモ', en: 'Mr. Kuroda\'s note', doc: 'kuroda', desc: 'A warning scrawled on staff paper by the music teacher.' },
   dutylog: { k: '誌', jp: '宿直日誌', en: 'Night-duty log', doc: 'dutylog', desc: 'The log kept by the teacher on night duty.' },
   shoenote: { k: '紙', jp: '下駄箱の手紙', en: 'Note in your shoe', doc: 'shoenote', desc: 'A note someone left in your outdoor shoe.' },
+  pencil: { k: '筆', jp: '鉛筆', en: 'Pencil', count: true, desc: 'A short pencil. In Nightmare, writing in a class journal saves your progress.' },
 };
 const WEAPON_ORDER = ['hands', 'shinai', 'salt', 'ofuda'];
 
@@ -120,8 +122,9 @@ function has(id) { return (G.inv[id] || 0) > 0; }
 function give(id, n = 1) {
   G.inv[id] = (G.inv[id] || 0) + n;
   audio.play('pickup');
-  toast(`${ITEMS[id].jp}　${ITEMS[id].en}${n > 1 || ITEMS[id].count ? ' ×' + n : ''}`);
+  toast(`${ITEMS[id].jp}　${tr(ITEMS[id].en)}${n > 1 || ITEMS[id].count ? ' ×' + n : ''}`);
   updateHUD();
+  if (ITEMS[id].doc) syncMeta();
 }
 function take(id, n = 1) { G.inv[id] = Math.max(0, (G.inv[id] || 0) - n); if (!G.inv[id]) delete G.inv[id]; updateHUD(); }
 function equip(id) { G.equipped = id; player.m.shinai.visible = id === 'shinai'; updateHUD(); }
@@ -139,7 +142,7 @@ function updateHUD() {
   hud.hp.classList.toggle('low', G.hp < 30);
   const it = ITEMS[G.equipped];
   hud.equip.querySelector('b').textContent = it.k;
-  hud.equip.querySelector('.n').textContent = it.en + (it.count ? ' ×' + (G.inv[G.equipped] || 0) : '');
+  hud.equip.querySelector('.n').textContent = tr(it.en) + (it.count ? ' ×' + (G.inv[G.equipped] || 0) : '');
 }
 let toastEl = null, toastT = 0;
 function toast(text) {
@@ -148,24 +151,27 @@ function toast(text) {
 }
 function showRoomCard(R) {
   hud.card.querySelector('.jp').textContent = R.name;
-  hud.card.querySelector('.en').textContent = R.en;
+  hud.card.querySelector('.en').textContent = tr(R.en);
   hud.card.classList.add('on');
   clearTimeout(showRoomCard.t);
   showRoomCard.t = setTimeout(() => hud.card.classList.remove('on'), 2600);
 }
 function setPrompt(text) {
-  if (text) { hud.prompt.innerHTML = `<kbd>${isTouch ? '調' : 'E'}</kbd>${text}`; hud.prompt.classList.add('on'); }
+  setPrompt.text = text;
+  if (text) { hud.prompt.innerHTML = `<kbd>${esc(glyph('interact'))}</kbd>${esc(tr(text))}`; hud.prompt.classList.add('on'); }
   else hud.prompt.classList.remove('on');
 }
 
 // ── message box: say() blocks the game until dismissed, note() is a passing caption ──
 const msgP = hud.msg.querySelector('p');
 function esc(s) { return s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
-function say(text, o = {}) {
+function say(text, o = {}) {   // o: { jp: the line is Japanese, sub: its English subtitle, voice: a VOICE id spoken with it }
   return new Promise((resolve) => {
-    G.dialog = { text, o, shown: 0, resolve };
+    const t = dlgText(text);
+    G.dialog = { text: t, src: text, subSrc: o.sub, o: { ...o, sub: tr(o.sub) }, shown: 0, rate: textRate(t), resolve };   // src: re-translated on a language change
     hud.msg.classList.add('on');
     renderDialog();
+    if (o.voice) audio.speak(o.voice);
   });
 }
 function renderDialog() {
@@ -178,25 +184,27 @@ function advanceDialog() {
   const d = G.dialog; if (!d) return;
   if (d.shown < d.text.length) { d.shown = d.text.length; renderDialog(); return; }
   G.dialog = null; hud.msg.classList.remove('on');
+  if (d.o.voice) audio.stopVoice();
   d.resolve();
 }
 let noteT = 0;
-function note(text, secs = 3, jp = false) {
+function note(text, secs = 3, jp = false, sub) {   // sub: English under a Japanese line, as in say()
   if (G.dialog) return;
-  msgP.innerHTML = jp ? `<span class="jp">${esc(text)}</span>` : esc(text);
+  text = tr(text);
+  msgP.innerHTML = jp ? `<span class="jp">${esc(text)}</span>${sub ? esc(tr(sub)) : ''}` : esc(text);
   hud.msg.classList.add('on'); noteT = secs;
 }
-function ask(text, options) {
+function ask(text, options, sel = 0) {   // sel: the option selected when it opens
   return new Promise((resolve) => {
-    msgP.innerHTML = esc(text); hud.msg.classList.add('on');
+    msgP.innerHTML = esc(tr(text)); hud.msg.classList.add('on');
     const box = $('choice'), opts = box.querySelector('.opts');
     opts.innerHTML = '';
     options.forEach((o, i) => {
-      const b = document.createElement('button'); b.className = 'btn' + (i === 0 ? ' sel' : ''); b.textContent = o;
+      const b = document.createElement('button'); b.className = 'btn' + (i === sel ? ' sel' : ''); b.textContent = tr(o);
       b.onclick = () => finish(i); opts.appendChild(b);
     });
     box.hidden = false;
-    G.choice = { sel: 0, n: options.length, finish };
+    G.choice = { sel, n: options.length, finish };
     function finish(i) { box.hidden = true; G.choice = null; hud.msg.classList.remove('on'); resolve(i); }
   });
 }
@@ -214,10 +222,27 @@ function showDoc(id) {
 function renderDoc() {
   const d = DOCS[G.docOpen.id], pg = G.docOpen.page;
   $('doctitle').textContent = d.title;
-  $('docbody').innerHTML = d.pages[pg].map(([jp, en, cls]) => `<p class="${cls || ''}">${esc(jp)}</p><p class="en">${esc(en)}</p>`).join('');
+  $('docbody').innerHTML = d.pages[pg].map(([jp, en, cls]) => `<p class="${cls || ''}">${esc(jp)}</p><p class="en">${esc(tr(en))}</p>`).join('');
   $('docpage').textContent = d.pages.length > 1 ? `${pg + 1} / ${d.pages.length}` : '';
   $('docprev').style.visibility = pg > 0 ? 'visible' : 'hidden';
-  $('docnext').textContent = pg < d.pages.length - 1 ? '次 →' : '閉じる ×';
+  $('docbody').scrollTop = 0;
+  docNextLabel();
+}
+// long pages (big text sizes) scroll: ▼ on the next button while text is hidden below; interact/→ scroll a screen before turning the page
+const docMore = () => { const b = $('docbody'); return b.scrollTop + b.clientHeight < b.scrollHeight - 2; };
+function docNextLabel() {
+  if (!G.docOpen) return;
+  $('docnext').textContent = docMore() ? '続き ▼' : G.docOpen.page < DOCS[G.docOpen.id].pages.length - 1 ? '次 →' : '閉じる ×';
+}
+function docScroll(lines) {
+  const b = $('docbody'), lh = parseFloat(getComputedStyle(b).lineHeight) || 20;
+  b.scrollTop += lines === 'page' ? Math.max(lh, b.clientHeight - lh) : lines === '-page' ? -Math.max(lh, b.clientHeight - lh) : lines * lh;
+  docNextLabel();
+}
+function docStep(d) {
+  if (d > 0 && docMore()) docScroll('page');
+  else if (d < 0 && $('docbody').scrollTop > 0) docScroll('-page');
+  else docNav(d);
 }
 function docNav(d) {
   const doc = DOCS[G.docOpen.id], np = G.docOpen.page + d;
@@ -227,7 +252,8 @@ function docNav(d) {
 }
 function closeDoc() { G.docOpen = null; $('doc').hidden = true; }
 $('docprev').onclick = () => docNav(-1);
-$('docnext').onclick = () => docNav(1);
+$('docnext').onclick = () => docStep(1);
+$('docbody').addEventListener('scroll', docNextLabel);
 
 // ── inventory screen ──
 const inv = { sel: 0, list: [], ecgX: 0, ecgY: 20 };
@@ -247,19 +273,19 @@ function renderInv() {
   inv.list.forEach((id, i) => {
     const it = ITEMS[id], li = document.createElement('li'), b = document.createElement('button');
     b.className = i === inv.sel ? 'sel' : '';
-    b.innerHTML = `<span class="k">${it.k}</span><span>${esc(it.en)}${G.equipped === id ? ' <span class="eq">装備中</span>' : ''}</span><span class="c">${it.count ? '×' + G.inv[id] : ''}</span>`;
+    b.innerHTML = `<span class="k">${it.k}</span><span>${esc(tr(it.en))}${G.equipped === id ? ' <span class="eq">装備中</span>' : ''}</span><span class="c">${it.count ? '×' + G.inv[id] : ''}</span>`;
     b.onclick = () => { if (inv.sel === i) invAction(0); else { inv.sel = i; renderInv(); } };
     li.appendChild(b); ul.appendChild(li);
   });
   const id = inv.list[inv.sel], it = ITEMS[id];
   $('invbig').textContent = it.k;
-  $('invname').innerHTML = `${esc(it.en)}<small>${esc(it.jp)}</small>`;
-  $('invdesc').textContent = it.desc;
+  $('invname').innerHTML = `${esc(tr(it.en))}<small>${esc(it.jp)}</small>`;
+  $('invdesc').textContent = tr(F.hard && it.descHard || it.desc);
   const acts = invActs(id), box = $('invacts'); box.innerHTML = '';
-  acts.forEach(([label], i) => { const b = document.createElement('button'); b.className = 'btn'; b.textContent = label; b.onclick = () => invAction(i); box.appendChild(b); });
+  acts.forEach(([label], i) => { const b = document.createElement('button'); b.className = 'btn'; b.textContent = tr(label); b.onclick = () => invAction(i); box.appendChild(b); });
   const cond = G.hp > 60 ? ['良好 · Fine', '#6fd08c'] : G.hp > 30 ? ['注意 · Hurt', '#e8a24a'] : ['危険 · Danger', '#e0484c'];
-  $('condtxt').textContent = cond[0]; $('condtxt').style.color = cond[1];
-  $('goal').innerHTML = `<b>目的</b>${esc(currentGoal())}`;
+  $('condtxt').textContent = tr(cond[0]); $('condtxt').style.color = cond[1];
+  $('goal').innerHTML = `<b>目的</b>${esc(tr(currentGoal()))}`;
 }
 function currentGoal() {
   if (!F.loop) {
@@ -283,7 +309,7 @@ function invActs(id) {
   const it = ITEMS[id], a = [];
   if (it.weapon && G.equipped !== id) a.push(['装備 Equip', () => { equip(id); renderInv(); }]);
   if (it.heal) a.push(['使う Use', () => {
-    const before = G.hp; G.hp = Math.min(100, G.hp + it.heal); take(id); audio.play('pickup');
+    const before = G.hp; G.hp = Math.min(100, G.hp + (id === 'firstaid' && F.hard ? 60 : it.heal)); take(id); audio.play('pickup');
     toast(`体力 +${Math.round(G.hp - before)}`); renderInv();
   }]);
   if (it.doc) a.push(['読む Read', () => { showDoc(it.doc); }]);
@@ -307,9 +333,11 @@ function drawECG(dt) {
 }
 
 // ── pause ──
-function setPause(on) { G.paused = on; $('pause').hidden = !on; if (on) $('pause').querySelector('.btn').focus(); }
+function setPause(on) { G.paused = on; $('pause').hidden = !on; if (on) { pauseInfo(); $('pause').querySelector('.btn').focus(); } }
 $('pause').addEventListener('click', (e) => {
   const act = e.target.dataset?.act;
   if (act === 'resume') setPause(false);
+  if (act === 'settings') openSettings('pause');
+  if (act === 'records') openRecords('pause');
   if (act === 'restart') { setPause(false); toTitle(); }
 });
