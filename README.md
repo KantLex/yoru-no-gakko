@@ -46,21 +46,37 @@ No further spoilers here.
 - **Two acts and four chapters**, with notes, diaries and old class photographs that slowly rewrite what
   you thought the story was.
 - A shinai, purifying salt and ofuda to fight back; onigiri, ramune and bandages to keep going.
-- **Bilingual text** (Japanese with English beneath), procedural WebAudio sound, autosave in your browser,
-  and on-screen touch controls on phones and tablets.
+- **Bilingual text**: Japanese on screen with English or Traditional Chinese (繁體中文) beneath. Simplified
+  Chinese isn't translated yet.
+- **Voiced heroine**: sixteen short Japanese voice lines at key moments of the story, with subtitles.
+- **Richer sound**, all synthesised in the browser: each room has its own acoustics, footsteps echo down
+  the corridors, wind blows on the roof, and a school chime sounds somewhere far away.
+- **Settings**: brightness, music, sound and voice volume, text size, control scheme and subtitle language.
+- **Two control schemes**: classic tank controls, or modern controls where you push the way you want to go
+  on screen. Keyboard, touch and gamepad all work.
+- **悪夢 · Nightmare mode**: harder obake, fewer supplies, and no autosave. You save by writing in a class
+  journal, and each save uses up a pencil.
+- **Records and a second ending**: the records screen tracks the seven mysteries, the nine documents, the
+  endings you've seen and your best times. Read every document before dawn to see what else the night
+  was hiding.
+- Autosave in your browser, and on-screen touch controls on phones and tablets.
 
 ## Controls
 
-| Action | Keyboard | Touch |
-|---|---|---|
-| Move / turn (tank controls) | Arrow keys or WASD | D-pad |
-| Run | Shift | 走 (toggle) |
-| Examine / interact | E or Enter | 調 |
-| Attack with equipped item | Space | 撃 |
-| Items | I or Tab | 持 |
-| Cycle item | Q | 替 |
-| Map | M | |
-| Pause | Esc or P | |
+| Action | Keyboard | Gamepad | Touch |
+|---|---|---|---|
+| Move / turn | Arrow keys or WASD | Left stick or D-pad | D-pad |
+| Run | Shift | LT or hold B | 走 (toggle) |
+| Examine / interact | E or Enter | A | 調 |
+| Attack with equipped item | Space | X or RT | 撃 |
+| Items | I or Tab | Y | 持 |
+| Cycle item | Q | LB or RB | 替 |
+| Map | M | Back / View | |
+| Back / close | Backspace or Esc | B | |
+| Pause | Esc or P | Start / Menu | ⏸ |
+
+Tank controls are the default on computers and modern controls on phones. Change them under
+設定 · Settings, from the title screen or the pause menu.
 
 ## Running it locally
 
@@ -88,12 +104,20 @@ The source lives in `src/` as numbered parts that `build.sh` joins in order into
 | `06b-actors.js` | Enemy behaviour |
 | `06c-flow.js` | Title, intro, room transitions, game over, ending |
 | `06d-act2.js` | Act 2, the chase sequence and chapter cards |
+| `06e-i18n.js` | Language switching and the translation lookup |
+| `06f-settings.js` | Settings screen and saved preferences |
+| `06g-strings-zh.js` | Traditional Chinese text |
+| `06h-voice.js` | The heroine's voice lines and their subtitles |
+| `06i-meta.js` | Records kept across playthroughs |
 
 ## Credits and licences
 
 - Code: [MIT](LICENSE) © 2026 KantLex.
 - [three.js](https://threejs.org) (MIT), loaded from jsDelivr.
-- Fonts from Google Fonts under the SIL Open Font License: Yuji Syuku, DotGothic16 and Klee One.
-- All sound is synthesised procedurally in the browser.
+- Fonts from Google Fonts under the SIL Open Font License: Yuji Syuku, DotGothic16, Klee One, Noto Sans TC
+  and Noto Sans SC.
+- Music and sound effects are synthesised procedurally in the browser.
+- The heroine's Japanese voice lines (`audio/voice/`) were generated with ElevenLabs (eleven_v3). They are
+  subject to ElevenLabs' terms rather than the MIT licence.
 - Yōkai and *nana fushigi* are Japanese folklore and school legend. The characters, story and school
   are fictional.
