@@ -46,8 +46,8 @@ No further spoilers here.
 - **Two acts and four chapters**, with notes, diaries and old class photographs that slowly rewrite what
   you thought the story was.
 - A shinai, purifying salt and ofuda to fight back; onigiri, ramune and bandages to keep going.
-- **Bilingual text**: Japanese on screen with English or Traditional Chinese (繁體中文) beneath. Simplified
-  Chinese isn't translated yet.
+- **Bilingual text**: Japanese on screen with English, Traditional Chinese (繁體中文) or Simplified Chinese
+  (简体中文) beneath.
 - **Voiced heroine**: sixteen short Japanese voice lines at key moments of the story, with subtitles.
 - **Richer sound**, all synthesised in the browser: each room has its own acoustics, footsteps echo down
   the corridors, wind blows on the roof, and a school chime sounds somewhere far away.
@@ -106,7 +106,7 @@ The source lives in `src/` as numbered parts that `build.sh` joins in order into
 | `06d-act2.js` | Act 2, the chase sequence and chapter cards |
 | `06e-i18n.js` | Language switching and the translation lookup |
 | `06f-settings.js` | Settings screen and saved preferences |
-| `06g-strings-zh.js` | Traditional Chinese text |
+| `06g-strings-zh.js` | Simplified and Traditional Chinese text |
 | `06h-voice.js` | The heroine's voice lines and their subtitles |
 | `06i-meta.js` | Records kept across playthroughs |
 
